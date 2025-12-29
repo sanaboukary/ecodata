@@ -42,11 +42,11 @@ RUN mkdir -p staticfiles media logs airflow/logs
 RUN python manage.py collectstatic --noinput || true
 
 # Exposer les ports
-EXPOSE 8000
+EXPOSE 8003
 
 # Script de démarrage
 COPY docker-entrypoint.sh /docker-entrypoint.sh
 RUN chmod +x /docker-entrypoint.sh
 
 ENTRYPOINT ["/docker-entrypoint.sh"]
-CMD ["gunicorn", "plateforme_centralisation.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "3", "--timeout", "120"]
+CMD ["gunicorn", "plateforme_centralisation.wsgi:application", "--bind", "0.0.0.0:8003", "--workers", "3", "--timeout", "120"]
