@@ -1,0 +1,183 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recommandations IA - BRVM</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        body { background: linear-gradient(135deg, #10b981 0%, #3b82f6 100%); min-height: 100vh; }
+        .recommendations-container { background: white; border-radius: 15px; padding: 30px; margin: 30px 0; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .recommendation-card { background: #f8f9fa; border-radius: 10px; padding: 20px; margin-bottom: 15px; border-left: 5px solid #10b981; }
+        .recommendation-card.sell { border-left-color: #ef4444; }
+        .confidence-badge { padding: 5px 15px; border-radius: 20px; font-weight: 600; }
+        .confidence-high { background: #10b981; color: white; }
+        .confidence-medium { background: #f59e0b; color: white; }
+        .stats-card { background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%); color: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; text-align: center; }
+        .stats-number { font-size: 2rem; font-weight: 700; }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{% url 'dashboard:index' %}"><i class="bi bi-graph-up-arrow"></i> Plateforme BRVM</a>
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="{% url 'dashboard:dashboard_brvm' %}">BRVM</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="{% url 'dashboard:brvm_recommendations_page' %}">Recommandations</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'dashboard:brvm_publications_page' %}">Publications</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="recommendations-container">
+            <div class="text-center mb-4">
+                <h1><i class="bi bi-lightbulb"></i> Recommandations d'Investissement IA</h1>
+                <p class="text-muted">Analyse prédictive basée sur {{ days }} jours d'historique</p>
+                <small class="text-muted">Dernière mise à jour: {{ timestamp }}</small>
+            </div>
+
+            <!-- Statistics -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="stats-card">
+                        <div class="stats-number">{{ recommendations.total_recommendations }}</div>
+                        <div>Recommandations</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stats-card">
+                        <div class="stats-number">{{ recommendations.average_confidence|floatformat:1 }}%</div>
+                        <div>Confiance Moyenne</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stats-card">
+                        <div class="stats-number">{{ recommendations.average_weekly_potential|floatformat:1 }}%</div>
+                        <div>Potentiel Hebdo</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stats-card">
+                        <div class="stats-number">{{ recommendations.statistics.total_analyzed }}</div>
+                        <div>Actions Analysées</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Strong Buy Signals -->
+            {% if recommendations.strong_buys %}
+            <h3 class="mb-3"><i class="bi bi-arrow-up-circle-fill text-success"></i> Signaux d'Achat Fort</h3>
+            {% for signal in recommendations.strong_buys %}
+            <div class="recommendation-card">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div class="flex-grow-1">
+                        <h5 class="mb-1">{{ signal.symbol }} - {{ signal.company_name }}</h5>
+                        <p class="text-muted mb-2">{{ signal.display_name }}</p>
+                        <div class="mb-2">
+                            <span class="badge bg-success">{{ signal.action }}</span>
+                            <span class="confidence-badge confidence-high ms-2">{{ signal.confidence|floatformat:0 }}% confiance</span>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <small class="text-muted">Prix actuel:</small><br>
+                                <strong>{{ signal.current_price|floatformat:0 }} FCFA</strong>
+                            </div>
+                            <div class="col-md-4">
+                                <small class="text-muted">Prix cible:</small><br>
+                                <strong class="text-success">{{ signal.target_price|floatformat:0 }} FCFA</strong>
+                            </div>
+                            <div class="col-md-4">
+                                <small class="text-muted">Potentiel:</small><br>
+                                <strong class="text-success">+{{ signal.expected_weekly_return|floatformat:1 }}%</strong>
+                            </div>
+                        </div>
+                        {% if signal.key_factors %}
+                        <div class="mt-2">
+                            <small class="text-muted">Facteurs clés:</small>
+                            <ul class="small mb-0">
+                                {% for factor in signal.key_factors %}
+                                <li>{{ factor }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+            {% endif %}
+
+            <!-- Regular Buy Signals -->
+            {% if recommendations.buys %}
+            <h3 class="mb-3 mt-4"><i class="bi bi-arrow-up-circle text-success"></i> Opportunités d'Achat</h3>
+            {% for signal in recommendations.buys %}
+            <div class="recommendation-card">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div class="flex-grow-1">
+                        <h5 class="mb-1">{{ signal.symbol }} - {{ signal.company_name }}</h5>
+                        <div class="mb-2">
+                            <span class="badge bg-success">{{ signal.action }}</span>
+                            <span class="confidence-badge confidence-medium ms-2">{{ signal.confidence|floatformat:0 }}% confiance</span>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <small>Prix:</small> <strong>{{ signal.current_price|floatformat:0 }} FCFA</strong>
+                            </div>
+                            <div class="col-md-3">
+                                <small>Cible:</small> <strong>{{ signal.target_price|floatformat:0 }} FCFA</strong>
+                            </div>
+                            <div class="col-md-3">
+                                <small>Potentiel:</small> <strong class="text-success">+{{ signal.expected_weekly_return|floatformat:1 }}%</strong>
+                            </div>
+                            <div class="col-md-3">
+                                <small>Risque:</small> <span class="badge bg-{{ signal.risk_level|lower }}">{{ signal.risk_level }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+            {% endif %}
+
+            <!-- Sell Signals -->
+            {% if recommendations.strong_sells or recommendations.sells %}
+            <h3 class="mb-3 mt-4"><i class="bi bi-arrow-down-circle text-danger"></i> Signaux de Vente</h3>
+            {% for signal in recommendations.strong_sells %}
+            <div class="recommendation-card sell">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h5>{{ signal.symbol }} - {{ signal.company_name }}</h5>
+                        <span class="badge bg-danger">{{ signal.action }}</span>
+                        <span class="confidence-badge confidence-high ms-2">{{ signal.confidence|floatformat:0 }}% confiance</span>
+                    </div>
+                    <div class="text-end">
+                        <strong>{{ signal.current_price|floatformat:0 }} FCFA</strong><br>
+                        <small class="text-danger">{{ signal.expected_weekly_return|floatformat:1 }}%</small>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+            {% endif %}
+
+            {% if not recommendations.strong_buys and not recommendations.buys %}
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle"></i> Aucune recommandation d'achat avec le niveau de confiance actuel ({{ min_confidence }}%).
+                Essayez de réduire le seuil de confiance pour voir plus d'opportunités.
+            </div>
+            {% endif %}
+
+            <div class="text-center mt-4">
+                <a href="?refresh=true" class="btn btn-primary"><i class="bi bi-arrow-clockwise"></i> Actualiser les Recommandations</a>
+                <a href="{% url 'dashboard:dashboard_brvm' %}" class="btn btn-outline-secondary ms-2">Retour au Dashboard</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

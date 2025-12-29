@@ -1,0 +1,504 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Publications Officielles BRVM - Bulletins de la Cote{% endblock %}
+
+{% block head_extra %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #f5f7fa;
+  }
+
+  /* Header */
+  .page-header {
+    background: linear-gradient(135deg, #C9A961 0%, #b09050 100%);
+    color: white;
+    padding: 3rem 2rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  .header-content {
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  .page-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .page-subtitle {
+    font-size: 1.1rem;
+    opacity: 0.95;
+    font-weight: 400;
+  }
+
+  /* Toolbar */
+  .toolbar {
+    background: white;
+    padding: 1.5rem 2rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .toolbar-content {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .toolbar-left {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .toolbar-right {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+  }
+
+  .stats-badge {
+    background: #f1f5f9;
+    padding: 0.6rem 1rem;
+    border-radius: 8px;
+    font-weight: 600;
+    color: #1e3a8a;
+    font-size: 0.95rem;
+  }
+
+  .filter-select, .search-input {
+    padding: 0.6rem 1rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    background: white;
+    min-width: 150px;
+  }
+
+  .btn {
+    padding: 0.6rem 1.2rem;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s;
+    text-decoration: none;
+  }
+
+  .btn-primary {
+    background: #C9A961;
+    color: white;
+  }
+
+  .btn-primary:hover {
+    background: #b09050;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(201, 169, 97, 0.3);
+  }
+
+  .btn-secondary {
+    background: #10b981;
+    color: white;
+  }
+
+  .btn-secondary:hover {
+    background: #059669;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(16, 185, 129, 0.3);
+  }
+
+  .btn-outline {
+    background: white;
+    color: #1e3a8a;
+    border: 2px solid #1e3a8a;
+  }
+
+  .btn-outline:hover {
+    background: #f8fafc;
+  }
+
+  /* Main Content */
+  .main-content {
+    max-width: 1400px;
+    margin: 2rem auto;
+    padding: 0 2rem;
+  }
+
+  /* Publications Grid */
+  .publications-grid {
+    display: grid;
+    gap: 1.2rem;
+  }
+
+  .publication-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s;
+    border: 1px solid #e2e8f0;
+  }
+
+  .publication-card:hover {
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+    border-color: #C9A961;
+    transform: translateY(-2px);
+  }
+
+  .publication-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .publication-icon {
+    background: linear-gradient(135deg, #C9A961 0%, #b09050 100%);
+    color: white;
+    width: 56px;
+    height: 56px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    flex-shrink: 0;
+  }
+
+  .publication-info {
+    flex: 1;
+  }
+
+  .publication-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #1e3a8a;
+    margin-bottom: 0.5rem;
+    line-height: 1.4;
+  }
+
+  .publication-meta {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    font-size: 0.85rem;
+    color: #64748b;
+    flex-wrap: wrap;
+  }
+
+  .publication-meta span {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .publication-actions {
+    display: flex;
+    gap: 0.8rem;
+    margin-top: 1rem;
+  }
+
+  .action-btn {
+    padding: 0.6rem 1.2rem;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s;
+    text-decoration: none;
+  }
+
+  .action-btn-download {
+    background: #C9A961;
+    color: white;
+  }
+
+  .action-btn-download:hover {
+    background: #b09050;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(201, 169, 97, 0.3);
+  }
+
+  .action-btn-view {
+    background: #3b82f6;
+    color: white;
+  }
+
+  .action-btn-view:hover {
+    background: #2563eb;
+    transform: translateY(-2px);
+  }
+
+  /* Empty State */
+  .empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  }
+
+  .empty-state-icon {
+    font-size: 4rem;
+    color: #cbd5e1;
+    margin-bottom: 1rem;
+  }
+
+  .empty-state-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #1e3a8a;
+    margin-bottom: 0.5rem;
+  }
+
+  .empty-state-text {
+    color: #64748b;
+    font-size: 1rem;
+  }
+
+  /* Pagination */
+  .pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 2rem;
+  }
+
+  .pagination-btn {
+    padding: 0.6rem 1rem;
+    border: 1px solid #e2e8f0;
+    background: white;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    color: #1e3a8a;
+    transition: all 0.3s;
+  }
+
+  .pagination-btn:hover {
+    background: #f8fafc;
+    border-color: #C9A961;
+  }
+
+  .pagination-btn.active {
+    background: #C9A961;
+    color: white;
+    border-color: #C9A961;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .page-title {
+      font-size: 1.8rem;
+    }
+
+    .toolbar-content {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .toolbar-left, .toolbar-right {
+      width: 100%;
+      justify-content: space-between;
+    }
+
+    .publication-header {
+      flex-direction: column;
+    }
+
+    .publication-actions {
+      flex-direction: column;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<header class="page-header">
+  <div class="header-content">
+    <h1 class="page-title">
+      <i class="fas fa-file-pdf"></i>
+      Publications Officielles BRVM
+    </h1>
+    <p class="page-subtitle">
+      Bulletins Officiels de la Cote - Archive complète des publications quotidiennes
+    </p>
+  </div>
+</header>
+
+<!-- Toolbar -->
+<div class="toolbar">
+  <div class="toolbar-content">
+    <div class="toolbar-left">
+      <div class="stats-badge">
+        <i class="fas fa-chart-bar"></i>
+        {{ total_publications }} Publications
+      </div>
+      
+      <select class="filter-select" onchange="filterByCategory(this.value)">
+        <option value="">Toutes les catégories</option>
+        {% for category in categories %}
+        <option value="{{ category }}" {% if current_category == category %}selected{% endif %}>
+          {{ category }}
+        </option>
+        {% endfor %}
+      </select>
+      
+      <select class="filter-select" onchange="changeLimit(this.value)">
+        <option value="50" {% if current_limit == 50 %}selected{% endif %}>50 résultats</option>
+        <option value="100" {% if current_limit == 100 %}selected{% endif %}>100 résultats</option>
+        <option value="200" {% if current_limit == 200 %}selected{% endif %}>200 résultats</option>
+        <option value="500" {% if current_limit == 500 %}selected{% endif %}>500 résultats</option>
+      </select>
+    </div>
+    
+    <div class="toolbar-right">
+      <a href="{% url 'dashboard:export_brvm_publications' %}?format=csv&limit={{ current_limit }}" class="btn btn-secondary">
+        <i class="fas fa-download"></i>
+        Export CSV
+      </a>
+      <a href="{% url 'dashboard:export_brvm_publications' %}?format=json&limit={{ current_limit }}" class="btn btn-secondary">
+        <i class="fas fa-file-code"></i>
+        Export JSON
+      </a>
+      <a href="{% url 'dashboard:brvm_publications_api' %}" target="_blank" class="btn btn-outline">
+        <i class="fas fa-code"></i>
+        API
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- Main Content -->
+<main class="main-content">
+  {% if publications %}
+  <div class="publications-grid">
+    {% for pub in publications %}
+    <div class="publication-card">
+      <div class="publication-header">
+        <div class="publication-icon">
+          <i class="fas fa-file-pdf"></i>
+        </div>
+        <div class="publication-info">
+          <h3 class="publication-title">{{ pub.title }}</h3>
+          <div class="publication-meta">
+            <span>
+              <i class="fas fa-calendar-alt"></i>
+              {{ pub.date }}
+            </span>
+            <span>
+              <i class="fas fa-tag"></i>
+              {{ pub.category }}
+            </span>
+            {% if pub.emetteur %}
+            <span>
+              <i class="fas fa-building"></i>
+              {{ pub.emetteur }}
+            </span>
+            {% endif %}
+            {% if pub.file_type %}
+            <span>
+              <i class="fas fa-file"></i>
+              {{ pub.file_type }}
+            </span>
+            {% endif %}
+            {% if pub.file_size and pub.file_size != 'N/A' %}
+            <span>
+              <i class="fas fa-database"></i>
+              {{ pub.file_size }}
+            </span>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      
+      <div class="publication-actions">
+        {% if pub.local_path %}
+        <!-- Fichier PDF stocké localement -->
+        <a href="/media/{{ pub.local_path }}" target="_blank" class="action-btn action-btn-download" download>
+          <i class="fas fa-download"></i>
+          Télécharger PDF
+        </a>
+        <a href="/media/{{ pub.local_path }}" target="_blank" class="action-btn action-btn-view">
+          <i class="fas fa-eye"></i>
+          Consulter
+        </a>
+        {% elif pub.url and pub.url != '#' %}
+        <!-- Lien externe (fallback) -->
+        <a href="{{ pub.url }}" target="_blank" class="action-btn action-btn-download" download>
+          <i class="fas fa-download"></i>
+          Télécharger PDF
+        </a>
+        <a href="{{ pub.url }}" target="_blank" class="action-btn action-btn-view">
+          <i class="fas fa-external-link-alt"></i>
+          Consulter sur BRVM
+        </a>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <div class="empty-state-icon">
+      <i class="fas fa-inbox"></i>
+    </div>
+    <h2 class="empty-state-title">Aucune publication trouvée</h2>
+    <p class="empty-state-text">
+      Les bulletins officiels de la BRVM seront collectés automatiquement.
+      <br>
+      Relancez la collecte avec : <code>python manage.py ingest_source --source brvm_publications</code>
+    </p>
+  </div>
+  {% endif %}
+</main>
+
+<script>
+function filterByCategory(category) {
+  const url = new URL(window.location.href);
+  if (category) {
+    url.searchParams.set('category', category);
+  } else {
+    url.searchParams.delete('category');
+  }
+  window.location.href = url.toString();
+}
+
+function changeLimit(limit) {
+  const url = new URL(window.location.href);
+  url.searchParams.set('limit', limit);
+  window.location.href = url.toString();
+}
+</script>
+{% endblock %}

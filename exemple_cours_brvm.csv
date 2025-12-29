@@ -1,0 +1,20 @@
+# Exemple de fichier CSV pour import des cours BRVM
+# Format: SYMBOLE,PRIX,DATE (optionnel)
+# Mettez à jour les prix depuis https://www.brvm.org/fr/investir/cours-et-cotations
+
+# Actions principales (exemples - À METTRE À JOUR avec les vrais cours du jour)
+SNTS,15500,2025-12-18
+BOAB,5800,2025-12-18
+SOGC,3200,2025-12-18
+NTLC,5900,2025-12-18
+SIBC,7200,2025-12-18
+BOAS,6500,2025-12-18
+PALC,2800,2025-12-18
+ECOC,6600,2025-12-18
+BICC,7400,2025-12-18
+UNLC,2200,2025-12-18
+
+# Ajoutez les autres actions ici...
+# BOABF,7000,2025-12-18
+# ETIT,5700,2025-12-18
+# etc.

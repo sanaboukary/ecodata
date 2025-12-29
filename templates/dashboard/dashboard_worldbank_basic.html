@@ -1,0 +1,297 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}WorldBank - Tableau de Bord{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/finance.css' %}">
+<style>
+  body { background: #0B0F14; }
+  .finance-sidebar { background: #0B0F14; }
+  .finance-main { background: #0B0F14; color: #E6E6E6; }
+  .card-dark { background: #0F141B; border: 1px solid #1E293B; border-radius: 12px; }
+  .muted { color: #94A3B8; }
+  .accent { color: #4A9EFF; }
+  .kpi { font-size: 2.25rem; font-weight: 800; }
+  .kpi-sub { font-size: 0.9rem; }
+  .mini-kpi { font-size: 1.5rem; font-weight: 700; }
+  .period-btn { background:#1E293B; color:#E6E6E6; border:1px solid #334155; padding:.4rem .9rem; border-radius:6px; cursor:pointer; font-size:.75rem; }
+  .period-btn.active { background:#4A9EFF; color:#0B0F14; border-color:#4A9EFF; }
+  .mini-title { font-size:.65rem; letter-spacing:.5px; text-transform:uppercase; color:#64748B; }
+  .progress-bar-custom { height:8px; background:#1E293B; border-radius:4px; overflow:hidden; }
+  .progress-fill { height:100%; background:#4A9EFF; transition: width 0.3s; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="finance-dashboard">
+  <aside class="finance-sidebar">
+    <h1 class="platform-title">Plateforme de Centralisation<br><span style="font-weight:400;font-size:.9rem;">de Données Financières</span></h1>
+    <input type="text" class="search-input" placeholder="Rechercher...">
+    <nav class="sidebar-nav">
+      <a href="{% url 'dashboard:dashboard_brvm' %}" class="nav-item">��� BRVM</a>
+      <a href="{% url 'dashboard:dashboard_imf' %}" class="nav-item">��� FMI</a>
+      <a href="{% url 'dashboard:dashboard_afdb' %}" class="nav-item">��� BAD</a>
+      <a href="{% url 'dashboard:dashboard_un' %}" class="nav-item">��� ONU</a>
+      <a href="{% url 'dashboard:dashboard_worldbank' %}" class="nav-item active">��� Banque Mondiale</a>
+    </nav>
+  </aside>
+
+  <main class="finance-main">
+    <nav class="top-nav">
+      <a href="{% url 'dashboard:explorer' %}" class="top-nav-link">Explorateur</a>
+      <a href="{% url 'dashboard:comparateur' %}" class="top-nav-link">Comparateur</a>
+      <a href="{% url 'dashboard:index' %}" class="top-nav-link">Tableaux de bord</a>
+      <a href="/admin/" class="top-nav-link">Administration</a>
+    </nav>
+
+    <div class="main-header" style="background: linear-gradient(135deg,#0F141B,#121826);">
+      <h2 class="section-title" style="color:#E6E6E6;">BANQUE MONDIALE</h2>
+      <div class="muted">Mise à jour: <span id="wb-last-update">--</span></div>
+    </div>
+
+    <div class="indicators-section">
+      <!-- Filtres période + pays -->
+      <div style="display:flex; gap:.5rem; margin-bottom:.75rem; align-items:center; flex-wrap:wrap;">
+        <span class="muted" style="font-size:.75rem; text-transform:uppercase;">Période</span>
+        <button class="period-btn" data-period="day">Jour</button>
+        <button class="period-btn" data-period="week">Semaine</button>
+        <button class="period-btn" data-period="month">Mois</button>
+        <button class="period-btn" data-period="">Tout</button>
+        <div style="margin-left:auto; display:flex; align-items:center; gap:.5rem;">
+          <span class="muted" style="font-size:.75rem; text-transform:uppercase;">Pays</span>
+          <select id="country-select" class="source-dropdown" style="width:auto; background:#0B0F14; color:#E6E6E6; border-color:#1E293B; padding:.4rem .7rem;">
+            <option value="">Tous</option>
+          </select>
+        </div>
+        <span class="mini-title" style="margin-left:1rem;">Dernier refresh: <span id="wb-refresh-ts">--:--:--</span></span>
+      </div>
+
+      <!-- Top KPIs (2x2 grid) -->
+      <div style="display:grid;grid-template-columns: repeat(2, 1fr); gap:1rem; margin-bottom:1rem;">
+        <div class="card-dark" style="padding:1rem;">
+          <div class="muted">Taux de croissance<br>du PIB</div>
+          <div style="display:flex; align-items:baseline; gap:.5rem;">
+            <span class="accent" style="font-size:3rem; font-weight:800;" id="kpi-gdp-growth">--</span>
+            <canvas id="gdp-sparkline" width="120" height="60" style="margin-left:auto;"></canvas>
+          </div>
+        </div>
+        <div class="card-dark" style="padding:1rem;">
+          <div class="muted">Taux de pauvreté<br>(1,90 USD/jour)</div>
+          <div class="kpi accent" id="kpi-poverty">--</div>
+        </div>
+        <div class="card-dark" style="padding:1rem;">
+          <div class="muted">RNB par habitant (USD)</div>
+          <div class="kpi accent" id="kpi-gni">--</div>
+        </div>
+        <div class="card-dark" style="padding:1rem;">
+          <div class="muted">Dépenses publiques<br>(% du PIB)</div>
+          <div class="mini-kpi accent" id="kpi-spending">--</div>
+        </div>
+      </div>
+
+      <!-- Section: Éducation, Santé, Infrastructure -->
+      <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:1rem; margin-bottom:1rem;">
+        <!-- Éducation -->
+        <div class="card-dark" style="padding:1rem;">
+          <div style="display:flex; align-items:center; gap:.5rem; margin-bottom:.75rem;">
+            <span style="font-size:1.5rem;">📚</span>
+            <div class="muted" style="font-weight:600;">ÉDUCATION</div>
+          </div>
+          <div style="display:grid; gap:.75rem;">
+            <div>
+              <div class="mini-title">Scolarisation primaire (%)</div>
+              <div style="display:flex; align-items:baseline; gap:.5rem;">
+                <span class="accent" style="font-size:1.75rem; font-weight:700;" id="edu-primary">--</span>
+                <span class="muted" style="font-size:.75rem;" id="edu-primary-change">--</span>
+              </div>
+            </div>
+            <div>
+              <div class="mini-title">Scolarisation secondaire (%)</div>
+              <div style="display:flex; align-items:baseline; gap:.5rem;">
+                <span class="accent" style="font-size:1.5rem; font-weight:700;" id="edu-secondary">--</span>
+                <span class="muted" style="font-size:.75rem;" id="edu-secondary-change">--</span>
+              </div>
+            </div>
+            <div>
+              <div class="mini-title">Alphabétisation adultes (%)</div>
+              <div style="display:flex; align-items:baseline; gap:.5rem;">
+                <span class="accent" style="font-size:1.5rem; font-weight:700;" id="edu-literacy">--</span>
+                <span class="muted" style="font-size:.75rem;" id="edu-literacy-change">--</span>
+              </div>
+            </div>
+            <div>
+              <div class="mini-title">Dépenses éducation (% PIB)</div>
+              <div style="display:flex; align-items:baseline; gap:.5rem;">
+                <span class="accent" style="font-size:1.5rem; font-weight:700;" id="edu-spending">--</span>
+                <span class="muted" style="font-size:.75rem;" id="edu-spending-change">--</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Santé -->
+        <div class="card-dark" style="padding:1rem;">
+          <div style="display:flex; align-items:center; gap:.5rem; margin-bottom:.75rem;">
+            <span style="font-size:1.5rem;">🏥</span>
+            <div class="muted" style="font-weight:600;">SANTÉ</div>
+          </div>
+          <div style="display:grid; gap:.75rem;">
+            <div>
+              <div class="mini-title">Espérance de vie (années)</div>
+              <div style="display:flex; align-items:baseline; gap:.5rem;">
+                <span class="accent" style="font-size:1.75rem; font-weight:700;" id="health-life">--</span>
+                <span class="muted" style="font-size:.75rem;" id="health-life-change">--</span>
+              </div>
+            </div>
+            <div>
+              <div class="mini-title">Dépenses santé (% PIB)</div>
+              <div style="display:flex; align-items:baseline; gap:.5rem;">
+                <span class="accent" style="font-size:1.5rem; font-weight:700;" id="health-spending">--</span>
+                <span class="muted" style="font-size:.75rem;" id="health-spending-change">--</span>
+              </div>
+            </div>
+            <div>
+              <div class="mini-title">Médecins (/1000 hab.)</div>
+              <div style="display:flex; align-items:baseline; gap:.5rem;">
+                <span class="accent" style="font-size:1.5rem; font-weight:700;" id="health-doctors">--</span>
+                <span class="muted" style="font-size:.75rem;" id="health-doctors-change">--</span>
+              </div>
+            </div>
+            <div>
+              <div class="mini-title">Mortalité maternelle (/100k)</div>
+              <div style="display:flex; align-items:baseline; gap:.5rem;">
+                <span class="accent" style="font-size:1.5rem; font-weight:700;" id="health-mortality">--</span>
+                <span class="muted" style="font-size:.75rem;" id="health-mortality-change">--</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Infrastructure -->
+        <div class="card-dark" style="padding:1rem;">
+          <div style="display:flex; align-items:center; gap:.5rem; margin-bottom:.75rem;">
+            <span style="font-size:1.5rem;">🏗️</span>
+            <div class="muted" style="font-weight:600;">INFRASTRUCTURE</div>
+          </div>
+          <div style="display:grid; gap:.75rem;">
+            <div>
+              <div class="mini-title">Accès électricité (%)</div>
+              <div style="display:flex; align-items:baseline; gap:.5rem;">
+                <span class="accent" style="font-size:1.75rem; font-weight:700;" id="infra-electricity">--</span>
+                <span class="muted" style="font-size:.75rem;" id="infra-electricity-change">--</span>
+              </div>
+              <div class="progress-bar-custom" style="margin-top:.25rem;">
+                <div class="progress-fill" id="infra-electricity-bar" style="width:0%;"></div>
+              </div>
+            </div>
+            <div>
+              <div class="mini-title">Utilisateurs Internet (%)</div>
+              <div style="display:flex; align-items:baseline; gap:.5rem;">
+                <span class="accent" style="font-size:1.5rem; font-weight:700;" id="infra-internet">--</span>
+                <span class="muted" style="font-size:.75rem;" id="infra-internet-change">--</span>
+              </div>
+              <div class="progress-bar-custom" style="margin-top:.25rem;">
+                <div class="progress-fill" id="infra-internet-bar" style="width:0%;"></div>
+              </div>
+            </div>
+            <div>
+              <div class="mini-title">Mobile (/100 hab.)</div>
+              <div style="display:flex; align-items:baseline; gap:.5rem;">
+                <span class="accent" style="font-size:1.5rem; font-weight:700;" id="infra-mobile">--</span>
+                <span class="muted" style="font-size:.75rem;" id="infra-mobile-change">--</span>
+              </div>
+            </div>
+            <div>
+              <div class="mini-title">Accès eau potable (%)</div>
+              <div style="display:flex; align-items:baseline; gap:.5rem;">
+                <span class="accent" style="font-size:1.5rem; font-weight:700;" id="infra-water">--</span>
+                <span class="muted" style="font-size:.75rem;" id="infra-water-change">--</span>
+              </div>
+              <div class="progress-bar-custom" style="margin-top:.25rem;">
+                <div class="progress-fill" id="infra-water-bar" style="width:0%;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Doing Business & Indicateurs Grid -->
+      <div style="display:grid;grid-template-columns: 1fr 1fr; gap:1rem;">
+        <!-- Doing Business Radar -->
+        <div class="card-dark" style="padding:1rem;">
+          <div class="muted" style="margin-bottom:.75rem;">Doing Business — Classements globaux</div>
+          <div style="display:flex; gap:2rem; align-items:center;">
+            <canvas id="radar-chart" width="200" height="200"></canvas>
+            <div style="flex:1;">
+              <div style="margin-bottom:.5rem;">
+                <div style="display:flex; justify-content:space-between; margin-bottom:.25rem;">
+                  <span class="muted" style="font-size:.7rem;">Voix et accontabilité</span>
+                  <span class="accent" style="font-size:.75rem;" id="db-voice">--</span>
+                </div>
+                <div class="progress-bar-custom"><div class="progress-fill" id="db-voice-bar" style="width:0%;"></div></div>
+              </div>
+              <div style="margin-bottom:.5rem;">
+                <div style="display:flex; justify-content:space-between; margin-bottom:.25rem;">
+                  <span class="muted" style="font-size:.7rem;">Vide du loi</span>
+                  <span class="accent" style="font-size:.75rem;" id="db-rule">--</span>
+                </div>
+                <div class="progress-bar-custom"><div class="progress-fill" id="db-rule-bar" style="width:0%;"></div></div>
+              </div>
+              <div style="margin-bottom:.5rem;">
+                <div style="display:flex; justify-content:space-between; margin-bottom:.25rem;">
+                  <span class="muted" style="font-size:.7rem;">Stabilité patl politique</span>
+                  <span class="accent" style="font-size:.75rem;" id="db-stability">--</span>
+                </div>
+                <div class="progress-bar-custom"><div class="progress-fill" id="db-stability-bar" style="width:0%;"></div></div>
+              </div>
+              <div style="margin-bottom:.5rem;">
+                <div style="display:flex; justify-content:space-between; margin-bottom:.25rem;">
+                  <span class="muted" style="font-size:.7rem;">Contrôlé de corruption</span>
+                  <span class="accent" style="font-size:.75rem;" id="db-corruption">--</span>
+                </div>
+                <div class="progress-bar-custom"><div class="progress-fill" id="db-corruption-bar" style="width:0%;"></div></div>
+              </div>
+              <div style="margin-bottom:.5rem;">
+                <div style="display:flex; justify-content:space-between; margin-bottom:.25rem;">
+                  <span class="muted" style="font-size:.7rem;">Effectivité ducable</span>
+                  <span class="accent" style="font-size:.75rem;" id="db-education">--</span>
+                </div>
+                <div class="progress-bar-custom"><div class="progress-fill" id="db-education-bar" style="width:0%;"></div></div>
+              </div>
+              <div>
+                <div style="display:flex; justify-content:space-between; margin-bottom:.25rem;">
+                  <span class="muted" style="font-size:.7rem;">Efficacinemt</span>
+                  <span class="accent" style="font-size:.75rem;" id="db-efficiency">--</span>
+                </div>
+                <div class="progress-bar-custom"><div class="progress-fill" id="db-efficiency-bar" style="width:0%;"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Indicateurs Sparklines -->
+        <div class="card-dark" style="padding:1rem;">
+          <div class="muted" style="margin-bottom:.5rem;">Indicateurs clés — Tendances</div>
+          <div id="indicators-sparklines" style="display:grid; grid-template-columns: 1fr; gap:.5rem;"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="{% static 'js/dashboard_worldbank.js' %}"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', ()=> {
+    WorldBankDashboard.initWorldBankDashboard({
+      urls: {
+        summary: '{% url "dashboard:worldbank_summary_api" %}',
+        indicators: '{% url "dashboard:worldbank_indicators_api" %}',
+        countries: '{% url "dashboard:worldbank_countries_api" %}',
+        sectors: '{% url "dashboard:worldbank_sectors_api" %}'
+      }
+    });
+  });
+</script>
+{% endblock %}

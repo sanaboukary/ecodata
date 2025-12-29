@@ -1,0 +1,20 @@
+{% extends 'base_modern.html' %}
+{% load humanize %}
+
+{% block title %}Tableau de Bord — (ARCHIVE){% endblock %}
+
+{% block content %}
+<!-- Ancien template archivé : dashboard/dashboard.html -->
+<div class="container-fluid animate-fade-in">
+    <!-- Contenu archivé — conservé pour référence -->
+    <div class="alert alert-warning">Ce fichier est une archive du template de tableau de bord historique. Il a été déplacé pour éviter les doublons.</div>
+    <p>Conservez ce fichier comme référence. Le nouveau template actif est <code>templates/dashboard/index.html</code>.</p>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ block.super }}
+<script>
+console.warn('Fichier template archivé — ne pas utiliser en production');
+</script>
+{% endblock %}

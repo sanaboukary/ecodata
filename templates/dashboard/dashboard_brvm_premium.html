@@ -1,0 +1,532 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}BRVM - Plateforme d'Investissement{% endblock %}
+
+{% block head_extra %}
+<link rel="stylesheet" href="{% static 'css/finance.css' %}">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+<style>
+  .investment-dashboard {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    min-height: 100vh;
+    padding: 2rem;
+    color: #ffffff;
+  }
+  
+  .dashboard-header {
+    margin-bottom: 2rem;
+  }
+  
+  .dashboard-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #C9A961 0%, #FFD700 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 0.5rem;
+  }
+  
+  .dashboard-subtitle {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 1.1rem;
+  }
+  
+  .market-overview {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+  
+  .metric-card {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+    border-radius: 16px;
+    padding: 1.5rem;
+    border: 1px solid rgba(201, 169, 97, 0.2);
+    backdrop-filter: blur(10px);
+    transition: transform 0.3s, box-shadow 0.3s;
+  }
+  
+  .metric-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(201, 169, 97, 0.3);
+  }
+  
+  .metric-label {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  
+  .metric-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #C9A961;
+    margin-bottom: 0.5rem;
+  }
+  
+  .metric-change {
+    font-size: 0.9rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    display: inline-block;
+  }
+  
+  .metric-change.positive {
+    background: rgba(34, 197, 94, 0.2);
+    color: #22c55e;
+  }
+  
+  .metric-change.negative {
+    background: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+  }
+  
+  .section-card {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%);
+    border-radius: 16px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    border: 1px solid rgba(201, 169, 97, 0.15);
+  }
+  
+  .section-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    color: #C9A961;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .stocks-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .stocks-table th {
+    background: rgba(201, 169, 97, 0.1);
+    padding: 1rem;
+    text-align: left;
+    font-weight: 600;
+    color: #C9A961;
+    border-bottom: 2px solid rgba(201, 169, 97, 0.3);
+  }
+  
+  .stocks-table td {
+    padding: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  }
+  
+  .stocks-table tbody tr:hover {
+    background: rgba(201, 169, 97, 0.05);
+  }
+  
+  .stock-symbol {
+    font-weight: 700;
+    color: #C9A961;
+  }
+  
+  .stock-name {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9rem;
+  }
+  
+  .recommendation-badge {
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-align: center;
+    display: inline-block;
+  }
+  
+  .recommendation-badge.strong-buy {
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    color: white;
+  }
+  
+  .recommendation-badge.buy {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: white;
+  }
+  
+  .recommendation-badge.hold {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: white;
+  }
+  
+  .recommendation-badge.sell {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: white;
+  }
+  
+  .score-indicator {
+    display: flex;
+    gap: 0.25rem;
+  }
+  
+  .score-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: rgba(201, 169, 97, 0.3);
+  }
+  
+  .score-dot.active {
+    background: #C9A961;
+  }
+  
+  .sector-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+  }
+  
+  .sector-card {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 1.5rem;
+    border-left: 4px solid #C9A961;
+  }
+  
+  .sector-name {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+  
+  .sector-stats {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.7);
+  }
+  
+  .chart-container {
+    position: relative;
+    height: 300px;
+    margin-top: 1rem;
+  }
+  
+  .alert-box {
+    background: linear-gradient(135deg, rgba(201, 169, 97, 0.1), rgba(201, 169, 97, 0.05));
+    border: 1px solid #C9A961;
+    border-radius: 12px;
+    padding: 1rem 1.5rem;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  
+  .alert-icon {
+    font-size: 1.5rem;
+  }
+  
+  .two-column-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+  }
+  
+  @media (max-width: 968px) {
+    .two-column-layout {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="investment-dashboard">
+  <!-- Header -->
+  <div class="dashboard-header">
+    <h1 class="dashboard-title">📈 BRVM - Tableau de Bord Investisseurs</h1>
+    <p class="dashboard-subtitle">
+      Données en temps réel pour vos décisions d'investissement | 
+      Dernière mise à jour : {{ market_overview.last_update }}
+    </p>
+  </div>
+
+  <!-- Market Overview Cards -->
+  <div class="market-overview">
+    <div class="metric-card">
+      <div class="metric-label">🏢 Actions Cotées</div>
+      <div class="metric-value">{{ market_overview.total_stocks }}</div>
+      <span class="metric-change positive">Actif</span>
+    </div>
+
+    <div class="metric-card">
+      <div class="metric-label">💎 Capitalisation Totale</div>
+      <div class="metric-value">{{ market_overview.market_cap|floatformat:0|default:"0" }} M FCFA</div>
+      <span class="metric-change {% if market_overview.brvm_composite.change_pct >= 0 %}positive{% else %}negative{% endif %}">
+        {{ market_overview.brvm_composite.change_pct|floatformat:2 }}%
+      </span>
+    </div>
+
+    <div class="metric-card">
+      <div class="metric-label">📊 BRVM Composite</div>
+      <div class="metric-value">{{ market_overview.brvm_composite.value|floatformat:2 }}</div>
+      <span class="metric-change {% if market_overview.brvm_composite.change_pct >= 0 %}positive{% else %}negative{% endif %}">
+        {{ market_overview.brvm_composite.change_pct|floatformat:2 }}%
+      </span>
+    </div>
+
+    <div class="metric-card">
+      <div class="metric-label">🏆 BRVM 10</div>
+      <div class="metric-value">{{ market_overview.brvm10.value|floatformat:2 }}</div>
+      <span class="metric-change {% if market_overview.brvm10.change_pct >= 0 %}positive{% else %}negative{% endif %}">
+        {{ market_overview.brvm10.change_pct|floatformat:2 }}%
+      </span>
+    </div>
+
+    <div class="metric-card">
+      <div class="metric-label">📈 Volume Total</div>
+      <div class="metric-value">{{ market_overview.total_volume|floatformat:0 }}</div>
+      <span class="metric-change positive">Aujourd'hui</span>
+    </div>
+
+    <div class="metric-card">
+      <div class="metric-label">💰 P/E Moyen</div>
+      <div class="metric-value">{{ market_overview.avg_pe|floatformat:2 }}</div>
+      <span class="metric-change positive">Valorisation</span>
+    </div>
+  </div>
+
+  <!-- Investment Opportunities -->
+  <div class="section-card">
+    <h2 class="section-title">
+      <span>🎯</span> Opportunités d'Investissement (Top Recommandations)
+    </h2>
+    
+    {% if investment_opportunities %}
+    <div class="alert-box">
+      <span class="alert-icon">💡</span>
+      <div>
+        <strong>{{ investment_opportunities|length }} opportunité(s) détectée(s)</strong> 
+        selon nos analyses (Score ≥ 4/5 ou recommandation BUY)
+      </div>
+    </div>
+    
+    <table class="stocks-table">
+      <thead>
+        <tr>
+          <th>Action</th>
+          <th>Secteur</th>
+          <th>Prix</th>
+          <th>P/E</th>
+          <th>Div %</th>
+          <th>ROE %</th>
+          <th>Potentiel</th>
+          <th>Recommandation</th>
+          <th>Score</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for opportunity in investment_opportunities %}
+        <tr>
+          <td>
+            <div class="stock-symbol">{{ opportunity.symbol }}</div>
+            <div class="stock-name">{{ opportunity.name }}</div>
+          </td>
+          <td>{{ opportunity.sector }}</td>
+          <td>{{ opportunity.price|floatformat:0 }} FCFA</td>
+          <td>{{ opportunity.pe_ratio|floatformat:1 }}</td>
+          <td>{{ opportunity.dividend_yield|floatformat:1 }}%</td>
+          <td>{{ opportunity.roe|floatformat:1 }}%</td>
+          <td>
+            <span class="metric-change positive">+{{ opportunity.upside_potential|floatformat:1 }}%</span>
+          </td>
+          <td>
+            <span class="recommendation-badge {% if opportunity.recommendation == 'STRONG BUY' %}strong-buy{% elif opportunity.recommendation == 'BUY' %}buy{% elif opportunity.recommendation == 'HOLD' %}hold{% else %}sell{% endif %}">
+              {{ opportunity.recommendation }}
+            </span>
+          </td>
+          <td>
+            <div class="score-indicator">
+              {% for i in "12345" %}
+              <span class="score-dot {% if forloop.counter <= opportunity.score %}active{% endif %}"></span>
+              {% endfor %}
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p style="text-align: center; color: rgba(255,255,255,0.5); padding: 2rem;">
+      Aucune opportunité détectée actuellement. Lancer une collecte de données.
+    </p>
+    {% endif %}
+  </div>
+
+  <!-- Top Gainers & Losers -->
+  <div class="two-column-layout">
+    <!-- Top Gainers -->
+    <div class="section-card">
+      <h2 class="section-title">
+        <span>🚀</span> Top Performers du Jour
+      </h2>
+      <table class="stocks-table">
+        <thead>
+          <tr>
+            <th>Action</th>
+            <th>Prix</th>
+            <th>Variation</th>
+            <th>Volume</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for stock in top_gainers %}
+          <tr>
+            <td>
+              <div class="stock-symbol">{{ stock.symbol }}</div>
+              <div class="stock-name">{{ stock.name }}</div>
+            </td>
+            <td>{{ stock.price|floatformat:0 }} FCFA</td>
+            <td>
+              <span class="metric-change positive">+{{ stock.change_pct|floatformat:2 }}%</span>
+            </td>
+            <td>{{ stock.volume|floatformat:0 }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="4" style="text-align: center; color: rgba(255,255,255,0.5);">Aucune donnée</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Top Losers -->
+    <div class="section-card">
+      <h2 class="section-title">
+        <span>📉</span> Plus Grandes Baisses
+      </h2>
+      <table class="stocks-table">
+        <thead>
+          <tr>
+            <th>Action</th>
+            <th>Prix</th>
+            <th>Variation</th>
+            <th>Volume</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for stock in top_losers %}
+          <tr>
+            <td>
+              <div class="stock-symbol">{{ stock.symbol }}</div>
+              <div class="stock-name">{{ stock.name }}</div>
+            </td>
+            <td>{{ stock.price|floatformat:0 }} FCFA</td>
+            <td>
+              <span class="metric-change negative">{{ stock.change_pct|floatformat:2 }}%</span>
+            </td>
+            <td>{{ stock.volume|floatformat:0 }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="4" style="text-align: center; color: rgba(255,255,255,0.5);">Aucune donnée</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Sector Analysis -->
+  <div class="section-card">
+    <h2 class="section-title">
+      <span>🏭</span> Analyse Sectorielle
+    </h2>
+    <div class="sector-grid">
+      {% for sector in sector_stats %}
+      <div class="sector-card">
+        <div class="sector-name">{{ sector.name }}</div>
+        <div class="sector-stats">
+          {{ sector.stocks_count }} action(s) | {{ sector.market_cap_pct|floatformat:1 }}% du marché
+        </div>
+        <div style="margin-top: 0.5rem;">
+          <span class="metric-change {% if sector.avg_performance >= 0 %}positive{% else %}negative{% endif %}">
+            {{ sector.avg_performance|floatformat:2 }}%
+          </span>
+        </div>
+      </div>
+      {% empty %}
+      <p style="text-align: center; color: rgba(255,255,255,0.5);">Aucune donnée sectorielle</p>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Market Chart -->
+  <div class="section-card">
+    <h2 class="section-title">
+      <span>📊</span> Évolution du Marché (30 derniers jours)
+    </h2>
+    <div class="chart-container">
+      <canvas id="marketChart"></canvas>
+    </div>
+  </div>
+
+  <!-- Other Data Sources -->
+  <div class="section-card">
+    <h2 class="section-title">
+      <span>🌍</span> Autres Sources de Données
+    </h2>
+    <div class="sector-grid">
+      {% for source in sources_stats %}
+      <div class="sector-card">
+        <div class="sector-name">{{ source.name }}</div>
+        <div class="sector-stats">
+          {{ source.count }} observations
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<script>
+// Market Chart
+const chartData = {{ chart_data|safe }};
+const ctx = document.getElementById('marketChart');
+if (ctx && chartData) {
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: chartData.labels,
+      datasets: [{
+        label: 'Prix moyen (FCFA)',
+        data: chartData.prices,
+        borderColor: '#C9A961',
+        backgroundColor: 'rgba(201, 169, 97, 0.1)',
+        borderWidth: 3,
+        fill: true,
+        tension: 0.4,
+        pointRadius: 4,
+        pointBackgroundColor: '#C9A961'
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          labels: { color: '#ffffff' }
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: false,
+          grid: { color: 'rgba(255, 255, 255, 0.1)' },
+          ticks: { color: '#ffffff' }
+        },
+        x: {
+          grid: { display: false },
+          ticks: { color: '#ffffff' }
+        }
+      }
+    }
+  });
+}
+</script>
+{% endblock %}

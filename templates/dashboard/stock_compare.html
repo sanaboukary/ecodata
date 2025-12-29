@@ -1,0 +1,504 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comparaison d'Actions BRVM</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(201, 169, 97, 0.2);
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            color: #C9A961;
+            margin-bottom: 10px;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: rgba(201, 169, 97, 0.2);
+            border: 1px solid #C9A961;
+            border-radius: 8px;
+            color: #C9A961;
+            text-decoration: none;
+            transition: all 0.3s;
+            margin-bottom: 20px;
+        }
+
+        .back-btn:hover {
+            background: rgba(201, 169, 97, 0.3);
+        }
+
+        .selector-section {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 30px;
+            border-radius: 15px;
+            border: 1px solid rgba(201, 169, 97, 0.2);
+            margin-bottom: 30px;
+        }
+
+        .selector-section h2 {
+            color: #C9A961;
+            margin-bottom: 20px;
+        }
+
+        .stock-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .stock-checkbox {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid transparent;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .stock-checkbox:hover {
+            background: rgba(201, 169, 97, 0.1);
+            border-color: rgba(201, 169, 97, 0.5);
+        }
+
+        .stock-checkbox input[type="checkbox"] {
+            margin-right: 10px;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .stock-checkbox input[type="checkbox"]:checked {
+            accent-color: #C9A961;
+        }
+
+        .stock-checkbox.selected {
+            background: rgba(201, 169, 97, 0.2);
+            border-color: #C9A961;
+        }
+
+        .compare-btn {
+            display: inline-block;
+            padding: 15px 40px;
+            background: linear-gradient(135deg, #C9A961 0%, #d4b76a 100%);
+            color: #1a1a2e;
+            font-weight: bold;
+            font-size: 1.1rem;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .compare-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(201, 169, 97, 0.4);
+        }
+
+        .compare-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .comparison-table {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            border: 1px solid rgba(201, 169, 97, 0.2);
+            overflow-x: auto;
+            margin-bottom: 30px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        th {
+            background: rgba(201, 169, 97, 0.2);
+            color: #C9A961;
+            font-weight: bold;
+            position: sticky;
+            top: 0;
+        }
+
+        tr:hover {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .metric-label {
+            color: #C9A961;
+            font-weight: bold;
+        }
+
+        .value-cell {
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .best-value {
+            background: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+
+        .chart-container {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 25px;
+            border-radius: 15px;
+            border: 1px solid rgba(201, 169, 97, 0.2);
+            margin-bottom: 30px;
+            height: 400px;
+        }
+
+        .recommendation-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 15px;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .recommendation-badge.strong-buy {
+            background: rgba(34, 197, 94, 0.3);
+            color: #22c55e;
+        }
+
+        .recommendation-badge.buy {
+            background: rgba(74, 222, 128, 0.2);
+            color: #4ade80;
+        }
+
+        .recommendation-badge.hold {
+            background: rgba(251, 191, 36, 0.2);
+            color: #fbbf24;
+        }
+
+        .recommendation-badge.sell {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+
+        .sector-filter {
+            margin-bottom: 20px;
+        }
+
+        .sector-filter select {
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            border: 1px solid rgba(201, 169, 97, 0.5);
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        .selected-count {
+            display: inline-block;
+            background: rgba(201, 169, 97, 0.3);
+            padding: 8px 15px;
+            border-radius: 8px;
+            margin-left: 15px;
+            color: #C9A961;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <a href="/" class="back-btn">← Retour à l'accueil</a>
+            <h1>🔍 Comparaison d'Actions</h1>
+            <p style="color: #888; margin-top: 10px;">Comparez jusqu'à 5 actions BRVM côte à côte</p>
+        </div>
+
+        {% if not comparing %}
+        <!-- Sélection des actions -->
+        <div class="selector-section">
+            <h2>Sélectionnez les actions à comparer</h2>
+            
+            <div class="sector-filter">
+                <label for="sectorFilter" style="margin-right: 10px;">Filtrer par secteur:</label>
+                <select id="sectorFilter" onchange="filterBySector()">
+                    <option value="">Tous les secteurs</option>
+                </select>
+                <span class="selected-count">0 sélectionnée(s)</span>
+            </div>
+
+            <form id="compareForm" method="get">
+                <div class="stock-grid" id="stockGrid">
+                    {% for stock in available_stocks %}
+                    <label class="stock-checkbox" data-sector="{{ stock.sector }}">
+                        <input type="checkbox" name="symbols" value="{{ stock.symbol }}" onchange="updateSelection()">
+                        <strong>{{ stock.symbol }}</strong><br>
+                        <small style="color: #888;">{{ stock.name }}</small><br>
+                        <small style="color: #C9A961;">{{ stock.sector }}</small>
+                    </label>
+                    {% endfor %}
+                </div>
+
+                <div style="text-align: center;">
+                    <button type="submit" class="compare-btn" id="compareBtn" disabled>
+                        Comparer les actions sélectionnées
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <script>
+            // Peupler le filtre secteur
+            const sectors = new Set();
+            document.querySelectorAll('.stock-checkbox').forEach(box => {
+                const sector = box.dataset.sector;
+                if (sector && sector !== 'N/A') {
+                    sectors.add(sector);
+                }
+            });
+
+            const sectorFilter = document.getElementById('sectorFilter');
+            Array.from(sectors).sort().forEach(sector => {
+                const option = document.createElement('option');
+                option.value = sector;
+                option.textContent = sector;
+                sectorFilter.appendChild(option);
+            });
+
+            function filterBySector() {
+                const selectedSector = document.getElementById('sectorFilter').value;
+                document.querySelectorAll('.stock-checkbox').forEach(box => {
+                    if (!selectedSector || box.dataset.sector === selectedSector) {
+                        box.style.display = 'block';
+                    } else {
+                        box.style.display = 'none';
+                    }
+                });
+            }
+
+            function updateSelection() {
+                const checkboxes = document.querySelectorAll('input[name="symbols"]:checked');
+                const count = checkboxes.length;
+                
+                document.querySelector('.selected-count').textContent = `${count} sélectionnée(s)`;
+                document.getElementById('compareBtn').disabled = count < 2 || count > 5;
+
+                // Désactiver les checkboxes si 5 sont sélectionnées
+                if (count >= 5) {
+                    document.querySelectorAll('input[name="symbols"]:not(:checked)').forEach(cb => {
+                        cb.disabled = true;
+                        cb.parentElement.style.opacity = '0.5';
+                    });
+                } else {
+                    document.querySelectorAll('input[name="symbols"]').forEach(cb => {
+                        cb.disabled = false;
+                        cb.parentElement.style.opacity = '1';
+                    });
+                }
+
+                // Mettre en surbrillance les sélectionnées
+                document.querySelectorAll('.stock-checkbox').forEach(box => {
+                    const checkbox = box.querySelector('input[type="checkbox"]');
+                    if (checkbox.checked) {
+                        box.classList.add('selected');
+                    } else {
+                        box.classList.remove('selected');
+                    }
+                });
+            }
+        </script>
+
+        {% else %}
+        <!-- Tableau de comparaison -->
+        <div style="text-align: center; margin-bottom: 20px;">
+            <a href="/compare/" class="back-btn">← Nouvelle comparaison</a>
+        </div>
+
+        <!-- Graphique Radar -->
+        <div class="chart-container">
+            <canvas id="radarChart"></canvas>
+        </div>
+
+        <div class="comparison-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Métrique</th>
+                        {% for stock in comparison_data %}
+                        <th style="text-align: center;">
+                            <a href="/stock/{{ stock.symbol }}/" style="color: #C9A961; text-decoration: none;">
+                                {{ stock.symbol }}
+                            </a><br>
+                            <small style="color: #888; font-weight: normal;">{{ stock.name }}</small>
+                        </th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="metric-label">Secteur</td>
+                        {% for stock in comparison_data %}
+                        <td class="value-cell">{{ stock.sector }}</td>
+                        {% endfor %}
+                    </tr>
+                    <tr>
+                        <td class="metric-label">Prix Actuel (FCFA)</td>
+                        {% for stock in comparison_data %}
+                        <td class="value-cell">{{ stock.price|floatformat:0 }}</td>
+                        {% endfor %}
+                    </tr>
+                    <tr>
+                        <td class="metric-label">Variation Jour</td>
+                        {% for stock in comparison_data %}
+                        <td class="value-cell" style="color: {% if stock.day_change_pct >= 0 %}#22c55e{% else %}#ef4444{% endif %};">
+                            {% if stock.day_change_pct >= 0 %}+{% endif %}{{ stock.day_change_pct|floatformat:2 }}%
+                        </td>
+                        {% endfor %}
+                    </tr>
+                    <tr>
+                        <td class="metric-label">Capitalisation (M FCFA)</td>
+                        {% for stock in comparison_data %}
+                        <td class="value-cell">{{ stock.market_cap|floatformat:0 }}</td>
+                        {% endfor %}
+                    </tr>
+                    <tr>
+                        <td class="metric-label">Ratio P/E</td>
+                        {% for stock in comparison_data %}
+                        <td class="value-cell">{{ stock.pe_ratio|floatformat:2 }}</td>
+                        {% endfor %}
+                    </tr>
+                    <tr>
+                        <td class="metric-label">Rendement Dividende (%)</td>
+                        {% for stock in comparison_data %}
+                        <td class="value-cell">{{ stock.dividend_yield|floatformat:2 }}%</td>
+                        {% endfor %}
+                    </tr>
+                    <tr>
+                        <td class="metric-label">ROE (%)</td>
+                        {% for stock in comparison_data %}
+                        <td class="value-cell">{{ stock.roe|floatformat:2 }}%</td>
+                        {% endfor %}
+                    </tr>
+                    <tr>
+                        <td class="metric-label">Dette/Capitaux</td>
+                        {% for stock in comparison_data %}
+                        <td class="value-cell">{{ stock.debt_to_equity|floatformat:2 }}</td>
+                        {% endfor %}
+                    </tr>
+                    <tr>
+                        <td class="metric-label">Beta</td>
+                        {% for stock in comparison_data %}
+                        <td class="value-cell">{{ stock.beta|floatformat:2 }}</td>
+                        {% endfor %}
+                    </tr>
+                    <tr>
+                        <td class="metric-label">Recommandation</td>
+                        {% for stock in comparison_data %}
+                        <td class="value-cell">
+                            <span class="recommendation-badge {% if stock.recommendation == 'STRONG BUY' %}strong-buy{% elif stock.recommendation == 'BUY' %}buy{% elif stock.recommendation == 'HOLD' %}hold{% else %}sell{% endif %}">
+                                {{ stock.recommendation }}
+                            </span>
+                        </td>
+                        {% endfor %}
+                    </tr>
+                    <tr>
+                        <td class="metric-label">Score Consensus (/ 5)</td>
+                        {% for stock in comparison_data %}
+                        <td class="value-cell">
+                            <span style="color: #fbbf24;">
+                                {% for i in "12345" %}
+                                    {% if forloop.counter <= stock.score %}★{% else %}☆{% endif %}
+                                {% endfor %}
+                            </span>
+                        </td>
+                        {% endfor %}
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <script>
+            // Graphique Radar de comparaison
+            const ctx = document.getElementById('radarChart').getContext('2d');
+            const chartLabels = {{ chart_labels|safe }};
+            const chartDatasets = {{ chart_datasets|safe }};
+
+            const datasets = chartDatasets.map(ds => ({
+                label: ds.label,
+                data: ds.data,
+                borderColor: ds.color,
+                backgroundColor: ds.color.replace(')', ', 0.2)').replace('rgb', 'rgba'),
+                borderWidth: 2
+            }));
+
+            new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: chartLabels,
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#fff',
+                                font: { size: 14 }
+                            }
+                        }
+                    },
+                    scales: {
+                        r: {
+                            angleLines: { color: 'rgba(255, 255, 255, 0.1)' },
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                            pointLabels: {
+                                color: '#C9A961',
+                                font: { size: 14, weight: 'bold' }
+                            },
+                            ticks: { color: '#fff', backdropColor: 'transparent' }
+                        }
+                    }
+                }
+            });
+        </script>
+        {% endif %}
+    </div>
+</body>
+</html>

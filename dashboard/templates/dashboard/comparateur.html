@@ -1,0 +1,97 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comparateur - Plateforme BRVM</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        body { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; }
+        .comparator-container { background: white; border-radius: 15px; padding: 30px; margin: 30px 0; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{% url 'dashboard:index' %}"><i class="bi bi-graph-up-arrow"></i> Plateforme BRVM</a>
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="{% url 'dashboard:dashboard_brvm' %}">BRVM</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="{% url 'dashboard:comparateur' %}">Comparateur</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="comparator-container">
+            <h1 class="text-center mb-4"><i class="bi bi-bar-chart-line"></i> Comparateur d'Indicateurs</h1>
+            
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <label>Indicateur A:</label>
+                    <select class="form-select" id="indicatorA" onchange="updateComparison()">
+                        <option value="PIB_total_USD_courant" {% if alias_a == "PIB_total_USD_courant" %}selected{% endif %}>PIB Total (USD)</option>
+                        <option value="Inflation_CPI_annuelle_pct" {% if alias_a == "Inflation_CPI_annuelle_pct" %}selected{% endif %}>Inflation (CPI %)</option>
+                        <option value="Dette_publique_pctPIB" {% if alias_a == "Dette_publique_pctPIB" %}selected{% endif %}>Dette Publique (% PIB)</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label>Indicateur B:</label>
+                    <select class="form-select" id="indicatorB" onchange="updateComparison()">
+                        <option value="PIB_total_USD_courant" {% if alias_b == "PIB_total_USD_courant" %}selected{% endif %}>PIB Total (USD)</option>
+                        <option value="Inflation_CPI_annuelle_pct" {% if alias_b == "Inflation_CPI_annuelle_pct" %}selected{% endif %}>Inflation (CPI %)</option>
+                        <option value="Dette_publique_pctPIB" {% if alias_b == "Dette_publique_pctPIB" %}selected{% endif %}>Dette Publique (% PIB)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <canvas id="comparisonChart"></canvas>
+            </div>
+
+            <div class="text-center mt-4">
+                <a href="{% url 'dashboard:explorer' %}" class="btn btn-outline-secondary">Retour à l'Explorateur</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function updateComparison() {
+            const a = document.getElementById('indicatorA').value;
+            const b = document.getElementById('indicatorB').value;
+            window.location.href = `?a=${a}&b=${b}`;
+        }
+
+        // Sample chart (replace with real data)
+        const ctx = document.getElementById('comparisonChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['2020', '2021', '2022', '2023'],
+                datasets: [{
+                    label: '{{ alias_a }}',
+                    data: [10, 12, 15, 18],
+                    borderColor: '#3b82f6',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)'
+                }, {
+                    label: '{{ alias_b }}',
+                    data: [5, 6, 7, 8],
+                    borderColor: '#10b981',
+                    backgroundColor: 'rgba(16, 185, 129, 0.1)'
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: true }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

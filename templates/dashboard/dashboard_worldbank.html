@@ -1,0 +1,740 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load dashboard_filters %}
+
+{% block title %}Banque Mondiale - Indicateurs de Développement{% endblock %}
+
+{% block head_extra %}
+<link rel="stylesheet" href="{% static 'css/finance.css' %}">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+<style>
+  .platform-dashboard {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    min-height: 100vh;
+    padding: 2rem;
+    color: #ffffff;
+  }
+  
+  .dashboard-header {
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+  
+  .dashboard-title {
+    font-size: 3rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 1rem;
+  }
+  
+  .dashboard-subtitle {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 1.2rem;
+  }
+  
+  .stats-overview {
+    background: rgba(59, 130, 246, 0.1);
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    text-align: center;
+  }
+  
+  .stats-overview h2 {
+    color: #60a5fa;
+    font-size: 1.8rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+  }
+  
+  .metric-card {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(59, 130, 246, 0.05) 100%);
+    border-radius: 16px;
+    padding: 2rem;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    transition: all 0.3s;
+  }
+  
+  .metric-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(59, 130, 246, 0.3);
+  }
+  
+  .metric-label {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.85rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .metric-value {
+    color: #60a5fa;
+    font-size: 2rem;
+    font-weight: 700;
+  }
+  
+  .section-card {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    border: 1px solid rgba(59, 130, 246, 0.2);
+  }
+  
+  .section-card h2 {
+    color: #60a5fa;
+    font-size: 1.8rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .indicator-card {
+    background: rgba(0, 0, 0, 0.2);
+    padding: 1.5rem;
+    border-radius: 12px;
+    border-left: 4px solid #60a5fa;
+    margin-bottom: 1rem;
+  }
+  
+  .chart-container {
+    position: relative;
+    height: 400px;
+    margin: 2rem 0;
+  }
+  
+  .refresh-btn {
+    position: fixed;
+    top: 2rem;
+    right: 2rem;
+    padding: 0.75rem 1.5rem;
+    background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    z-index: 1000;
+  }
+  
+  .refresh-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 5px 15px rgba(59, 130, 246, 0.4);
+  }
+  
+  .back-link {
+    display: inline-block;
+    margin-bottom: 2rem;
+    padding: 0.75rem 1.5rem;
+    background: rgba(255, 255, 255, 0.1);
+    color: #60a5fa;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: all 0.3s;
+  }
+  
+  .back-link:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateX(-5px);
+  }
+  
+  .filters-section {
+    background: rgba(59, 130, 246, 0.1);
+    border-radius: 16px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+  }
+  
+  .filters-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1rem;
+  }
+  
+  .filter-group {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .filter-label {
+    color: #60a5fa;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+  
+  .filter-select {
+    padding: 0.75rem 1rem;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    border-radius: 8px;
+    color: #ffffff;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  
+  .filter-select:hover {
+    border-color: #60a5fa;
+    background: rgba(0, 0, 0, 0.4);
+  }
+  
+  .filter-select:focus {
+    outline: none;
+    border-color: #60a5fa;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+  }
+  
+  .filter-select option {
+    background: #1a1a2e;
+    color: #ffffff;
+  }
+  
+  .filter-buttons {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+  }
+  
+  .filter-btn {
+    padding: 0.75rem 2rem;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  
+  .filter-btn-apply {
+    background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
+    color: #ffffff;
+  }
+  
+  .filter-btn-apply:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(59, 130, 246, 0.4);
+  }
+  
+  .filter-btn-reset {
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+  }
+  
+  .filter-btn-reset:hover {
+    background: rgba(255, 255, 255, 0.15);
+  }
+  
+  .active-filters {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-top: 1rem;
+  }
+  
+  .filter-tag {
+    padding: 0.5rem 1rem;
+    background: rgba(59, 130, 246, 0.2);
+    border-radius: 20px;
+    color: #60a5fa;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .filter-tag-close {
+    cursor: pointer;
+    font-weight: bold;
+  }
+  
+  .country-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+  
+  .country-badge {
+    padding: 0.75rem 1rem;
+    background: rgba(59, 130, 246, 0.2);
+    border-radius: 8px;
+    text-align: center;
+    transition: all 0.3s;
+  }
+  
+  .country-badge:hover {
+    background: rgba(59, 130, 246, 0.3);
+    transform: translateY(-2px);
+  }
+  
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+  
+  .updating {
+    animation: pulse 1s ease-in-out;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="platform-dashboard">
+  <!-- Boutons d'export -->
+  {% include 'dashboard/export_buttons.html' with source='WorldBank' period='30d' %}
+  
+  <button id="refreshBtn" class="refresh-btn" onclick="refreshData()">
+    🔄 Rafraîchir
+  </button>
+  
+  <a href="{% url 'dashboard:index' %}" class="back-link">
+    ← Retour à l'accueil
+  </a>
+  
+  <div class="dashboard-header">
+    <h1 class="dashboard-title">Banque Mondiale</h1>
+    <p class="dashboard-subtitle">
+      Indicateurs de Développement Économique et Social
+    </p>
+  </div>
+  
+  <!-- Section de Filtres -->
+  <div class="filters-section">
+    <h2 style="color: #60a5fa; font-size: 1.5rem; margin-bottom: 0.5rem;">🔍 Filtres</h2>
+    <p style="color: rgba(255, 255, 255, 0.6); font-size: 0.9rem; margin-bottom: 1rem;">
+      Affinez votre analyse par période et secteur
+    </p>
+    
+    <form method="GET" action="{% url 'dashboard:dashboard_worldbank' %}" id="filterForm">
+      <div class="filters-grid">
+        <div class="filter-group">
+          <label class="filter-label">📅 Année</label>
+          <select name="year" class="filter-select" id="yearFilter">
+            <option value="">Toutes les années</option>
+            {% for year in available_years %}
+            <option value="{{ year }}" {% if year == selected_year %}selected{% endif %}>
+              {{ year }}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+        
+        <div class="filter-group">
+          <label class="filter-label">📆 Trimestre</label>
+          <select name="quarter" class="filter-select" id="quarterFilter">
+            <option value="">Tous les trimestres</option>
+            {% for quarter in available_quarters %}
+            <option value="{{ quarter }}" {% if quarter == selected_quarter %}selected{% endif %}>
+              {{ quarter }}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+        
+        <div class="filter-group">
+          <label class="filter-label">🏢 Secteur</label>
+          <select name="sector" class="filter-select" id="sectorFilter">
+            <option value="">Tous les secteurs</option>
+            {% for sector in available_sectors %}
+            <option value="{{ sector }}" {% if sector == selected_sector %}selected{% endif %}>
+              {{ sector }}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+        
+        <div class="filter-group">
+          <label class="filter-label">🌍 Pays</label>
+          <select name="country" class="filter-select" id="countryFilter">
+            <option value="">Tous les pays</option>
+            {% for country in available_countries %}
+            <option value="{{ country }}" {% if country == selected_country %}selected{% endif %}>
+              {{ country_display|get_item:country|default:country }}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+      
+      <div class="filter-buttons">
+        <button type="submit" class="filter-btn filter-btn-apply">
+          ✓ Appliquer les filtres
+        </button>
+        <button type="button" class="filter-btn filter-btn-reset" onclick="resetFilters()">
+          ✕ Réinitialiser
+        </button>
+      </div>
+    </form>
+    
+    <!-- Tags des filtres actifs -->
+    <div class="active-filters">
+      {% if selected_year %}
+      <div class="filter-tag">
+        <span>📅 {{ selected_year }}</span>
+        <span class="filter-tag-close" onclick="removeFilter('year')">×</span>
+      </div>
+      {% endif %}
+      {% if selected_quarter %}
+      <div class="filter-tag">
+        <span>📆 {{ selected_quarter }}</span>
+        <span class="filter-tag-close" onclick="removeFilter('quarter')">×</span>
+      </div>
+      {% endif %}
+      {% if selected_sector %}
+      <div class="filter-tag">
+        <span>🏢 {{ selected_sector }}</span>
+        <span class="filter-tag-close" onclick="removeFilter('sector')">×</span>
+      </div>
+      {% endif %}
+      {% if selected_country %}
+      <div class="filter-tag">
+        <span>🌍 {{ country_display|get_item:selected_country|default:selected_country }}</span>
+        <span class="filter-tag-close" onclick="removeFilter('country')">×</span>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+  
+  <div class="stats-overview">
+    <h2>{{ total_observations|default:0 }} Observations</h2>
+    <p>Dernière mise à jour: {{ last_update }}</p>
+    <p style="margin-top: 0.5rem; color: rgba(255, 255, 255, 0.6);">
+      {{ datasets_stats|length }} indicateurs • 15 pays CEDEAO
+    </p>
+  </div>
+  
+  <!-- KPIs Enrichis -->
+  <div class="section-card">
+    <h2>📊 Indicateurs Clés de Développement</h2>
+    <div class="metrics-grid">
+      {% for key, kpi in kpis.items %}
+      <div class="metric-card">
+        <div class="metric-label">{{ kpi.icon }} {{ kpi.name }}</div>
+        <div class="metric-value">
+          {{ kpi.value }}
+          <span style="font-size: 1rem; color: rgba(255, 255, 255, 0.6);">{{ kpi.unit }}</span>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  
+  <!-- KPIs par Pays -->
+  <div class="section-card">
+    <h2>🌍 Indicateurs Clés par Pays</h2>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 1.5rem; margin-top: 1.5rem;">
+      {% for country, country_kpis in kpis_by_country.items %}
+      <div style="background: linear-gradient(135deg, #1e3a5f 0%, #2d5a8e 100%); padding: 1.5rem; border-radius: 12px; border: 1px solid rgba(96, 165, 250, 0.2);">
+        <h3 style="margin: 0 0 1rem 0; color: #60a5fa; font-size: 1.1rem; font-weight: 600;">
+          {{ country_display|get_item:country|default:country }}
+        </h3>
+        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem; background: rgba(0,0,0,0.2); border-radius: 6px;">
+            <span style="color: rgba(255,255,255,0.7); font-size: 0.85rem;">📈 Croissance PIB</span>
+            <span style="color: #ffffff; font-weight: 600;">{{ country_kpis.gdp_growth.value }}{{ country_kpis.gdp_growth.unit|default:"%" }}</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem; background: rgba(0,0,0,0.2); border-radius: 6px;">
+            <span style="color: rgba(255,255,255,0.7); font-size: 0.85rem;">👥 Population</span>
+            <span style="color: #ffffff; font-weight: 600;">{{ country_kpis.population.value }} {{ country_kpis.population.unit|default:"M" }}</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem; background: rgba(0,0,0,0.2); border-radius: 6px;">
+            <span style="color: rgba(255,255,255,0.7); font-size: 0.85rem;">🏥 Santé</span>
+            <span style="color: #ffffff; font-weight: 600;">{{ country_kpis.health_expenditure.value }}%</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem; background: rgba(0,0,0,0.2); border-radius: 6px;">
+            <span style="color: rgba(255,255,255,0.7); font-size: 0.85rem;">🎓 Éducation</span>
+            <span style="color: #ffffff; font-weight: 600;">{{ country_kpis.education_expenditure.value }}%</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem; background: rgba(0,0,0,0.2); border-radius: 6px;">
+            <span style="color: rgba(255,255,255,0.7); font-size: 0.85rem;">📚 Alphabétisation</span>
+            <span style="color: #ffffff; font-weight: 600;">{{ country_kpis.literacy_rate.value }}%</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem; background: rgba(0,0,0,0.2); border-radius: 6px;">
+            <span style="color: rgba(255,255,255,0.7); font-size: 0.85rem;">💡 Électricité</span>
+            <span style="color: #ffffff; font-weight: 600;">{{ country_kpis.electricity_access.value }}%</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem; background: rgba(0,0,0,0.2); border-radius: 6px;">
+            <span style="color: rgba(255,255,255,0.7); font-size: 0.85rem;">🌐 Internet</span>
+            <span style="color: #ffffff; font-weight: 600;">{{ country_kpis.internet_users.value }}%</span>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  
+  <div class="section-card">
+    <h2>📊 Détails des Indicateurs</h2>
+    {% for dataset, stats in datasets_stats.items %}
+    <div class="indicator-card">
+      <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+        <div style="flex: 1;">
+          <div style="font-size: 1.1rem; font-weight: 600; color: #ffffff;">
+            {{ indicator_names|get_item:dataset|default:dataset }}
+          </div>
+          <div style="font-size: 0.85rem; color: rgba(255, 255, 255, 0.6); margin-top: 0.25rem;">
+            {{ stats.count }} observations • {{ stats.country_count }} pays
+          </div>
+        </div>
+        <div style="text-align: right;">
+          <div style="font-size: 1.8rem; font-weight: 700; color: #60a5fa;">
+            {{ stats.avg_value|floatformat:2 }}
+          </div>
+          <div style="font-size: 0.75rem; color: rgba(255, 255, 255, 0.6);">Moyenne</div>
+        </div>
+      </div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; font-size: 0.85rem; padding-top: 0.75rem; border-top: 1px solid rgba(255, 255, 255, 0.1);">
+        <div>
+          <span style="color: rgba(255, 255, 255, 0.5);">Min:</span>
+          <span style="color: #22c55e; font-weight: 600; margin-left: 0.25rem;">{{ stats.min_value|floatformat:2 }}</span>
+        </div>
+        <div>
+          <span style="color: rgba(255, 255, 255, 0.5);">Médiane:</span>
+          <span style="color: #ffffff; font-weight: 600; margin-left: 0.25rem;">{{ stats.median_value|floatformat:2 }}</span>
+        </div>
+        <div>
+          <span style="color: rgba(255, 255, 255, 0.5);">Max:</span>
+          <span style="color: #ef4444; font-weight: 600; margin-left: 0.25rem;">{{ stats.max_value|floatformat:2 }}</span>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  
+  <!-- NOUVELLE SECTION: Tous les Indicateurs Disponibles -->
+  <div class="section-card">
+    <h2>📋 Tous les Indicateurs Disponibles ({{ all_indicators|length }} indicateurs)</h2>
+    <p style="color: rgba(255, 255, 255, 0.6); margin-bottom: 1.5rem;">
+      Détails complets de tous les indicateurs WorldBank collectés pour les pays CEDEAO
+    </p>
+    
+    <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+      {% for indicator_code in all_indicators %}
+      {% with indicator_info=indicators_stats|get_item:indicator_code %}
+      {% if indicator_info %}
+      <div style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(59, 130, 246, 0.05) 100%); border-radius: 12px; padding: 1.5rem; border: 1px solid rgba(59, 130, 246, 0.3);">
+        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+          <div style="flex: 1;">
+            <h3 style="margin: 0; font-size: 1.2rem; color: #60a5fa; font-weight: 600;">
+              {{ indicator_info.name }}
+            </h3>
+            <p style="margin: 0.25rem 0 0 0; font-size: 0.85rem; color: rgba(255, 255, 255, 0.5); font-family: monospace;">
+              {{ indicator_code }}
+            </p>
+          </div>
+          <div style="text-align: right;">
+            <div style="font-size: 1.5rem; font-weight: 700; color: #3b82f6;">
+              {{ indicator_info.total_observations }}
+            </div>
+            <div style="font-size: 0.75rem; color: rgba(255, 255, 255, 0.6);">observations</div>
+          </div>
+        </div>
+        
+        <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255, 255, 255, 0.1);">
+          <p style="color: rgba(255, 255, 255, 0.7); margin-bottom: 0.75rem; font-weight: 500;">
+            📊 Couverture: {{ indicator_info.countries_count }} pays
+          </p>
+          
+          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.75rem;">
+            {% for country_data in indicator_info.countries %}
+            <div style="background: rgba(0, 0, 0, 0.3); padding: 0.75rem; border-radius: 8px; display: flex; flex-direction: column; gap: 0.25rem;">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="color: #ffffff; font-weight: 600; font-size: 0.9rem;">{{ country_data.name }}</span>
+                <span style="color: rgba(255, 255, 255, 0.5); font-size: 0.75rem;">{{ country_data.observations }} obs</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.25rem;">
+                <span style="color: #60a5fa; font-weight: 700;">{{ country_data.latest_value }}</span>
+                <span style="color: rgba(255, 255, 255, 0.4); font-size: 0.75rem;">({{ country_data.latest_year }})</span>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+      {% endif %}
+      {% endwith %}
+      {% endfor %}
+    </div>
+  </div>
+  
+  <div class="section-card">
+    <h2>📈 Évolution Historique</h2>
+    <div class="chart-container">
+      <canvas id="trendsChart"></canvas>
+    </div>
+  </div>
+  
+  <div class="section-card">
+    <h2>🌍 Comparaison Par Pays - Croissance PIB</h2>
+    <div class="chart-container">
+      <canvas id="countryComparisonChart"></canvas>
+    </div>
+  </div>
+</div>
+
+<script>
+let trendsChart = null;
+let comparisonChart = null;
+
+document.addEventListener('DOMContentLoaded', function() {
+  initializeCharts();
+});
+
+function initializeCharts() {
+  // Graphique d'évolution
+  const ctx1 = document.getElementById('trendsChart');
+  if (ctx1) {
+    const chartData = {{ chart_data|safe }};
+    
+    trendsChart = new Chart(ctx1, {
+      type: 'line',
+      data: {
+        labels: chartData.map(d => d.year || d.date),
+        datasets: [{
+          label: 'Valeur',
+          data: chartData.map(d => d.value),
+          borderColor: '#60a5fa',
+          backgroundColor: 'rgba(96, 165, 250, 0.1)',
+          borderWidth: 2,
+          tension: 0.4,
+          fill: true
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            labels: { color: '#ffffff' }
+          },
+          tooltip: {
+            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+            titleColor: '#ffffff',
+            bodyColor: '#ffffff'
+          }
+        },
+        scales: {
+          x: {
+            ticks: { color: 'rgba(255, 255, 255, 0.7)' },
+            grid: { color: 'rgba(255, 255, 255, 0.1)' }
+          },
+          y: {
+            ticks: { color: 'rgba(255, 255, 255, 0.7)' },
+            grid: { color: 'rgba(255, 255, 255, 0.1)' }
+          }
+        }
+      }
+    });
+  }
+  
+  // Graphique de comparaison pays
+  const ctx2 = document.getElementById('countryComparisonChart');
+  if (ctx2) {
+    const chartData = {{ chart_data|safe }};
+    
+    comparisonChart = new Chart(ctx2, {
+      type: 'bar',
+      data: {
+        labels: chartData.map(d => d.country),
+        datasets: [{
+          label: 'Croissance PIB (%)',
+          data: chartData.map(d => d.value),
+          backgroundColor: chartData.map((d, i) => {
+            const colors = ['#3b82f6', '#60a5fa', '#93c5fd', '#dbeafe', '#eff6ff'];
+            return colors[i % colors.length];
+          }),
+          borderColor: '#60a5fa',
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            labels: { color: '#ffffff' }
+          },
+          tooltip: {
+            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+            titleColor: '#ffffff',
+            bodyColor: '#ffffff'
+          }
+        },
+        scales: {
+          x: {
+            ticks: { color: 'rgba(255, 255, 255, 0.7)' },
+            grid: { color: 'rgba(255, 255, 255, 0.1)' }
+          },
+          y: {
+            ticks: { color: 'rgba(255, 255, 255, 0.7)' },
+            grid: { color: 'rgba(255, 255, 255, 0.1)' },
+            beginAtZero: true
+          }
+        }
+      }
+    });
+  }
+}
+
+async function refreshData() {
+  const btn = document.getElementById('refreshBtn');
+  btn.classList.add('updating');
+  btn.textContent = '⏳ Mise à jour...';
+  
+  try {
+    // Recharger la page pour actualiser les données
+    document.querySelectorAll('.metric-card, .section-card').forEach(card => {
+      card.classList.add('updating');
+      setTimeout(() => card.classList.remove('updating'), 800);
+    });
+    
+    setTimeout(() => {
+      window.location.reload();
+    }, 1000);
+    
+  } catch (error) {
+    console.error('Erreur:', error);
+    btn.textContent = '🔄 Rafraîchir';
+    btn.classList.remove('updating');
+  }
+}
+
+function resetFilters() {
+  // Rediriger vers la page sans paramètres
+  window.location.href = '{% url "dashboard:dashboard_worldbank" %}';
+}
+
+function removeFilter(filterName) {
+  // Récupérer l'URL actuelle
+  const url = new URL(window.location.href);
+  const params = new URLSearchParams(url.search);
+  
+  // Supprimer le filtre
+  params.delete(filterName);
+  
+  // Rediriger avec les nouveaux paramètres
+  window.location.href = url.pathname + (params.toString() ? '?' + params.toString() : '');
+}
+
+// Auto-submit du formulaire quand un filtre change
+document.addEventListener('DOMContentLoaded', function() {
+  const selects = document.querySelectorAll('.filter-select');
+  selects.forEach(select => {
+    select.addEventListener('change', function() {
+      // Optionnel: soumettre automatiquement le formulaire
+      // document.getElementById('filterForm').submit();
+    });
+  });
+});
+</script>
+{% endblock %}

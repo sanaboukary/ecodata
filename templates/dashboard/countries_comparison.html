@@ -1,0 +1,671 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Comparaison Multi-Pays CEDEAO{% endblock %}
+
+{% block head_extra %}
+<link rel="stylesheet" href="{% static 'css/finance.css' %}">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+<style>
+  .comparison-dashboard {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    min-height: 100vh;
+    padding: 2rem;
+    color: #ffffff;
+  }
+  
+  .dashboard-header {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+  
+  .dashboard-title {
+    font-size: 2.8rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 0.5rem;
+  }
+  
+  .dashboard-subtitle {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 1.1rem;
+  }
+  
+  /* Filtres */
+  .filters-panel {
+    background: rgba(30, 41, 59, 0.8);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+  }
+  
+  .filters-title {
+    color: #60a5fa;
+    font-size: 1.3rem;
+    margin-bottom: 1.5rem;
+    font-weight: 700;
+  }
+  
+  .countries-selector {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .country-checkbox {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem;
+    background: rgba(15, 23, 42, 0.6);
+    border-radius: 8px;
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  
+  .country-checkbox:hover {
+    background: rgba(15, 23, 42, 0.8);
+    border-color: rgba(59, 130, 246, 0.4);
+    transform: translateY(-2px);
+  }
+  
+  .country-checkbox input[type="checkbox"] {
+    margin-right: 0.5rem;
+    cursor: pointer;
+  }
+  
+  .country-checkbox.selected {
+    background: rgba(59, 130, 246, 0.2);
+    border-color: #3b82f6;
+  }
+  
+  .filter-actions {
+    display: flex;
+    gap: 1rem;
+  }
+  
+  .filter-btn {
+    flex: 1;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  
+  .filter-btn-primary {
+    background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+    color: #ffffff;
+  }
+  
+  .filter-btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(59, 130, 246, 0.4);
+  }
+  
+  .filter-btn-secondary {
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+  }
+  
+  /* Table de comparaison */
+  .comparison-table-section {
+    background: rgba(30, 41, 59, 0.6);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    overflow-x: auto;
+  }
+  
+  .section-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #60a5fa;
+    margin-bottom: 1.5rem;
+  }
+  
+  .comparison-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 800px;
+  }
+  
+  .comparison-table th {
+    background: rgba(59, 130, 246, 0.2);
+    padding: 1rem;
+    text-align: left;
+    color: #60a5fa;
+    font-weight: 700;
+    border-bottom: 2px solid rgba(59, 130, 246, 0.4);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  
+  .comparison-table td {
+    padding: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.9);
+  }
+  
+  .comparison-table tbody tr {
+    transition: all 0.3s;
+  }
+  
+  .comparison-table tbody tr:hover {
+    background: rgba(59, 130, 246, 0.1);
+  }
+  
+  .indicator-label {
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.8);
+  }
+  
+  .value-cell {
+    font-weight: 600;
+    font-size: 1.05rem;
+  }
+  
+  .value-positive {
+    color: #22c55e;
+  }
+  
+  .value-negative {
+    color: #ef4444;
+  }
+  
+  .value-neutral {
+    color: #fbbf24;
+  }
+  
+  /* Graphiques */
+  .charts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+    gap: 2rem;
+    margin-bottom: 2rem;
+  }
+  
+  .chart-card {
+    background: rgba(30, 41, 59, 0.6);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    padding: 2rem;
+    border: 1px solid rgba(59, 130, 246, 0.2);
+  }
+  
+  .chart-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #60a5fa;
+    margin-bottom: 1rem;
+  }
+  
+  .chart-container {
+    position: relative;
+    height: 350px;
+  }
+  
+  /* KPIs Cards */
+  .kpis-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+  
+  .kpi-card {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(139, 92, 246, 0.05) 100%);
+    border-radius: 12px;
+    padding: 1.5rem;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    transition: all 0.3s;
+  }
+  
+  .kpi-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
+  }
+  
+  .kpi-label {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.85rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .kpi-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #ffffff;
+  }
+  
+  /* Back link */
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background: rgba(255, 255, 255, 0.1);
+    color: #60a5fa;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: all 0.3s;
+    margin-bottom: 2rem;
+  }
+  
+  .back-link:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateX(-5px);
+  }
+  
+  @media (max-width: 768px) {
+    .charts-grid {
+      grid-template-columns: 1fr;
+    }
+    
+    .countries-selector {
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="comparison-dashboard">
+  <a href="{% url 'dashboard:index' %}" class="back-link">
+    ← Retour au tableau de bord
+  </a>
+  
+  <div class="dashboard-header">
+    <h1 class="dashboard-title">Comparaison Multi-Pays CEDEAO</h1>
+    <p class="dashboard-subtitle">
+      Analyse comparative des indicateurs économiques et sociaux
+    </p>
+  </div>
+  
+  <!-- Filtres de sélection des pays -->
+  <div class="filters-panel">
+    <h2 class="filters-title">🌍 Sélectionner les pays à comparer (2-5 pays)</h2>
+    
+    <form method="GET" id="compareForm">
+      <div class="countries-selector">
+        {% for code, name in all_countries.items %}
+        <label class="country-checkbox {% if code in selected_countries %}selected{% endif %}">
+          <input type="checkbox" 
+                 name="countries" 
+                 value="{{ code }}" 
+                 {% if code in selected_countries %}checked{% endif %}
+                 onchange="this.parentElement.classList.toggle('selected', this.checked)">
+          <span>{{ name }}</span>
+        </label>
+        {% endfor %}
+      </div>
+      
+      <div class="filter-actions">
+        <button type="submit" class="filter-btn filter-btn-primary">
+          ✓ Comparer les pays sélectionnés
+        </button>
+        <button type="button" class="filter-btn filter-btn-secondary" onclick="resetSelection()">
+          ✕ Réinitialiser
+        </button>
+      </div>
+    </form>
+  </div>
+  
+  {% if comparison_data %}
+  <!-- KPIs Résumé -->
+  <div class="kpis-grid">
+    <div class="kpi-card">
+      <div class="kpi-label">Pays Comparés</div>
+      <div class="kpi-value">{{ total_compared }}</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Population Totale</div>
+      <div class="kpi-value">{{ comparison_data|length }}</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">PIB Cumulé</div>
+      <div class="kpi-value">-</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Année Référence</div>
+      <div class="kpi-value">{{ selected_year }}</div>
+    </div>
+  </div>
+  
+  <!-- Table de comparaison détaillée -->
+  <div class="comparison-table-section">
+    <h2 class="section-title">📊 Tableau Comparatif Détaillé</h2>
+    
+    <table class="comparison-table">
+      <thead>
+        <tr>
+          <th>Indicateur</th>
+          {% for country in comparison_data %}
+          <th>{{ country.name }}</th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="indicator-label">Population</td>
+          {% for country in comparison_data %}
+          <td class="value-cell">{{ country.population|floatformat:0 }}</td>
+          {% endfor %}
+        </tr>
+        <tr>
+          <td class="indicator-label">PIB (Milliards USD)</td>
+          {% for country in comparison_data %}
+          <td class="value-cell">{{ country.gdp|floatformat:2 }}</td>
+          {% endfor %}
+        </tr>
+        <tr>
+          <td class="indicator-label">Croissance PIB (%)</td>
+          {% for country in comparison_data %}
+          <td class="value-cell {% if country.gdp_growth >= 5 %}value-positive{% elif country.gdp_growth <= 0 %}value-negative{% else %}value-neutral{% endif %}">
+            {{ country.gdp_growth|floatformat:1 }}%
+          </td>
+          {% endfor %}
+        </tr>
+        <tr>
+          <td class="indicator-label">Inflation (%)</td>
+          {% for country in comparison_data %}
+          <td class="value-cell {% if country.inflation <= 3 %}value-positive{% elif country.inflation >= 10 %}value-negative{% else %}value-neutral{% endif %}">
+            {{ country.inflation|floatformat:1 }}%
+          </td>
+          {% endfor %}
+        </tr>
+        <tr>
+          <td class="indicator-label">Dette/PIB (%)</td>
+          {% for country in comparison_data %}
+          <td class="value-cell {% if country.debt_to_gdp <= 60 %}value-positive{% elif country.debt_to_gdp >= 90 %}value-negative{% else %}value-neutral{% endif %}">
+            {{ country.debt_to_gdp|floatformat:1 }}%
+          </td>
+          {% endfor %}
+        </tr>
+        <tr>
+          <td class="indicator-label">Chômage (%)</td>
+          {% for country in comparison_data %}
+          <td class="value-cell {% if country.unemployment <= 5 %}value-positive{% elif country.unemployment >= 15 %}value-negative{% else %}value-neutral{% endif %}">
+            {{ country.unemployment|floatformat:1 }}%
+          </td>
+          {% endfor %}
+        </tr>
+        <tr>
+          <td class="indicator-label">Pauvreté (%)</td>
+          {% for country in comparison_data %}
+          <td class="value-cell {% if country.poverty_rate <= 20 %}value-positive{% elif country.poverty_rate >= 50 %}value-negative{% else %}value-neutral{% endif %}">
+            {{ country.poverty_rate|floatformat:1 }}%
+          </td>
+          {% endfor %}
+        </tr>
+        <tr>
+          <td class="indicator-label">Espérance de vie (ans)</td>
+          {% for country in comparison_data %}
+          <td class="value-cell {% if country.life_expectancy >= 70 %}value-positive{% elif country.life_expectancy <= 55 %}value-negative{% else %}value-neutral{% endif %}">
+            {{ country.life_expectancy|floatformat:1 }}
+          </td>
+          {% endfor %}
+        </tr>
+        <tr>
+          <td class="indicator-label">Score ODD (/100)</td>
+          {% for country in comparison_data %}
+          <td class="value-cell {% if country.sdg_score >= 70 %}value-positive{% elif country.sdg_score <= 40 %}value-negative{% else %}value-neutral{% endif %}">
+            {{ country.sdg_score|floatformat:0 }}
+          </td>
+          {% endfor %}
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  
+  <!-- Graphiques comparatifs -->
+  <div class="charts-grid">
+    <div class="chart-card">
+      <h3 class="chart-title">📊 Comparaison PIB</h3>
+      <div class="chart-container">
+        <canvas id="gdpChart"></canvas>
+      </div>
+    </div>
+    
+    <div class="chart-card">
+      <h3 class="chart-title">📈 Croissance & Inflation</h3>
+      <div class="chart-container">
+        <canvas id="growthInflationChart"></canvas>
+      </div>
+    </div>
+    
+    <div class="chart-card">
+      <h3 class="chart-title">👥 Population</h3>
+      <div class="chart-container">
+        <canvas id="populationChart"></canvas>
+      </div>
+    </div>
+    
+    <div class="chart-card">
+      <h3 class="chart-title">🎯 Score ODD</h3>
+      <div class="chart-container">
+        <canvas id="sdgChart"></canvas>
+      </div>
+    </div>
+    
+    <div class="chart-card">
+      <h3 class="chart-title">💰 Dette/PIB</h3>
+      <div class="chart-container">
+        <canvas id="debtChart"></canvas>
+      </div>
+    </div>
+    
+    <div class="chart-card">
+      <h3 class="chart-title">🏥 Indicateurs Sociaux</h3>
+      <div class="chart-container">
+        <canvas id="socialChart"></canvas>
+      </div>
+    </div>
+  </div>
+  {% else %}
+  <div style="text-align: center; padding: 3rem; color: rgba(255,255,255,0.6);">
+    <p>Veuillez sélectionner au moins 2 pays pour commencer la comparaison.</p>
+  </div>
+  {% endif %}
+</div>
+
+<script>
+  const chartData = {{ chart_data|safe }};
+  
+  // Configuration commune des graphiques
+  const commonOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: true,
+        labels: { color: '#ffffff', font: { size: 12 } }
+      },
+      tooltip: {
+        backgroundColor: 'rgba(15, 23, 42, 0.9)',
+        titleColor: '#ffffff',
+        bodyColor: '#ffffff',
+        borderColor: '#3b82f6',
+        borderWidth: 1
+      }
+    },
+    scales: {
+      y: {
+        grid: { color: 'rgba(255, 255, 255, 0.1)' },
+        ticks: { color: '#ffffff' }
+      },
+      x: {
+        grid: { color: 'rgba(255, 255, 255, 0.1)' },
+        ticks: { color: '#ffffff' }
+      }
+    }
+  };
+  
+  // Graphique PIB
+  if (chartData.gdp && chartData.gdp.length > 0) {
+    new Chart(document.getElementById('gdpChart'), {
+      type: 'bar',
+      data: {
+        labels: chartData.countries,
+        datasets: [{
+          label: 'PIB (Milliards USD)',
+          data: chartData.gdp,
+          backgroundColor: 'rgba(59, 130, 246, 0.7)',
+          borderColor: '#3b82f6',
+          borderWidth: 2
+        }]
+      },
+      options: commonOptions
+    });
+  }
+  
+  // Graphique Croissance & Inflation
+  if (chartData.gdp_growth && chartData.gdp_growth.length > 0) {
+    new Chart(document.getElementById('growthInflationChart'), {
+      type: 'bar',
+      data: {
+        labels: chartData.countries,
+        datasets: [
+          {
+            label: 'Croissance PIB (%)',
+            data: chartData.gdp_growth,
+            backgroundColor: 'rgba(34, 197, 94, 0.7)',
+            borderColor: '#22c55e',
+            borderWidth: 2
+          },
+          {
+            label: 'Inflation (%)',
+            data: chartData.inflation,
+            backgroundColor: 'rgba(239, 68, 68, 0.7)',
+            borderColor: '#ef4444',
+            borderWidth: 2
+          }
+        ]
+      },
+      options: commonOptions
+    });
+  }
+  
+  // Graphique Population
+  if (chartData.population && chartData.population.length > 0) {
+    new Chart(document.getElementById('populationChart'), {
+      type: 'doughnut',
+      data: {
+        labels: chartData.countries,
+        datasets: [{
+          data: chartData.population,
+          backgroundColor: [
+            'rgba(59, 130, 246, 0.7)',
+            'rgba(139, 92, 246, 0.7)',
+            'rgba(236, 72, 153, 0.7)',
+            'rgba(34, 197, 94, 0.7)',
+            'rgba(251, 191, 36, 0.7)'
+          ],
+          borderColor: '#0f172a',
+          borderWidth: 2
+        }]
+      },
+      options: {
+        ...commonOptions,
+        scales: undefined
+      }
+    });
+  }
+  
+  // Graphique Score ODD
+  if (chartData.sdg_score && chartData.sdg_score.length > 0) {
+    new Chart(document.getElementById('sdgChart'), {
+      type: 'radar',
+      data: {
+        labels: chartData.countries,
+        datasets: [{
+          label: 'Score ODD',
+          data: chartData.sdg_score,
+          backgroundColor: 'rgba(139, 92, 246, 0.2)',
+          borderColor: '#8b5cf6',
+          borderWidth: 3,
+          pointBackgroundColor: '#8b5cf6',
+          pointBorderColor: '#ffffff',
+          pointRadius: 5
+        }]
+      },
+      options: {
+        ...commonOptions,
+        scales: {
+          r: {
+            grid: { color: 'rgba(255, 255, 255, 0.1)' },
+            ticks: { color: '#ffffff' }
+          }
+        }
+      }
+    });
+  }
+  
+  // Graphique Dette/PIB
+  if (chartData.debt_to_gdp && chartData.debt_to_gdp.length > 0) {
+    new Chart(document.getElementById('debtChart'), {
+      type: 'line',
+      data: {
+        labels: chartData.countries,
+        datasets: [{
+          label: 'Dette/PIB (%)',
+          data: chartData.debt_to_gdp,
+          backgroundColor: 'rgba(251, 191, 36, 0.1)',
+          borderColor: '#fbbf24',
+          borderWidth: 3,
+          fill: true,
+          tension: 0.4,
+          pointRadius: 5,
+          pointBackgroundColor: '#fbbf24',
+          pointBorderColor: '#ffffff'
+        }]
+      },
+      options: commonOptions
+    });
+  }
+  
+  // Graphique Indicateurs Sociaux
+  if (chartData.poverty_rate && chartData.poverty_rate.length > 0) {
+    new Chart(document.getElementById('socialChart'), {
+      type: 'bar',
+      data: {
+        labels: chartData.countries,
+        datasets: [
+          {
+            label: 'Chômage (%)',
+            data: chartData.unemployment,
+            backgroundColor: 'rgba(239, 68, 68, 0.7)',
+            borderColor: '#ef4444',
+            borderWidth: 2
+          },
+          {
+            label: 'Pauvreté (%)',
+            data: chartData.poverty_rate,
+            backgroundColor: 'rgba(251, 191, 36, 0.7)',
+            borderColor: '#fbbf24',
+            borderWidth: 2
+          }
+        ]
+      },
+      options: commonOptions
+    });
+  }
+  
+  // Fonction reset
+  function resetSelection() {
+    document.querySelectorAll('input[name="countries"]').forEach(cb => {
+      cb.checked = false;
+      cb.parentElement.classList.remove('selected');
+    });
+  }
+</script>
+{% endblock %}

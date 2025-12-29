@@ -1,0 +1,76 @@
+# Fichiers Python bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Environnements virtuels
+.venv/
+venv/
+ENV/
+env/
+
+# Django
+*.log
+db.sqlite3
+db.sqlite3-journal
+/staticfiles/
+/media/
+/logs/
+
+# Airflow
+airflow/logs/
+airflow/*.db
+airflow/*.pid
+airflow/*.cfg.backup
+airflow/airflow.db-*
+airflow/webserver_config.py
+
+# Secrets & Configuration
+.env
+.env.local
+.env.production
+*.pem
+*.key
+secrets/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Tests
+.pytest_cache/
+.coverage
+htmlcov/
+*.cover
+
+# Distribution
+build/
+dist/
+*.egg-info/
+
+# Backups
+*.backup
+*.bak
+backup/
+dumps/
+
+# Temporary
+*.tmp
+temp/
+tmp/
+
+# MongoDB dumps
+dump/
+
+# Docker volumes (ne pas commit les données)
+mongodb_data/
+mongodb_config/

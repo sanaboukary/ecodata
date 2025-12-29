@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    {% load static %}
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Plateforme de centralisation{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{% static 'css/finance.css' %}">
+    {% block head_extra %}{% endblock %}
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
+        <div class="container-fluid">
+            <a class="navbar-brand fw-bold" href="/">Plateforme de Centralisation</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarsExample" aria-controls="navbarsExample" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarsExample">
+                {% include 'partials/_top_tabs.html' %}
+                
+                <!-- Barre de recherche -->
+                <form class="d-flex ms-auto" action="{% url 'dashboard:global_search' %}" method="GET" style="position: relative; width: 300px;">
+                    <input 
+                        id="globalSearch" 
+                        class="form-control" 
+                        type="search" 
+                        name="q" 
+                        placeholder="🔍 Rechercher..." 
+                        autocomplete="off"
+                        style="padding-right: 2.5rem;">
+                    <div id="autocompleteResults" style="
+                        position: absolute;
+                        top: 100%;
+                        left: 0;
+                        right: 0;
+                        background: white;
+                        border: 1px solid #ddd;
+                        border-radius: 0 0 8px 8px;
+                        max-height: 400px;
+                        overflow-y: auto;
+                        z-index: 9999;
+                        display: none;
+                        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                    "></div>
+                </form>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container-fluid py-4">
+        <div class="layout">
+            <aside class="sidebar">
+                {% block sidebar %}{% endblock %}
+            </aside>
+            <section>
+                {% block content %}{% endblock %}
+            </section>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    
+    <!-- Script autocomplete recherche -->
+    <script>
+    (function() {
+        const searchInput = document.getElementById('globalSearch');
+        const autocompleteResults = document.getElementById('autocompleteResults');
+        
+        if (!searchInput || !autocompleteResults) return;
+        
+        let debounceTimer;
+        
+        searchInput.addEventListener('input', function(e) {
+            const query = e.target.value.trim();
+            
+            // Clear previous timer
+            clearTimeout(debounceTimer);
+            
+            if (query.length < 2) {
+                autocompleteResults.style.display = 'none';
+                return;
+            }
+            
+            // Debounce pour éviter trop de requêtes
+            debounceTimer = setTimeout(() => {
+                fetch(`/api/search/autocomplete/?q=${encodeURIComponent(query)}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        displaySuggestions(data.suggestions);
+                    })
+                    .catch(err => console.error('Erreur autocomplete:', err));
+            }, 300);
+        });
+        
+        function displaySuggestions(suggestions) {
+            if (!suggestions || suggestions.length === 0) {
+                autocompleteResults.style.display = 'none';
+                return;
+            }
+            
+            autocompleteResults.innerHTML = '';
+            
+            suggestions.forEach(item => {
+                const div = document.createElement('div');
+                div.style.cssText = `
+                    padding: 0.75rem 1rem;
+                    cursor: pointer;
+                    border-bottom: 1px solid #eee;
+                    transition: background 0.2s;
+                `;
+                
+                div.innerHTML = `
+                    <div style="font-weight: 500; color: #1e293b; margin-bottom: 0.25rem;">
+                        ${item.label}
+                    </div>
+                    <div style="font-size: 0.85rem; color: #64748b;">
+                        ${item.category}
+                    </div>
+                `;
+                
+                div.addEventListener('mouseenter', () => {
+                    div.style.background = '#f1f5f9';
+                });
+                
+                div.addEventListener('mouseleave', () => {
+                    div.style.background = 'white';
+                });
+                
+                div.addEventListener('click', () => {
+                    searchInput.value = item.value;
+                    searchInput.form.submit();
+                });
+                
+                autocompleteResults.appendChild(div);
+            });
+            
+            autocompleteResults.style.display = 'block';
+        }
+        
+        // Fermer autocomplete si clic ailleurs
+        document.addEventListener('click', function(e) {
+            if (!searchInput.contains(e.target) && !autocompleteResults.contains(e.target)) {
+                autocompleteResults.style.display = 'none';
+            }
+        });
+        
+        // Gérer touche Enter
+        searchInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                autocompleteResults.style.display = 'none';
+            }
+        });
+    })();
+    </script>
+    
+    {% block scripts %}{% endblock %}
+  </body>
+</html>
+
+

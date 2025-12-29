@@ -1,0 +1,237 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Données - Explorateur{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/finance.css' %}">
+<style>
+  body { background:#0B0F14; }
+  .card-dark { background:#0F141B; border:1px solid #1E293B; border-radius:12px; }
+  .muted { color:#94A3B8; }
+  .accent { color:#4A9EFF; }
+  table.data { width:100%; border-collapse: collapse; }
+  table.data th, table.data td { padding:.5rem .75rem; border-bottom:1px solid #1E293B; color:#E6E6E6; font-size:.9rem; }
+  table.data th { color:#94A3B8; font-weight:600; text-transform:uppercase; font-size:.75rem; }
+  .pill { padding:.15rem .5rem; border:1px solid #334155; border-radius:999px; font-size:.75rem; color:#E6E6E6; }
+  .toolbar input, .toolbar select { background:#0B0F14; color:#E6E6E6; border:1px solid #334155; border-radius:6px; padding:.4rem .6rem; }
+  .btn { background:#1E293B; color:#E6E6E6; border:1px solid #334155; border-radius:6px; padding:.4rem .8rem; cursor:pointer; }
+  .btn.primary { background:#4A9EFF; color:#0B0F14; border-color:#4A9EFF; }
+  .pagination button { margin-right:.25rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="finance-dashboard">
+  <aside class="finance-sidebar">
+    <h1 class="platform-title">Explorateur des données</h1>
+    <nav class="sidebar-nav">
+      <a href="{% url 'dashboard:index' %}" class="nav-item">Accueil</a>
+      <a href="{% url 'dashboard:data_browser' %}" class="nav-item active">Données</a>
+      <a href="{% url 'dashboard:dashboard_worldbank' %}" class="nav-item">Banque Mondiale</a>
+      <a href="{% url 'dashboard:data_browser' %}?source=WorldBank" class="nav-item">Banque Mondiale (données)</a>
+      <a href="{% url 'dashboard:dashboard_brvm' %}" class="nav-item">BRVM</a>
+    </nav>
+  </aside>
+  <main class="finance-main">
+    <nav class="top-nav">
+      <a href="{% url 'dashboard:explorer' %}" class="top-nav-link">Explorateur</a>
+      <a href="{% url 'dashboard:comparateur' %}" class="top-nav-link">Comparateur</a>
+    </nav>
+
+    <div class="main-header" style="background: linear-gradient(135deg,#0F141B,#121826);">
+      <h2 class="section-title" style="color:#E6E6E6;">Données (curated_observations)</h2>
+      <div class="muted">Total: <span id="db-total">--</span></div>
+    </div>
+
+    <div class="indicators-section">
+      <div class="card-dark" style="padding:1rem; margin-bottom:1rem;">
+        <div class="toolbar" style="display:flex; gap:.5rem; flex-wrap:wrap; align-items:end;">
+          <div>
+            <div class="muted" style="font-size:.75rem;">Source</div>
+            <select id="f-source"></select>
+          </div>
+          <div>
+            <div class="muted" style="font-size:.75rem;">Indicateur</div>
+            <input id="f-indicator" placeholder="code exact (ex: SE.PRM.ENRR)"/>
+          </div>
+          <div>
+            <div class="muted" style="font-size:.75rem;">Pays</div>
+            <input id="f-country" placeholder="ex: Côte d'Ivoire"/>
+          </div>
+          <div>
+            <div class="muted" style="font-size:.75rem;">De</div>
+            <input id="f-from" type="date"/>
+          </div>
+          <div>
+            <div class="muted" style="font-size:.75rem;">À</div>
+            <input id="f-to" type="date"/>
+          </div>
+          <div>
+            <div class="muted" style="font-size:.75rem;">Taille page</div>
+            <select id="f-page-size">
+              <option>25</option>
+              <option>50</option>
+              <option>100</option>
+            </select>
+          </div>
+          <button class="btn primary" id="btn-apply">Appliquer</button>
+          <button class="btn" id="btn-reset">Réinitialiser</button>
+          <button class="btn" id="btn-export" title="Exporter CSV">Exporter CSV</button>
+        </div>
+      </div>
+
+      <div class="card-dark" style="padding:1rem;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:.5rem;">
+          <div class="muted">Résultats</div>
+          <div class="pagination">
+            <button class="btn" id="prev">Précédent</button>
+            <span class="muted">Page <span id="page">1</span></span>
+            <button class="btn" id="next">Suivant</button>
+          </div>
+        </div>
+        <div style="overflow:auto;">
+          <table class="data">
+            <thead>
+              <tr>
+                <th data-sort="ts" class="sortable">ts</th>
+                <th data-sort="source" class="sortable">source</th>
+                <th data-sort="indicator" class="sortable">indicator</th>
+                <th data-sort="value" class="sortable">value</th>
+                <th data-sort="country" class="sortable">pays</th>
+                <th data-sort="dataset" class="sortable">dataset</th>
+                <th data-sort="key" class="sortable">key</th>
+              </tr>
+            </thead>
+            <tbody id="rows"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+(function(){
+  const state = { page: 1, page_size: 25, source: '', indicator:'', country:'', from:'', to:'', sort_by:'ts', sort_dir:'desc' };
+  const $ = (id)=> document.getElementById(id);
+
+  function initFromQuery(){
+    const sp = new URLSearchParams(window.location.search);
+    state.source = sp.get('source') || '';
+    state.indicator = sp.get('indicator') || '';
+    state.country = sp.get('country') || '';
+    state.from = sp.get('from') || '';
+    state.to = sp.get('to') || '';
+    state.page = parseInt(sp.get('page') || '1', 10);
+    state.page_size = parseInt(sp.get('page_size') || '25', 10);
+    // Reflect into inputs
+    $('f-indicator').value = state.indicator;
+    $('f-country').value = state.country;
+    $('f-from').value = state.from;
+    $('f-to').value = state.to;
+    $('f-page-size').value = String(state.page_size);
+  }
+
+  function qs(){
+    const p = new URLSearchParams();
+    if(state.source) p.set('source', state.source);
+    if(state.indicator) p.set('indicator', state.indicator);
+    if(state.country) p.set('country', state.country);
+    if(state.from) p.set('from', state.from);
+    if(state.to) p.set('to', state.to);
+    p.set('page', state.page);
+    p.set('page_size', state.page_size);
+    p.set('sort_by', state.sort_by);
+    p.set('sort_dir', state.sort_dir);
+    return '?' + p.toString();
+  }
+
+  async function load(){
+    const res = await fetch('{% url "dashboard:data_list_api" %}' + qs());
+    const data = await res.json();
+    $('db-total').textContent = data.total;
+  $('page').textContent = data.page;
+  state.sort_by = (data.sort && data.sort.by) || state.sort_by;
+  state.sort_dir = (data.sort && data.sort.dir) || state.sort_dir;
+  markSorting();
+
+    // Fill sources dropdown once
+    const sSel = $('f-source');
+    if(sSel.options.length === 0){
+      const opt0 = document.createElement('option'); opt0.value=''; opt0.textContent='Toutes'; sSel.appendChild(opt0);
+      (data.filters.sources||[]).forEach(v=>{ const o=document.createElement('option'); o.value=v; o.textContent=v; sSel.appendChild(o); });
+    }
+    // Select current source if provided in URL
+    if(state.source) sSel.value = state.source;
+
+    const body = $('rows'); body.innerHTML = '';
+    (data.items||[]).forEach(doc=>{
+      const tr = document.createElement('tr');
+      const country = (doc.metadata && doc.metadata.country) || '';
+      tr.innerHTML = `<td>${doc.ts||''}</td>
+                      <td><span class="pill">${doc.source||''}</span></td>
+                      <td>${doc.indicator||''}</td>
+                      <td>${doc.value ?? ''}</td>
+                      <td>${country}</td>
+                      <td>${doc.dataset ?? ''}</td>
+                      <td>${doc.key ?? ''}</td>`;
+      body.appendChild(tr);
+    });
+  }
+
+  function apply(){
+    state.source = $('f-source').value;
+    state.indicator = $('f-indicator').value.trim();
+    state.country = $('f-country').value.trim();
+    state.from = $('f-from').value;
+    state.to = $('f-to').value;
+    state.page_size = parseInt($('f-page-size').value, 10) || 25;
+    state.page = 1;
+    load();
+  }
+
+  function markSorting(){
+    document.querySelectorAll('th.sortable').forEach(th=>{
+      th.style.cursor='pointer';
+      const key = th.dataset.sort;
+      const base = th.textContent.replace(/\s*[▲▼]$/,'');
+      if(key === state.sort_by){
+        th.style.color = '#4A9EFF';
+        th.textContent = base + (state.sort_dir==='desc'?' ▼':' ▲');
+      } else {
+        th.style.color = '#94A3B8';
+        th.textContent = base;
+      }
+    });
+  }
+
+  document.addEventListener('click', (e)=>{
+    if(e.target.matches('th.sortable')){
+      const f = e.target.dataset.sort;
+      if(state.sort_by === f){
+        state.sort_dir = state.sort_dir === 'desc' ? 'asc' : 'desc';
+      } else {
+        state.sort_by = f; state.sort_dir = 'desc';
+      }
+      load();
+    }
+  });
+
+  document.getElementById('btn-export').onclick = ()=>{
+    const url = '{% url "dashboard:data_export_api" %}' + qs();
+    window.open(url, '_blank');
+  };
+
+  $('btn-apply').onclick = apply;
+  $('btn-reset').onclick = ()=>{ Object.assign(state, {page:1,page_size:25,source:'',indicator:'',country:'',from:'',to:'', sort_by:'ts', sort_dir:'desc'});
+    $('f-source').value=''; $('f-indicator').value=''; $('f-country').value=''; $('f-from').value=''; $('f-to').value=''; $('f-page-size').value='25'; load(); };
+  $('prev').onclick = ()=>{ if(state.page>1){ state.page--; load(); }};
+  $('next').onclick = ()=>{ state.page++; load(); };
+
+  // Initial load with URL params
+  initFromQuery();
+  load();
+})();
+</script>
+{% endblock %}

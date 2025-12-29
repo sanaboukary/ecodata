@@ -1,0 +1,231 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Plateforme de Centralisation de Données Financières{% endblock %}
+
+{% block head_extra %}
+<link rel="stylesheet" href="{% static 'css/finance.css' %}">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="finance-dashboard">
+  <!-- Sidebar -->
+  <aside class="finance-sidebar">
+    <div class="sidebar-header">
+      <h1 class="platform-title">Plateforme de Centralisation<br><span>de Données Financières</span></h1>
+    </div>
+
+    <div class="search-box">
+      <input type="text" placeholder="Rechercher..." class="search-input">
+      <i class="search-icon">🔍</i>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a href="{% url 'dashboard:dashboard_brvm' %}" class="nav-item {% if active_source == 'BRVM' %}active{% endif %}">
+        <span class="nav-icon">📈</span>
+        <span class="nav-text">BRVM</span>
+        <span class="nav-arrow">›</span>
+      </a>
+      <a href="{% url 'dashboard:dashboard_imf' %}" class="nav-item {% if active_source == 'IMF' %}active{% endif %}">
+        <span class="nav-icon">💰</span>
+        <span class="nav-text">FMI</span>
+        <span class="nav-arrow">›</span>
+      </a>
+      <a href="{% url 'dashboard:dashboard_afdb' %}" class="nav-item {% if active_source == 'AfDB' %}active{% endif %}">
+        <span class="nav-icon">🏛️</span>
+        <span class="nav-text">BAD</span>
+        <span class="nav-arrow">›</span>
+      </a>
+      <a href="{% url 'dashboard:dashboard_un' %}" class="nav-item {% if active_source == 'UN_SDG' %}active{% endif %}">
+        <span class="nav-icon">🌍</span>
+        <span class="nav-text">ONU</span>
+        <span class="nav-arrow">›</span>
+      </a>
+      <a href="{% url 'dashboard:dashboard_worldbank' %}" class="nav-item {% if active_source == 'WorldBank' %}active{% endif %}">
+        <span class="nav-icon">🏦</span>
+        <span class="nav-text">Banque Mondiale</span>
+        <span class="nav-arrow">›</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-divider"></div>
+
+    <div class="filters-section">
+      <h3 class="filters-title">Filtres</h3>
+      <button class="filters-button">Appliquer les filtres</button>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="finance-main">
+    <!-- Top Navigation -->
+    <nav class="top-nav">
+      <a href="{% url 'dashboard:explorer' %}" class="top-nav-link">Explorateur</a>
+      <a href="{% url 'dashboard:comparateur' %}" class="top-nav-link">Comparateur</a>
+  <a href="{% url 'dashboard:index' %}" class="top-nav-link">Tableaux de bord</a>
+      <a href="/admin/" class="top-nav-link">Administration</a>
+    </nav>
+
+    <!-- Header with Title and Chart -->
+    <div class="main-header">
+      <div class="header-content">
+        <div>
+          <h2 class="section-title">Indicateurs économiques</h2>
+          <p style="color: rgba(255,255,255,0.8); margin: 0.5rem 0 0 0;">
+            {{ total_observations }} observations collectées depuis 5 sources
+          </p>
+        </div>
+        <div class="trend-chart-mini">
+          <canvas id="miniTrendChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Indicators Table -->
+    <div class="indicators-section">
+      <table class="indicators-table">
+        <thead>
+          <tr>
+            <th>Indicateur</th>
+            <th>Source</th>
+            <th>Période</th>
+            <th>Valeur</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for indicator in indicators_table %}
+          <tr>
+            <td>{{ indicator.indicateur }}</td>
+            <td><span class="source-badge {{ indicator.badge_class }}">{{ indicator.source }}</span></td>
+            <td>{{ indicator.periode }}</td>
+            <td><span class="value-highlight">{{ indicator.valeur }}</span></td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="4" style="text-align: center; padding: 2rem;">
+              Aucune donnée disponible. Lancez une collecte de données.
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Bottom Section: Sources and Comparison -->
+    <div class="bottom-section">
+      <div class="sources-panel">
+        <h3 class="panel-title">Sources de données</h3>
+        <div class="source-selector">
+          <select class="source-dropdown">
+            <option>IDH</option>
+            <option>PIB par habitant</option>
+            <option>Taux de pauvreté</option>
+          </select>
+        </div>
+        <div class="source-selector">
+          <select class="source-dropdown">
+            <option>Taux d'inflation</option>
+            <option>IPC Annuel</option>
+            <option>IPC Mensuel</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="comparison-panel">
+        <h3 class="panel-title">Comparaison d'indicateurs</h3>
+        <div class="comparison-chart">
+          <canvas id="comparisonChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+// Mini trend chart avec vraies données
+const miniCtx = document.getElementById('miniTrendChart');
+if (miniCtx) {
+  const trendData = {{ trend_data|safe }};
+  new Chart(miniCtx, {
+    type: 'line',
+    data: {
+      labels: ['', '', '', '', '', '', ''],
+      datasets: [{
+        data: trendData.length > 0 ? trendData : [65, 59, 80, 81, 56, 75, 85],
+        borderColor: '#C9A961',
+        borderWidth: 2,
+        fill: false,
+        tension: 0.4,
+        pointRadius: 0
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { display: false },
+        y: { display: false }
+      }
+    }
+  });
+}
+
+// Comparison chart
+const compCtx = document.getElementById('comparisonChart');
+if (compCtx) {
+  new Chart(compCtx, {
+    type: 'line',
+    data: {
+      labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun'],
+      datasets: [
+        {
+          label: 'Série 1',
+          data: [30, 45, 35, 50, 45, 60],
+          borderColor: '#1E3A5F',
+          backgroundColor: 'rgba(30, 58, 95, 0.1)',
+          borderWidth: 2,
+          tension: 0.4
+        },
+        {
+          label: 'Série 2',
+          data: [40, 35, 45, 40, 50, 55],
+          borderColor: '#C9A961',
+          backgroundColor: 'rgba(201, 169, 97, 0.1)',
+          borderWidth: 2,
+          tension: 0.4
+        },
+        {
+          label: 'Série 3',
+          data: [20, 30, 25, 35, 30, 45],
+          borderColor: '#7B92AB',
+          backgroundColor: 'rgba(123, 146, 171, 0.1)',
+          borderWidth: 2,
+          tension: 0.4
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: true,
+          position: 'bottom'
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          grid: { color: '#E8EBF0' }
+        },
+        x: {
+          grid: { display: false }
+        }
+      }
+    }
+  });
+}
+</script>
+{% endblock %}

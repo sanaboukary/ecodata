@@ -1,0 +1,585 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ stock_info.symbol }} - {{ stock_info.name }} | Analyse Détaillée</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(201, 169, 97, 0.2);
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: rgba(201, 169, 97, 0.2);
+            border: 1px solid #C9A961;
+            border-radius: 8px;
+            color: #C9A961;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .back-btn:hover {
+            background: rgba(201, 169, 97, 0.3);
+            transform: translateX(-5px);
+        }
+
+        .stock-title {
+            text-align: center;
+            flex: 1;
+        }
+
+        .stock-symbol {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #C9A961;
+            margin-bottom: 10px;
+        }
+
+        .stock-name {
+            font-size: 1.5rem;
+            color: #ccc;
+        }
+
+        .stock-meta {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 15px;
+            color: #888;
+        }
+
+        .price-section {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 30px;
+            margin-top: 20px;
+        }
+
+        .current-price {
+            font-size: 4rem;
+            font-weight: bold;
+            color: #C9A961;
+        }
+
+        .price-change {
+            font-size: 2rem;
+            padding: 10px 20px;
+            border-radius: 10px;
+        }
+
+        .price-change.positive {
+            background: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+        }
+
+        .price-change.negative {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 25px;
+            border-radius: 15px;
+            border: 1px solid rgba(201, 169, 97, 0.2);
+            transition: all 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            border-color: #C9A961;
+            box-shadow: 0 10px 30px rgba(201, 169, 97, 0.2);
+        }
+
+        .card-title {
+            font-size: 1.3rem;
+            color: #C9A961;
+            margin-bottom: 20px;
+            border-bottom: 2px solid rgba(201, 169, 97, 0.3);
+            padding-bottom: 10px;
+        }
+
+        .metric-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .metric-row:last-child {
+            border-bottom: none;
+        }
+
+        .metric-label {
+            color: #999;
+        }
+
+        .metric-value {
+            font-weight: bold;
+            color: #fff;
+        }
+
+        .recommendation-badge {
+            display: inline-block;
+            padding: 8px 20px;
+            border-radius: 25px;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .recommendation-badge.strong-buy {
+            background: rgba(34, 197, 94, 0.3);
+            color: #22c55e;
+            border: 2px solid #22c55e;
+        }
+
+        .recommendation-badge.buy {
+            background: rgba(74, 222, 128, 0.2);
+            color: #4ade80;
+            border: 2px solid #4ade80;
+        }
+
+        .recommendation-badge.hold {
+            background: rgba(251, 191, 36, 0.2);
+            color: #fbbf24;
+            border: 2px solid #fbbf24;
+        }
+
+        .recommendation-badge.sell {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            border: 2px solid #ef4444;
+        }
+
+        .chart-container {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 25px;
+            border-radius: 15px;
+            border: 1px solid rgba(201, 169, 97, 0.2);
+            margin-bottom: 30px;
+            height: 400px;
+        }
+
+        .similar-stocks {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 25px;
+            border-radius: 15px;
+            border: 1px solid rgba(201, 169, 97, 0.2);
+        }
+
+        .stock-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 10px;
+            margin-bottom: 10px;
+            transition: all 0.3s;
+        }
+
+        .stock-item:hover {
+            background: rgba(201, 169, 97, 0.1);
+            transform: translateX(10px);
+        }
+
+        .stock-item a {
+            color: #C9A961;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .stock-item a:hover {
+            text-decoration: underline;
+        }
+
+        .stars {
+            color: #fbbf24;
+            font-size: 1.5rem;
+        }
+
+        .analysts-bar {
+            display: flex;
+            height: 30px;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 15px 0;
+        }
+
+        .analysts-buy {
+            background: #22c55e;
+        }
+
+        .analysts-hold {
+            background: #fbbf24;
+        }
+
+        .analysts-sell {
+            background: #ef4444;
+        }
+
+        .analysts-legend {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 10px;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- En-tête -->
+        <div class="header">
+            <div class="header-top">
+                <a href="/" class="back-btn">
+                    ← Retour au marché
+                </a>
+                <div class="stock-title">
+                    <div class="stock-symbol">{{ stock_info.symbol }}</div>
+                    <div class="stock-name">{{ stock_info.name }}</div>
+                    <div class="stock-meta">
+                        <span>📊 {{ stock_info.sector }}</span>
+                        <span>🌍 {{ stock_info.country }}</span>
+                        <span>🕐 Mis à jour: {{ stock_info.last_update }}</span>
+                    </div>
+                </div>
+                <div style="width: 150px;"></div> <!-- Spacer for symmetry -->
+            </div>
+
+            <div class="price-section">
+                <div class="current-price">{{ stock_info.current_price|floatformat:0 }} FCFA</div>
+                <div class="price-change {% if performance_metrics.day_change >= 0 %}positive{% else %}negative{% endif %}">
+                    {% if performance_metrics.day_change >= 0 %}+{% endif %}{{ performance_metrics.day_change|floatformat:2 }}%
+                </div>
+            </div>
+        </div>
+
+        <!-- Recommandation -->
+        <div class="card" style="text-align: center; margin-bottom: 30px;">
+            <div class="card-title">📈 Recommandation d'Analystes</div>
+            <div style="margin: 20px 0;">
+                <span class="recommendation-badge {% if recommendation.rating == 'STRONG BUY' %}strong-buy{% elif recommendation.rating == 'BUY' %}buy{% elif recommendation.rating == 'HOLD' %}hold{% else %}sell{% endif %}">
+                    {{ recommendation.rating }}
+                </span>
+            </div>
+            <div class="stars">
+                {% for i in "12345" %}
+                    {% if forloop.counter <= recommendation.score %}★{% else %}☆{% endif %}
+                {% endfor %}
+                <span style="color: #ccc; font-size: 1rem;">({{ recommendation.score }}/5)</span>
+            </div>
+
+            {% if recommendation.target_price > 0 %}
+            <div style="margin-top: 20px; font-size: 1.2rem;">
+                <div style="color: #999;">Prix Cible</div>
+                <div style="color: #C9A961; font-weight: bold; font-size: 2rem;">{{ recommendation.target_price|floatformat:0 }} FCFA</div>
+                <div style="color: {% if recommendation.upside_potential >= 0 %}#22c55e{% else %}#ef4444{% endif %};">
+                    Potentiel: {% if recommendation.upside_potential >= 0 %}+{% endif %}{{ recommendation.upside_potential|floatformat:1 }}%
+                </div>
+            </div>
+            {% endif %}
+
+            {% if recommendation.analysts_buy > 0 or recommendation.analysts_hold > 0 or recommendation.analysts_sell > 0 %}
+            <div style="margin-top: 25px;">
+                <div style="color: #999; margin-bottom: 10px;">Consensus Analystes</div>
+                <div class="analysts-bar">
+                    {% if recommendation.analysts_buy > 0 %}
+                        <div class="analysts-buy" style="width: {{ recommendation.analysts_buy }}%;"></div>
+                    {% endif %}
+                    {% if recommendation.analysts_hold > 0 %}
+                        <div class="analysts-hold" style="width: {{ recommendation.analysts_hold }}%;"></div>
+                    {% endif %}
+                    {% if recommendation.analysts_sell > 0 %}
+                        <div class="analysts-sell" style="width: {{ recommendation.analysts_sell }}%;"></div>
+                    {% endif %}
+                </div>
+                <div class="analysts-legend">
+                    <span style="color: #22c55e;">🟢 Acheter: {{ recommendation.analysts_buy }}%</span>
+                    <span style="color: #fbbf24;">🟡 Conserver: {{ recommendation.analysts_hold }}%</span>
+                    <span style="color: #ef4444;">🔴 Vendre: {{ recommendation.analysts_sell }}%</span>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Graphiques -->
+        <div class="chart-container">
+            <canvas id="priceChart"></canvas>
+        </div>
+
+        <!-- Métriques Financières -->
+        <div class="grid">
+            <div class="card">
+                <div class="card-title">💰 Valorisation</div>
+                <div class="metric-row">
+                    <span class="metric-label">Capitalisation Boursière</span>
+                    <span class="metric-value">{{ financial_metrics.market_cap|floatformat:0 }} M FCFA</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Ratio P/E</span>
+                    <span class="metric-value">{{ financial_metrics.pe_ratio|floatformat:2 }}</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Ratio P/B</span>
+                    <span class="metric-value">{{ financial_metrics.pb_ratio|floatformat:2 }}</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Rendement Dividende</span>
+                    <span class="metric-value">{{ financial_metrics.dividend_yield|floatformat:2 }}%</span>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">📊 Rentabilité</div>
+                <div class="metric-row">
+                    <span class="metric-label">ROE (Rendement des Capitaux)</span>
+                    <span class="metric-value">{{ financial_metrics.roe|floatformat:2 }}%</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Marge Bénéficiaire</span>
+                    <span class="metric-value">{{ financial_metrics.profit_margin|floatformat:2 }}%</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Croissance Revenus</span>
+                    <span class="metric-value">{{ financial_metrics.revenue_growth|floatformat:2 }}%</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Croissance Bénéfices</span>
+                    <span class="metric-value">{{ financial_metrics.earnings_growth|floatformat:2 }}%</span>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">🏦 Solidité Financière</div>
+                <div class="metric-row">
+                    <span class="metric-label">Dette/Capitaux Propres</span>
+                    <span class="metric-value">{{ financial_metrics.debt_to_equity|floatformat:2 }}</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Ratio de Liquidité</span>
+                    <span class="metric-value">{{ financial_metrics.current_ratio|floatformat:2 }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Performance -->
+        <div class="grid">
+            <div class="card">
+                <div class="card-title">📈 Performance</div>
+                <div class="metric-row">
+                    <span class="metric-label">Variation Jour</span>
+                    <span class="metric-value" style="color: {% if performance_metrics.day_change >= 0 %}#22c55e{% else %}#ef4444{% endif %};">
+                        {% if performance_metrics.day_change >= 0 %}+{% endif %}{{ performance_metrics.day_change|floatformat:2 }}%
+                    </span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Variation Semaine</span>
+                    <span class="metric-value" style="color: {% if performance_metrics.week_change >= 0 %}#22c55e{% else %}#ef4444{% endif %};">
+                        {% if performance_metrics.week_change >= 0 %}+{% endif %}{{ performance_metrics.week_change|floatformat:2 }}%
+                    </span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Variation Mois</span>
+                    <span class="metric-value" style="color: {% if performance_metrics.month_change >= 0 %}#22c55e{% else %}#ef4444{% endif %};">
+                        {% if performance_metrics.month_change >= 0 %}+{% endif %}{{ performance_metrics.month_change|floatformat:2 }}%
+                    </span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Variation Année</span>
+                    <span class="metric-value" style="color: {% if performance_metrics.year_change >= 0 %}#22c55e{% else %}#ef4444{% endif %};">
+                        {% if performance_metrics.year_change >= 0 %}+{% endif %}{{ performance_metrics.year_change|floatformat:2 }}%
+                    </span>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">📉 Risque & Volatilité</div>
+                <div class="metric-row">
+                    <span class="metric-label">Beta</span>
+                    <span class="metric-value">{{ performance_metrics.beta|floatformat:2 }}</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Volatilité</span>
+                    <span class="metric-value">{{ performance_metrics.volatility|floatformat:2 }}%</span>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">🔊 Volume</div>
+                <div class="metric-row">
+                    <span class="metric-label">Volume Actuel</span>
+                    <span class="metric-value">{{ performance_metrics.volume|floatformat:0 }}</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Volume Moyen</span>
+                    <span class="metric-value">{{ performance_metrics.avg_volume|floatformat:0 }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistiques 52 semaines -->
+        <div class="card" style="margin-bottom: 30px;">
+            <div class="card-title">📅 Statistiques 52 Semaines</div>
+            <div class="grid">
+                <div class="metric-row">
+                    <span class="metric-label">Plus Haut</span>
+                    <span class="metric-value" style="color: #22c55e;">{{ statistics.max_52w|floatformat:0 }} FCFA</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Plus Bas</span>
+                    <span class="metric-value" style="color: #ef4444;">{{ statistics.min_52w|floatformat:0 }} FCFA</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Prix Moyen</span>
+                    <span class="metric-value">{{ statistics.avg_price|floatformat:0 }} FCFA</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Volume Moyen</span>
+                    <span class="metric-value">{{ statistics.avg_volume|floatformat:0 }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions Similaires -->
+        {% if similar_stocks %}
+        <div class="similar-stocks">
+            <div class="card-title">🔍 Actions Similaires ({{ stock_info.sector }})</div>
+            {% for stock in similar_stocks %}
+            <div class="stock-item">
+                <div>
+                    <a href="/stock/{{ stock.symbol }}/">{{ stock.symbol }}</a> - {{ stock.name }}
+                </div>
+                <div>
+                    <span style="font-weight: bold;">{{ stock.price|floatformat:0 }} FCFA</span>
+                    <span style="margin-left: 15px; color: {% if stock.change_pct >= 0 %}#22c55e{% else %}#ef4444{% endif %};">
+                        {% if stock.change_pct >= 0 %}+{% endif %}{{ stock.change_pct|floatformat:2 }}%
+                    </span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+
+    <script>
+        // Données du graphique
+        const chartData = {{ chart_data|safe }};
+
+        // Graphique de prix
+        const ctx = document.getElementById('priceChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: chartData.dates,
+                datasets: [
+                    {
+                        label: 'Prix (FCFA)',
+                        data: chartData.prices,
+                        borderColor: '#C9A961',
+                        backgroundColor: 'rgba(201, 169, 97, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4,
+                        yAxisID: 'y'
+                    },
+                    {
+                        label: 'Volume',
+                        data: chartData.volumes,
+                        type: 'bar',
+                        backgroundColor: 'rgba(59, 130, 246, 0.3)',
+                        borderColor: 'rgba(59, 130, 246, 0.5)',
+                        yAxisID: 'y1'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    mode: 'index',
+                    intersect: false,
+                },
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: '#fff',
+                            font: { size: 14 }
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        titleColor: '#C9A961',
+                        bodyColor: '#fff',
+                        borderColor: '#C9A961',
+                        borderWidth: 1
+                    }
+                },
+                scales: {
+                    y: {
+                        type: 'linear',
+                        display: true,
+                        position: 'left',
+                        ticks: { color: '#C9A961' },
+                        grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                    },
+                    y1: {
+                        type: 'linear',
+                        display: true,
+                        position: 'right',
+                        ticks: { color: '#3b82f6' },
+                        grid: { drawOnChartArea: false }
+                    },
+                    x: {
+                        ticks: { color: '#fff' },
+                        grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,643 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Analyse Historique ML{% endblock %}
+
+{% block extra_head %}
+<style>
+    .analysis-page {
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        min-height: 100vh;
+        padding: 2rem;
+    }
+    
+    .page-header {
+        margin-bottom: 2rem;
+    }
+    
+    .page-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #60a5fa;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .page-subtitle {
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 1.1rem;
+    }
+    
+    .controls-bar {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+    
+    .control-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .control-label {
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+    
+    .control-input {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 8px;
+        padding: 0.5rem 1rem;
+        color: white;
+        font-size: 1rem;
+    }
+    
+    .control-input:focus {
+        outline: none;
+        border-color: #60a5fa;
+    }
+    
+    .toggle-group {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        background: rgba(255, 255, 255, 0.05);
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        margin-left: auto;
+    }
+    
+    .toggle-switch {
+        position: relative;
+        width: 50px;
+        height: 26px;
+        cursor: pointer;
+    }
+    
+    .toggle-switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+    
+    .toggle-slider {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 26px;
+        transition: 0.3s;
+    }
+    
+    .toggle-slider:before {
+        content: "";
+        position: absolute;
+        width: 18px;
+        height: 18px;
+        left: 4px;
+        bottom: 4px;
+        background: white;
+        border-radius: 50%;
+        transition: 0.3s;
+    }
+    
+    .toggle-switch input:checked + .toggle-slider {
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    }
+    
+    .toggle-switch input:checked + .toggle-slider:before {
+        transform: translateX(24px);
+    }
+    
+    .toggle-label {
+        color: white;
+        font-weight: 500;
+    }
+    
+    .metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .metric-card {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        padding: 1.5rem;
+        transition: all 0.3s;
+    }
+    
+    .metric-card:hover {
+        border-color: rgba(96, 165, 250, 0.5);
+        transform: translateY(-2px);
+    }
+    
+    .metric-icon {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .metric-label {
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .metric-value {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: white;
+    }
+    
+    .metric-subtext {
+        color: rgba(255, 255, 255, 0.5);
+        font-size: 0.85rem;
+        margin-top: 0.25rem;
+    }
+    
+    .chart-container {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+    
+    .chart-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+    
+    .chart-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: white;
+    }
+    
+    .chart-canvas {
+        height: 400px;
+    }
+    
+    .trend-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+    
+    .trend-positive {
+        background: rgba(16, 185, 129, 0.2);
+        color: #10b981;
+    }
+    
+    .trend-negative {
+        background: rgba(239, 68, 68, 0.2);
+        color: #ef4444;
+    }
+    
+    .trend-stable {
+        background: rgba(251, 191, 36, 0.2);
+        color: #fbbf24;
+    }
+    
+    .volatility-low {
+        color: #10b981;
+    }
+    
+    .volatility-medium {
+        color: #fbbf24;
+    }
+    
+    .volatility-high {
+        color: #ef4444;
+    }
+    
+    .anomalies-list {
+        max-height: 400px;
+        overflow-y: auto;
+    }
+    
+    .anomaly-item {
+        background: rgba(239, 68, 68, 0.1);
+        border-left: 3px solid #ef4444;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+    }
+    
+    .anomaly-date {
+        font-weight: 600;
+        color: #ef4444;
+    }
+    
+    .anomaly-value {
+        color: white;
+        font-size: 1.1rem;
+        margin: 0.5rem 0;
+    }
+    
+    .anomaly-deviation {
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 0.9rem;
+    }
+    
+    .loading {
+        text-align: center;
+        padding: 3rem;
+        color: rgba(255, 255, 255, 0.7);
+    }
+    
+    .spinner {
+        border: 3px solid rgba(255, 255, 255, 0.1);
+        border-top: 3px solid #60a5fa;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 1rem;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="analysis-page">
+    <div class="page-header">
+        <h1 class="page-title">
+            <span>📈</span>
+            Analyse Historique & Prédictions ML
+        </h1>
+        <p class="page-subtitle">
+            Analyse tendance, volatilité et prévisions basées sur Machine Learning
+        </p>
+    </div>
+    
+    <div class="controls-bar">
+        <div class="control-group">
+            <label class="control-label">Indicateur</label>
+            <select class="control-input" id="indicatorSelect" onchange="reloadAnalysis()">
+                <option value="NY.GDP.MKTP.KD.ZG" {% if indicator == 'NY.GDP.MKTP.KD.ZG' %}selected{% endif %}>Croissance PIB (%)</option>
+                <option value="NY.GDP.MKTP.CD" {% if indicator == 'NY.GDP.MKTP.CD' %}selected{% endif %}>PIB ($ courants)</option>
+                <option value="SP.POP.TOTL" {% if indicator == 'SP.POP.TOTL' %}selected{% endif %}>Population totale</option>
+                <option value="FP.CPI.TOTL.ZG" {% if indicator == 'FP.CPI.TOTL.ZG' %}selected{% endif %}>Inflation (%)</option>
+                <option value="GC.DOD.TOTL.GD.ZS" {% if indicator == 'GC.DOD.TOTL.GD.ZS' %}selected{% endif %}>Dette publique (% PIB)</option>
+            </select>
+        </div>
+        
+        <div class="control-group">
+            <label class="control-label">Pays</label>
+            <select class="control-input" id="countrySelect" onchange="reloadAnalysis()">
+                <option value="SEN" {% if country == 'SEN' %}selected{% endif %}>🇸🇳 Sénégal</option>
+                <option value="CIV" {% if country == 'CIV' %}selected{% endif %}>🇨🇮 Côte d'Ivoire</option>
+                <option value="BEN" {% if country == 'BEN' %}selected{% endif %}>🇧🇯 Bénin</option>
+                <option value="BFA" {% if country == 'BFA' %}selected{% endif %}>🇧🇫 Burkina Faso</option>
+                <option value="MLI" {% if country == 'MLI' %}selected{% endif %}>🇲🇱 Mali</option>
+                <option value="NER" {% if country == 'NER' %}selected{% endif %}>🇳🇪 Niger</option>
+                <option value="GHA" {% if country == 'GHA' %}selected{% endif %}>🇬🇭 Ghana</option>
+                <option value="NGA" {% if country == 'NGA' %}selected{% endif %}>🇳🇬 Nigeria</option>
+            </select>
+        </div>
+        
+        <div class="control-group">
+            <label class="control-label">Période (années)</label>
+            <select class="control-input" id="yearsSelect" onchange="reloadAnalysis()">
+                <option value="3" {% if years == 3 %}selected{% endif %}>3 ans</option>
+                <option value="5" {% if years == 5 %}selected{% endif %}>5 ans</option>
+                <option value="10" {% if years == 10 %}selected{% endif %}>10 ans</option>
+            </select>
+        </div>
+        
+        <div class="toggle-group">
+            <label class="toggle-label">Afficher Prédictions</label>
+            <label class="toggle-switch">
+                <input type="checkbox" id="showPredictions" checked onchange="togglePredictions()">
+                <span class="toggle-slider"></span>
+            </label>
+        </div>
+    </div>
+    
+    <div id="metricsContainer">
+        <div class="loading">
+            <div class="spinner"></div>
+            <p>Analyse en cours...</p>
+        </div>
+    </div>
+    
+    <div class="chart-container">
+        <div class="chart-header">
+            <h2 class="chart-title">📊 Évolution & Prédictions</h2>
+        </div>
+        <canvas id="mainChart" class="chart-canvas"></canvas>
+    </div>
+    
+    <div class="chart-container" id="anomaliesContainer" style="display: none;">
+        <div class="chart-header">
+            <h2 class="chart-title">🚨 Anomalies Détectées</h2>
+        </div>
+        <div id="anomaliesList" class="anomalies-list"></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+let currentChart = null;
+let currentData = null;
+let showPredictionsEnabled = true;
+
+// Au chargement
+document.addEventListener('DOMContentLoaded', function() {
+    loadAnalysis();
+});
+
+function reloadAnalysis() {
+    loadAnalysis();
+}
+
+function loadAnalysis() {
+    const indicator = document.getElementById('indicatorSelect').value;
+    const country = document.getElementById('countrySelect').value;
+    const years = document.getElementById('yearsSelect').value;
+    
+    // Afficher loading
+    document.getElementById('metricsContainer').innerHTML = `
+        <div class="loading">
+            <div class="spinner"></div>
+            <p>Analyse en cours...</p>
+        </div>
+    `;
+    
+    // Appel API
+    fetch(`/api/predict/${indicator}/${country}/?years=${years}&months=12`)
+        .then(res => res.json())
+        .then(data => {
+            currentData = data;
+            renderMetrics(data);
+            renderChart(data);
+            checkAnomalies(indicator, country, years);
+        })
+        .catch(err => {
+            console.error('Erreur:', err);
+            document.getElementById('metricsContainer').innerHTML = `
+                <div class="loading">
+                    <p style="color: #ef4444;">❌ Erreur lors du chargement</p>
+                </div>
+            `;
+        });
+}
+
+function renderMetrics(data) {
+    const trend = data.trend || {};
+    const volatility = data.volatility || {};
+    const predictions = data.predictions || {};
+    
+    // Classe tendance
+    let trendClass = 'trend-stable';
+    let trendIcon = '➡️';
+    if (trend.direction === 'positive') {
+        trendClass = 'trend-positive';
+        trendIcon = '📈';
+    } else if (trend.direction === 'negative') {
+        trendClass = 'trend-negative';
+        trendIcon = '📉';
+    }
+    
+    // Classe volatilité
+    let volatilityClass = 'volatility-low';
+    if (volatility.volatility_level === 'medium') {
+        volatilityClass = 'volatility-medium';
+    } else if (volatility.volatility_level === 'high') {
+        volatilityClass = 'volatility-high';
+    }
+    
+    const html = `
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-icon">${trendIcon}</div>
+                <div class="metric-label">Tendance</div>
+                <div class="metric-value">
+                    <span class="trend-badge ${trendClass}">
+                        ${trend.direction ? trend.direction.toUpperCase() : 'N/A'}
+                    </span>
+                </div>
+                <div class="metric-subtext">Pente: ${trend.slope ? trend.slope.toFixed(4) : 'N/A'}</div>
+            </div>
+            
+            <div class="metric-card">
+                <div class="metric-icon">📊</div>
+                <div class="metric-label">Qualité Modèle (R²)</div>
+                <div class="metric-value">${trend.r2_score ? (trend.r2_score * 100).toFixed(1) : 'N/A'}%</div>
+                <div class="metric-subtext">RMSE: ${trend.rmse ? trend.rmse.toFixed(2) : 'N/A'}</div>
+            </div>
+            
+            <div class="metric-card">
+                <div class="metric-icon">📉</div>
+                <div class="metric-label">Volatilité</div>
+                <div class="metric-value">
+                    <span class="${volatilityClass}">
+                        ${volatility.volatility_level ? volatility.volatility_level.toUpperCase() : 'N/A'}
+                    </span>
+                </div>
+                <div class="metric-subtext">CV: ${volatility.coefficient_variation ? volatility.coefficient_variation.toFixed(1) : 'N/A'}%</div>
+            </div>
+            
+            <div class="metric-card">
+                <div class="metric-icon">🔮</div>
+                <div class="metric-label">Prédictions</div>
+                <div class="metric-value">${predictions.dates ? predictions.dates.length : 0} mois</div>
+                <div class="metric-subtext">Intervalle confiance: ±${predictions.rmse ? (predictions.rmse * 1.96).toFixed(2) : 'N/A'}</div>
+            </div>
+        </div>
+    `;
+    
+    document.getElementById('metricsContainer').innerHTML = html;
+}
+
+function renderChart(data) {
+    const historical = data.historical || {};
+    const trend = data.trend || {};
+    const predictions = data.predictions || {};
+    
+    const ctx = document.getElementById('mainChart').getContext('2d');
+    
+    // Détruire ancien chart
+    if (currentChart) {
+        currentChart.destroy();
+    }
+    
+    // Données historiques
+    const datasets = [
+        {
+            label: 'Données Historiques',
+            data: historical.values || [],
+            borderColor: '#60a5fa',
+            backgroundColor: 'rgba(96, 165, 250, 0.1)',
+            borderWidth: 2,
+            pointRadius: 3,
+            pointHoverRadius: 5
+        }
+    ];
+    
+    // Ligne de tendance
+    if (trend.trend_line) {
+        datasets.push({
+            label: 'Ligne de Tendance',
+            data: trend.trend_line,
+            borderColor: '#fbbf24',
+            borderDash: [5, 5],
+            borderWidth: 2,
+            pointRadius: 0,
+            fill: false
+        });
+    }
+    
+    // Prédictions
+    let allLabels = historical.dates || [];
+    
+    if (showPredictionsEnabled && predictions.dates) {
+        allLabels = [...allLabels, ...predictions.dates];
+        
+        // Données prédites
+        const predData = new Array(historical.values.length).fill(null).concat(predictions.predictions);
+        
+        datasets.push({
+            label: 'Prédictions ML',
+            data: predData,
+            borderColor: '#10b981',
+            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+            borderWidth: 2,
+            borderDash: [10, 5],
+            pointRadius: 3,
+            pointStyle: 'rectRot'
+        });
+        
+        // Intervalle confiance
+        if (predictions.confidence_interval) {
+            const upperData = new Array(historical.values.length).fill(null).concat(predictions.confidence_interval.upper);
+            const lowerData = new Array(historical.values.length).fill(null).concat(predictions.confidence_interval.lower);
+            
+            datasets.push({
+                label: 'Intervalle Confiance (95%)',
+                data: upperData,
+                borderColor: 'rgba(16, 185, 129, 0.3)',
+                backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                borderWidth: 1,
+                borderDash: [2, 2],
+                fill: '+1',
+                pointRadius: 0
+            });
+            
+            datasets.push({
+                label: false,
+                data: lowerData,
+                borderColor: 'rgba(16, 185, 129, 0.3)',
+                borderWidth: 1,
+                borderDash: [2, 2],
+                pointRadius: 0
+            });
+        }
+    }
+    
+    currentChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: allLabels,
+            datasets: datasets
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: { 
+                        color: 'white',
+                        filter: function(item) {
+                            return item.text !== false;
+                        }
+                    }
+                },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false
+                }
+            },
+            scales: {
+                x: { 
+                    ticks: { 
+                        color: 'white',
+                        maxRotation: 45,
+                        minRotation: 45
+                    }, 
+                    grid: { color: 'rgba(255,255,255,0.1)' } 
+                },
+                y: { 
+                    ticks: { color: 'white' }, 
+                    grid: { color: 'rgba(255,255,255,0.1)' } 
+                }
+            }
+        }
+    });
+}
+
+function togglePredictions() {
+    showPredictionsEnabled = document.getElementById('showPredictions').checked;
+    if (currentData) {
+        renderChart(currentData);
+    }
+}
+
+function checkAnomalies(indicator, country, years) {
+    fetch(`/api/anomalies/?indicator=${indicator}&country=${country}&years=${years}&threshold=2.0`)
+        .then(res => res.json())
+        .then(data => {
+            if (data.anomalies && data.anomalies.length > 0) {
+                document.getElementById('anomaliesContainer').style.display = 'block';
+                
+                const html = data.anomalies.map(anomaly => `
+                    <div class="anomaly-item">
+                        <div class="anomaly-date">📅 ${anomaly.date}</div>
+                        <div class="anomaly-value">Valeur: ${anomaly.value.toFixed(2)}</div>
+                        <div class="anomaly-deviation">
+                            Déviation: ${anomaly.deviation.toFixed(1)}% 
+                            (Z-score: ${anomaly.z_score.toFixed(2)})
+                        </div>
+                    </div>
+                `).join('');
+                
+                document.getElementById('anomaliesList').innerHTML = html;
+            } else {
+                document.getElementById('anomaliesContainer').style.display = 'none';
+            }
+        })
+        .catch(err => console.error('Erreur anomalies:', err));
+}
+</script>
+{% endblock %}

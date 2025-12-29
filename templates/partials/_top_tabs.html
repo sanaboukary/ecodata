@@ -1,0 +1,11 @@
+<ul class="navbar-nav me-auto mb-2 mb-lg-0">
+    <li class="nav-item"><a class="nav-link{% block nav_explorer %}{% endblock %}" href="{% url 'dashboard:index' %}">Accueil</a></li>
+    <li class="nav-item"><a class="nav-link" href="{% url 'dashboard:explorer' %}">Explorateur</a></li>
+    <li class="nav-item"><a class="nav-link" href="{% url 'dashboard:comparateur' %}">Comparateur</a></li>
+    <li class="nav-item"><a class="nav-link" href="{% url 'dashboard:dashboard_brvm' %}">📈 BRVM</a></li>
+    <li class="nav-item"><a class="nav-link" href="{% url 'dashboard:brvm_publications_page' %}">📰 Publications BRVM</a></li>
+    <li class="nav-item"><a class="nav-link" href="{% url 'dashboard:brvm_recommendations_page' %}" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border-radius: 6px; padding: 0.5rem 1rem; font-weight: 700;">🤖 Recommandations AI</a></li>
+    <li class="nav-item"><a class="nav-link" href="{% url 'dashboard:dashboard_worldbank' %}">🏦 Banque Mondiale</a></li>
+    <li class="nav-item"><a class="nav-link" href="{% url 'dashboard:administration' %}">Administration</a></li>
+</ul>
+

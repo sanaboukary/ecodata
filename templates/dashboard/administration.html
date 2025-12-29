@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% block title %}Administration — Plateforme{% endblock %}
+{% block nav_explorer %}{% endblock %}
+
+{% block sidebar %}
+  <div class="menu">
+    <a href="/administration/" class="fw-semibold">Général</a>
+  </div>
+  <hr>
+  <div class="section-title">Actions</div>
+  <div class="d-grid gap-2">
+    <a class="btn btn-outline-primary" href="/api/ingestion/health/" target="_blank">Santé ingestion</a>
+  </div>
+{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+  <div class="col-12 col-lg-6">
+    <div class="card shadow-sm">
+      <div class="card-header bg-white fw-semibold">Dernières exécutions</div>
+      <div class="card-body small">
+        <ul class="mb-0">
+          {% for r in last_runs %}
+          <li>{{ r.started_at }} — {{ r.source_name }} — {{ r.status }}</li>
+          {% empty %}
+          <li>Aucune exécution récente.</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="col-12 col-lg-6">
+    <div class="card shadow-sm">
+      <div class="card-header bg-white fw-semibold">Outils</div>
+      <div class="card-body">
+        <p class="text-muted">Des actions (ingestions, initialisation DB, calcul KPI) pourront être exposées ici.</p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+

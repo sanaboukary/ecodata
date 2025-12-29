@@ -1,0 +1,772 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}ONU - Objectifs de Développement Durable{% endblock %}
+
+{% block head_extra %}
+<link rel="stylesheet" href="{% static 'css/finance.css' %}">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+<style>
+  .un-dashboard {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    min-height: 100vh;
+    padding: 2rem;
+    color: #ffffff;
+  }
+  
+  .dashboard-header {
+    text-align: center;
+    margin-bottom: 3rem;
+    position: relative;
+  }
+  
+  .dashboard-title {
+    font-size: 3rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 0.5rem;
+  }
+  
+  .dashboard-subtitle {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+  }
+  
+  .dashboard-badge {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    background: rgba(59, 130, 246, 0.2);
+    border-radius: 20px;
+    font-size: 0.9rem;
+    border: 1px solid rgba(59, 130, 246, 0.4);
+  }
+  
+  /* Filtres */
+  .filters-panel {
+    background: rgba(30, 41, 59, 0.8);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+  }
+  
+  .filters-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1rem;
+  }
+  
+  .filter-group label {
+    display: block;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.85rem;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+  }
+  
+  .filter-group select {
+    width: 100%;
+    padding: 0.75rem;
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    border-radius: 8px;
+    color: #ffffff;
+    font-size: 1rem;
+    transition: all 0.3s;
+  }
+  
+  .filter-group select:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+  
+  .filter-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+  }
+  
+  .filter-btn {
+    flex: 1;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  
+  .filter-btn-primary {
+    background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+    color: #ffffff;
+  }
+  
+  .filter-btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(59, 130, 246, 0.4);
+  }
+  
+  .filter-btn-secondary {
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+  }
+  
+  .filter-btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.15);
+  }
+  
+  /* KPIs Grid */
+  .kpis-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+  }
+  
+  .kpi-card {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+    border-radius: 16px;
+    padding: 1.5rem;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .kpi-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+  }
+  
+  .kpi-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(59, 130, 246, 0.3);
+    border-color: #3b82f6;
+  }
+  
+  .kpi-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+  
+  .kpi-icon {
+    font-size: 2rem;
+  }
+  
+  .kpi-trend {
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+  
+  .trend-up {
+    background: rgba(34, 197, 94, 0.2);
+    color: #22c55e;
+  }
+  
+  .trend-down {
+    background: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+  }
+  
+  .trend-stable {
+    background: rgba(251, 191, 36, 0.2);
+    color: #fbbf24;
+  }
+  
+  .kpi-label {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.85rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .kpi-value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #ffffff;
+    line-height: 1;
+  }
+  
+  .kpi-unit {
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.6);
+    margin-left: 0.25rem;
+  }
+  
+  /* Section Cards */
+  .section-card {
+    background: rgba(30, 41, 59, 0.6);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    border: 1px solid rgba(59, 130, 246, 0.2);
+  }
+  
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+  }
+  
+  .section-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #ffffff;
+  }
+  
+  .section-subtitle {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.9rem;
+    margin-top: 0.25rem;
+  }
+  
+  /* Country Cards */
+  .countries-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+  }
+  
+  .country-card {
+    background: linear-gradient(135deg, #1e3a5f 0%, #2d5a8e 100%);
+    border-radius: 12px;
+    padding: 1.5rem;
+    border: 1px solid rgba(96, 165, 250, 0.2);
+    transition: all 0.3s;
+  }
+  
+  .country-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
+    border-color: #3b82f6;
+  }
+  
+  .country-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .country-name {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #ffffff;
+  }
+  
+  .sdg-score-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    border: 1px solid;
+  }
+  
+  .score-high {
+    background: rgba(34, 197, 94, 0.2);
+    color: #22c55e;
+    border-color: rgba(34, 197, 94, 0.4);
+  }
+  
+  .score-medium {
+    background: rgba(251, 191, 36, 0.2);
+    color: #fbbf24;
+    border-color: rgba(251, 191, 36, 0.4);
+  }
+  
+  .score-low {
+    background: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+    border-color: rgba(239, 68, 68, 0.4);
+  }
+  
+  .country-metrics {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .metric-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 6px;
+  }
+  
+  .metric-label {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.85rem;
+  }
+  
+  .metric-value-text {
+    color: #ffffff;
+    font-weight: 600;
+  }
+  
+  .impact-score {
+    margin-top: 1rem;
+    padding: 0.75rem;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 8px;
+    text-align: center;
+  }
+  
+  .impact-label {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.75rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .impact-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+  }
+  
+  /* Charts */
+  .chart-container {
+    position: relative;
+    height: 400px;
+    margin: 1.5rem 0;
+  }
+  
+  .chart-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 2rem;
+  }
+  
+  /* Back Link */
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background: rgba(255, 255, 255, 0.1);
+    color: #60a5fa;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: all 0.3s;
+    margin-bottom: 2rem;
+  }
+  
+  .back-link:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateX(-5px);
+  }
+  
+  /* Refresh Button */
+  .refresh-btn {
+    position: fixed;
+    top: 2rem;
+    right: 2rem;
+    padding: 0.75rem 1.5rem;
+    background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    z-index: 1000;
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+  }
+  
+  .refresh-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.5);
+  }
+  
+  @media (max-width: 768px) {
+    .kpis-grid {
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    }
+    
+    .countries-grid {
+      grid-template-columns: 1fr;
+    }
+    
+    .chart-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="imf-dashboard">
+  <!-- Boutons d'export -->
+  {% include 'dashboard/export_buttons.html' with source='UN_SDG' period='90d' %}
+  
+  <button class="refresh-btn" onclick="location.reload()">
+    🔄 Rafraîchir
+  </button>
+  
+  <a href="{% url 'dashboard:index' %}" class="back-link">
+    ← Retour au tableau de bord
+  </a>
+  
+  <div class="dashboard-header">
+    <h1 class="dashboard-title">ONU - Objectifs de Développement Durable</h1>
+    <p class="dashboard-subtitle">
+      Agenda 2030 & Impact Social des Investissements
+    </p>
+    <div class="dashboard-badge">
+      📊 {{ total_observations }} observations • Dernière MàJ: {{ last_update }}
+    </div>
+  </div>
+  
+  <!-- Filtres Interactifs -->
+  <div class="filters-panel">
+    <h2 style="color: #60a5fa; font-size: 1.3rem; margin-bottom: 0.5rem;">🔍 Filtres d'Analyse</h2>
+    <p style="color: rgba(255, 255, 255, 0.6); font-size: 0.9rem;">
+      Personnalisez votre analyse selon les ODD et critères ESG
+    </p>
+    
+    <form method="GET" id="filterForm">
+      <div class="filters-grid">
+        <div class="filter-group">
+          <label>🌍 Pays</label>
+          <select name="country" id="countryFilter">
+            <option value="">Tous les pays</option>
+            {% for code, name in available_countries.items %}
+            <option value="{{ code }}" {% if code == country_filter %}selected{% endif %}>
+              {{ name }}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+        
+        <div class="filter-group">
+          <label>📅 Année</label>
+          <select name="year" id="yearFilter">
+            <option value="">Toutes les années</option>
+            {% for year in available_years %}
+            <option value="{{ year }}" {% if year == year_filter %}selected{% endif %}>
+              {{ year }}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+        
+        <div class="filter-group">
+          <label>🎯 ODD</label>
+          <select name="sdg" id="sdgFilter">
+            <option value="">Tous les ODD</option>
+            {% for code, name in available_sdgs.items %}
+            <option value="{{ code }}" {% if code == sdg_filter %}selected{% endif %}>
+              {{ name }}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+      
+      <div class="filter-actions">
+        <button type="submit" class="filter-btn filter-btn-primary">
+          ✓ Appliquer les filtres
+        </button>
+        <button type="button" class="filter-btn filter-btn-secondary" onclick="resetFilters()">
+          ✕ Réinitialiser
+        </button>
+      </div>
+    </form>
+  </div>
+  
+  <!-- KPIs Principaux -->
+  <div class="section-card">
+    <div class="section-header">
+      <div>
+        <h2 class="section-title">🎯 Indicateurs ODD Clés</h2>
+        <p class="section-subtitle">Vue d'ensemble des Objectifs de Développement Durable CEDEAO</p>
+      </div>
+    </div>
+    
+    <div class="kpis-grid">
+      {% for key, kpi in kpis.items %}
+      <div class="kpi-card">
+        <div class="kpi-header">
+          <span class="kpi-icon">{{ kpi.icon }}</span>
+          <span class="kpi-trend trend-{{ kpi.trend }}">
+            {% if kpi.trend == 'up' %}↗{% elif kpi.trend == 'down' %}↘{% else %}→{% endif %}
+          </span>
+        </div>
+        <div class="kpi-label">{{ kpi.name }}</div>
+        <div class="kpi-value">
+          {{ kpi.value }}
+          <span class="kpi-unit">{{ kpi.unit }}</span>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  
+  <!-- Graphiques d'Analyse -->
+  <div class="section-card">
+    <div class="section-header">
+      <div>
+        <h2 class="section-title">📈 Analyses Graphiques ODD</h2>
+        <p class="section-subtitle">Progression vers les objectifs 2030</p>
+      </div>
+    </div>
+    
+    <div class="chart-grid">
+      <div>
+        <h3 style="color: #60a5fa; font-size: 1.1rem; margin-bottom: 1rem;">Évolution Pauvreté</h3>
+        <div class="chart-container">
+          <canvas id="povertyChart"></canvas>
+        </div>
+      </div>
+      
+      <div>
+        <h3 style="color: #60a5fa; font-size: 1.1rem; margin-bottom: 1rem;">Comparaison Pays</h3>
+        <div class="chart-container">
+          <canvas id="countriesChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Analyse par Pays -->
+  <div class="section-card">
+    <div class="section-header">
+      <div>
+        <h2 class="section-title">🌍 Profils ODD & Impact Social</h2>
+        <p class="section-subtitle">Évaluation progression ODD et opportunités investissement à impact</p>
+      </div>
+    </div>
+    
+    <div class="countries-grid">
+      {% for code, data in kpis_by_country.items %}
+      <div class="country-card">
+        <div class="country-header">
+          <span class="country-name">{{ data.name }}</span>
+          <span class="sdg-score-badge {% if data.sdg_score >= 70 %}score-high{% elif data.sdg_score >= 40 %}score-medium{% else %}score-low{% endif %}">
+            Score: {{ data.sdg_score }}/100
+          </span>
+        </div>
+        
+        <div class="country-metrics">
+          <div class="metric-row">
+            <span class="metric-label">🎯 Pauvreté</span>
+            <span class="metric-value-text">{{ data.poverty }}%</span>
+          </div>
+          
+          <div class="metric-row">
+            <span class="metric-label">🍎 Faim</span>
+            <span class="metric-value-text">{{ data.hunger }}%</span>
+          </div>
+          
+          <div class="metric-row">
+            <span class="metric-label">🏥 Santé</span>
+            <span class="metric-value-text">{{ data.health }}/100</span>
+          </div>
+          
+          <div class="metric-row">
+            <span class="metric-label">📚 Éducation</span>
+            <span class="metric-value-text">{{ data.education }}%</span>
+          </div>
+          
+          <div class="metric-row">
+            <span class="metric-label">📊 Observations</span>
+            <span class="metric-value-text">{{ data.observations }}</span>
+          </div>
+        </div>
+        
+        <div class="impact-score">
+          <div class="impact-label">Score Impact Social</div>
+          <div class="impact-value {% if data.impact_score >= 70 %}score-high{% elif data.impact_score >= 40 %}score-medium{% else %}score-low{% endif %}">
+            {{ data.impact_score }}/100
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  
+  <!-- Recommandations -->
+  <div class="section-card">
+    <div class="section-header">
+      <div>
+        <h2 class="section-title">💡 Recommandations Investissement à Impact</h2>
+        <p class="section-subtitle">Insights basés sur l'analyse ODD et critères ESG</p>
+      </div>
+    </div>
+    
+    <div style="display: grid; gap: 1rem;">
+      <div style="padding: 1rem; background: rgba(34, 197, 94, 0.1); border-left: 4px solid #22c55e; border-radius: 8px;">
+        <div style="font-weight: 700; color: #22c55e; margin-bottom: 0.5rem;">✅ Opportunités Impact Social</div>
+        <div style="color: rgba(255, 255, 255, 0.8); font-size: 0.9rem;">
+          Les pays avec scores ODD > 60/100 offrent un environnement favorable pour les investissements à impact social. Privilégier les secteurs santé, éducation et infrastructure durable.
+        </div>
+      </div>
+      
+      <div style="padding: 1rem; background: rgba(251, 191, 36, 0.1); border-left: 4px solid #fbbf24; border-radius: 8px;">
+        <div style="font-weight: 700; color: #fbbf24; margin-bottom: 0.5rem;">⚠️ Défis de Développement</div>
+        <div style="color: rgba(255, 255, 255, 0.8); font-size: 0.9rem;">
+          Surveiller les pays avec taux de pauvreté > 40% et faim > 20%. Ces indicateurs nécessitent des investissements ciblés et des partenariats publics-privés renforcés.
+        </div>
+      </div>
+      
+      <div style="padding: 1rem; background: rgba(59, 130, 246, 0.1); border-left: 4px solid #3b82f6; border-radius: 8px;">
+        <div style="font-weight: 700; color: #3b82f6; margin-bottom: 0.5rem;">📊 Stratégie ESG</div>
+        <div style="color: rgba(255, 255, 255, 0.8); font-size: 0.9rem;">
+          Intégrer les ODD dans les critères d'investissement permet d'aligner performance financière et impact social. Les obligations vertes et sociales offrent des opportunités attractives.
+        </div>
+      </div>
+      
+      <div style="padding: 1rem; background: rgba(139, 92, 246, 0.1); border-left: 4px solid #8b5cf6; border-radius: 8px;">
+        <div style="font-weight: 700; color: #8b5cf6; margin-bottom: 0.5rem;">🌱 Développement Durable</div>
+        <div style="color: rgba(255, 255, 255, 0.8); font-size: 0.9rem;">
+          Les pays progressant vers l'Agenda 2030 démontrent une meilleure gouvernance et résilience économique. L'investissement dans ces marchés contribue à la réduction des inégalités régionales.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const chartData = {{ chart_data|safe }};
+  
+  // Graphique Évolution Pauvreté
+  if (chartData.poverty_trend.length > 0) {
+    const povertyCtx = document.getElementById('povertyChart').getContext('2d');
+    new Chart(povertyCtx, {
+      type: 'line',
+      data: {
+        labels: chartData.poverty_trend.map(d => d.date),
+        datasets: [{
+          label: 'Taux de Pauvreté (%)',
+          data: chartData.poverty_trend.map(d => d.value),
+          borderColor: '#ef4444',
+          backgroundColor: 'rgba(239, 68, 68, 0.1)',
+          borderWidth: 3,
+          fill: true,
+          tension: 0.4,
+          pointRadius: 4,
+          pointHoverRadius: 6,
+          pointBackgroundColor: '#ef4444',
+          pointBorderColor: '#ffffff',
+          pointBorderWidth: 2
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: true,
+            labels: { color: '#ffffff', font: { size: 14 } }
+          },
+          tooltip: {
+            backgroundColor: 'rgba(15, 23, 42, 0.9)',
+            titleColor: '#ffffff',
+            bodyColor: '#ffffff',
+            borderColor: '#3b82f6',
+            borderWidth: 1
+          }
+        },
+        scales: {
+          y: {
+            grid: { color: 'rgba(255, 255, 255, 0.1)' },
+            ticks: { color: '#ffffff' }
+          },
+          x: {
+            grid: { color: 'rgba(255, 255, 255, 0.1)' },
+            ticks: { color: '#ffffff' }
+          }
+        }
+      }
+    });
+  }
+  
+  // Graphique Comparaison Pays
+  if (chartData.countries_comparison.length > 0) {
+    const countriesCtx = document.getElementById('countriesChart').getContext('2d');
+    new Chart(countriesCtx, {
+      type: 'bar',
+      data: {
+        labels: chartData.countries_comparison.map(d => d.country),
+        datasets: [
+          {
+            label: 'Score ODD (/100)',
+            data: chartData.countries_comparison.map(d => d.sdg_score),
+            backgroundColor: 'rgba(34, 197, 94, 0.7)',
+            borderColor: '#22c55e',
+            borderWidth: 2
+          },
+          {
+            label: 'Impact Social (/100)',
+            data: chartData.countries_comparison.map(d => d.impact_score),
+            backgroundColor: 'rgba(59, 130, 246, 0.7)',
+            borderColor: '#3b82f6',
+            borderWidth: 2
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: true,
+            labels: { color: '#ffffff', font: { size: 14 } }
+          },
+          tooltip: {
+            backgroundColor: 'rgba(15, 23, 42, 0.9)',
+            titleColor: '#ffffff',
+            bodyColor: '#ffffff',
+            borderColor: '#3b82f6',
+            borderWidth: 1
+          }
+        },
+        scales: {
+          y: {
+            grid: { color: 'rgba(255, 255, 255, 0.1)' },
+            ticks: { color: '#ffffff' }
+          },
+          x: {
+            grid: { color: 'rgba(255, 255, 255, 0.1)' },
+            ticks: { color: '#ffffff' }
+          }
+        }
+      }
+    });
+  }
+  
+  // Fonction reset filtres
+  function resetFilters() {
+    document.getElementById('countryFilter').value = '';
+    document.getElementById('yearFilter').value = '';
+    document.getElementById('sdgFilter').value = '';
+    document.getElementById('filterForm').submit();
+  }
+  
+  // Auto-submit on filter change
+  document.querySelectorAll('select').forEach(select => {
+    select.addEventListener('change', () => {
+      document.getElementById('filterForm').submit();
+    });
+  });
+</script>
+{% endblock %}

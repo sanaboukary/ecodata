@@ -1,0 +1,523 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Corrélations & Contagion - Plateforme Centralisation{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dashboard-header {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 15px;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 30px rgba(245, 87, 108, 0.3);
+    }
+
+    .controls-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .heatmap-container {
+        background: white;
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+    }
+
+    .heatmap-cell {
+        display: inline-block;
+        width: 80px;
+        height: 80px;
+        text-align: center;
+        line-height: 80px;
+        margin: 2px;
+        border-radius: 8px;
+        font-weight: bold;
+        color: white;
+        cursor: pointer;
+        transition: transform 0.2s ease;
+    }
+
+    .heatmap-cell:hover {
+        transform: scale(1.1);
+        z-index: 10;
+    }
+
+    .correlation-legend {
+        display: flex;
+        justify-content: center;
+        margin-top: 1rem;
+        gap: 1rem;
+    }
+
+    .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .legend-color {
+        width: 40px;
+        height: 20px;
+        border-radius: 4px;
+    }
+
+    .strong-correlations {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+    }
+
+    .correlation-pair {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem;
+        margin-bottom: 0.5rem;
+        background: #f8f9fa;
+        border-radius: 8px;
+        border-left: 4px solid #667eea;
+    }
+
+    .contagion-panel {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .risk-bar {
+        height: 30px;
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        padding-left: 1rem;
+        color: white;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .risk-bar:hover {
+        transform: translateX(5px);
+    }
+
+    .risk-critical {
+        background: linear-gradient(90deg, #dc3545 0%, #c82333 100%);
+    }
+
+    .risk-high {
+        background: linear-gradient(90deg, #fd7e14 0%, #e8590c 100%);
+    }
+
+    .risk-moderate {
+        background: linear-gradient(90deg, #ffc107 0%, #e0a800 100%);
+    }
+
+    .risk-low {
+        background: linear-gradient(90deg, #28a745 0%, #218838 100%);
+    }
+
+    .section-title {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #2c3e50;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 3px solid #f093fb;
+    }
+
+    .loading-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 9999;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .loading-overlay.active {
+        display: flex;
+    }
+
+    .loading-content {
+        background: white;
+        padding: 2rem;
+        border-radius: 15px;
+        text-align: center;
+    }
+
+    .country-checkbox {
+        margin-right: 1rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .heatmap-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 1rem;
+    }
+
+    .heatmap-table th,
+    .heatmap-table td {
+        padding: 0.8rem;
+        text-align: center;
+        border: 2px solid white;
+        font-weight: bold;
+    }
+
+    .heatmap-table th {
+        background: #667eea;
+        color: white;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <h1><i class="fas fa-project-diagram"></i> Corrélations & Contagion</h1>
+    <p class="mb-0">Analyse des interdépendances économiques et détection des risques de contagion</p>
+</div>
+
+<!-- Contrôles -->
+<div class="controls-card">
+    <div class="row">
+        <div class="col-md-12 mb-3">
+            <label class="form-label fw-bold">
+                <i class="fas fa-flag"></i> Sélectionner les pays
+            </label>
+            <div id="countriesSelection">
+                <label class="country-checkbox">
+                    <input type="checkbox" value="SEN" checked> Sénégal
+                </label>
+                <label class="country-checkbox">
+                    <input type="checkbox" value="CIV" checked> Côte d'Ivoire
+                </label>
+                <label class="country-checkbox">
+                    <input type="checkbox" value="BEN" checked> Bénin
+                </label>
+                <label class="country-checkbox">
+                    <input type="checkbox" value="GHA" checked> Ghana
+                </label>
+                <label class="country-checkbox">
+                    <input type="checkbox" value="NGA" checked> Nigeria
+                </label>
+                <label class="country-checkbox">
+                    <input type="checkbox" value="BFA"> Burkina Faso
+                </label>
+                <label class="country-checkbox">
+                    <input type="checkbox" value="MLI"> Mali
+                </label>
+                <label class="country-checkbox">
+                    <input type="checkbox" value="NER"> Niger
+                </label>
+                <label class="country-checkbox">
+                    <input type="checkbox" value="TGO"> Togo
+                </label>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <label for="indicatorSelect" class="form-label fw-bold">
+                <i class="fas fa-chart-line"></i> Indicateur
+            </label>
+            <select id="indicatorSelect" class="form-select">
+                <option value="NY.GDP.MKTP.KD.ZG" selected>Croissance PIB (%)</option>
+                <option value="FP.CPI.TOTL.ZG">Inflation (%)</option>
+                <option value="GC.DOD.TOTL.GD.ZS">Dette/PIB (%)</option>
+                <option value="BN.CAB.XOKA.GD.ZS">Compte Courant/PIB (%)</option>
+                <option value="NY.GDP.PCAP.KD">PIB par habitant (USD)</option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label for="yearsSelect" class="form-label fw-bold">
+                <i class="fas fa-calendar-alt"></i> Période
+            </label>
+            <select id="yearsSelect" class="form-select">
+                <option value="3">3 ans</option>
+                <option value="5" selected>5 ans</option>
+                <option value="10">10 ans</option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label class="form-label fw-bold d-block">&nbsp;</label>
+            <button id="calculateBtn" class="btn btn-primary w-100">
+                <i class="fas fa-calculator"></i> Calculer
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Matrice de corrélation -->
+<div class="heatmap-container">
+    <h3 class="section-title">Matrice de Corrélation</h3>
+    <div id="heatmapContent">
+        <p class="text-muted text-center">Cliquez sur "Calculer" pour générer la matrice</p>
+    </div>
+    <div class="correlation-legend">
+        <div class="legend-item">
+            <div class="legend-color" style="background: #dc3545;"></div>
+            <span>Négative forte</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #ffc107;"></div>
+            <span>Faible</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #28a745;"></div>
+            <span>Positive forte</span>
+        </div>
+    </div>
+</div>
+
+<!-- Corrélations fortes -->
+<div class="strong-correlations">
+    <h3 class="section-title">Corrélations Significatives (|r| > 0.7)</h3>
+    <div id="strongCorrelationsContent">
+        <p class="text-muted">Aucune corrélation calculée</p>
+    </div>
+</div>
+
+<!-- Analyse de contagion -->
+<div class="contagion-panel">
+    <h3 class="section-title">Analyse de Contagion</h3>
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <label for="sourceCountry" class="form-label fw-bold">Pays Source (Crise)</label>
+            <select id="sourceCountry" class="form-select">
+                <option value="NGA" selected>Nigeria</option>
+                <option value="GHA">Ghana</option>
+                <option value="CIV">Côte d'Ivoire</option>
+                <option value="SEN">Sénégal</option>
+                <option value="BEN">Bénin</option>
+            </select>
+        </div>
+        <div class="col-md-4">
+            <label class="form-label fw-bold d-block">&nbsp;</label>
+            <button id="analyzeContagionBtn" class="btn btn-danger w-100">
+                <i class="fas fa-virus"></i> Analyser Contagion
+            </button>
+        </div>
+    </div>
+    <div id="contagionResults">
+        <p class="text-muted">Cliquez sur "Analyser Contagion" pour détecter les risques</p>
+    </div>
+</div>
+
+<!-- Loading Overlay -->
+<div id="loadingOverlay" class="loading-overlay">
+    <div class="loading-content">
+        <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
+            <span class="visually-hidden">Chargement...</span>
+        </div>
+        <p class="mt-3">Calcul des corrélations en cours...</p>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let correlationData = null;
+
+document.getElementById('calculateBtn').addEventListener('click', calculateCorrelations);
+document.getElementById('analyzeContagionBtn').addEventListener('click', analyzeContagion);
+
+async function calculateCorrelations() {
+    const countries = getSelectedCountries();
+    const indicator = document.getElementById('indicatorSelect').value;
+    const years = document.getElementById('yearsSelect').value;
+    
+    if (countries.length < 2) {
+        alert('Veuillez sélectionner au moins 2 pays');
+        return;
+    }
+    
+    showLoading(true);
+    
+    try {
+        const countriesParam = countries.join(',');
+        const response = await fetch(`/dashboard/api/correlation-matrix/?countries=${countriesParam}&indicator=${indicator}&years=${years}`);
+        const data = await response.json();
+        
+        if (data.error) {
+            throw new Error(data.error);
+        }
+        
+        correlationData = data;
+        displayHeatmap(data);
+        displayStrongCorrelations(data);
+        
+        showLoading(false);
+    } catch (error) {
+        console.error('Erreur:', error);
+        alert('Erreur lors du calcul des corrélations');
+        showLoading(false);
+    }
+}
+
+function displayHeatmap(data) {
+    const container = document.getElementById('heatmapContent');
+    const matrix = data.correlation_matrix;
+    const countries = Object.keys(matrix);
+    
+    let html = '<table class="heatmap-table"><thead><tr><th></th>';
+    
+    // En-têtes colonnes
+    countries.forEach(country => {
+        html += `<th>${country}</th>`;
+    });
+    html += '</tr></thead><tbody>';
+    
+    // Lignes
+    countries.forEach(country1 => {
+        html += `<tr><th>${country1}</th>`;
+        countries.forEach(country2 => {
+            const corr = matrix[country1][country2];
+            const color = getCorrelationColor(corr);
+            const textColor = Math.abs(corr) > 0.5 ? 'white' : 'black';
+            
+            html += `<td style="background: ${color}; color: ${textColor};" 
+                         title="${country1} vs ${country2}: ${corr.toFixed(3)}">
+                        ${corr.toFixed(2)}
+                     </td>`;
+        });
+        html += '</tr>';
+    });
+    
+    html += '</tbody></table>';
+    container.innerHTML = html;
+}
+
+function getCorrelationColor(corr) {
+    // Rouge négatif → Jaune neutre → Vert positif
+    if (corr < -0.7) return '#dc3545';
+    if (corr < -0.3) return '#fd7e14';
+    if (corr < 0.3) return '#ffc107';
+    if (corr < 0.7) return '#20c997';
+    return '#28a745';
+}
+
+function displayStrongCorrelations(data) {
+    const container = document.getElementById('strongCorrelationsContent');
+    const strong = data.strong_correlations;
+    
+    if (!strong || strong.length === 0) {
+        container.innerHTML = '<p class="text-muted">Aucune corrélation forte détectée (|r| ≤ 0.7)</p>';
+        return;
+    }
+    
+    let html = '';
+    strong.forEach(item => {
+        const significant = item.p_value < 0.05 ? '✓ Significatif' : '⚠ Non significatif';
+        const significantClass = item.p_value < 0.05 ? 'text-success' : 'text-warning';
+        
+        html += `
+            <div class="correlation-pair">
+                <div>
+                    <strong>${item.country1}</strong> ↔ <strong>${item.country2}</strong>
+                    <br>
+                    <small class="${significantClass}">
+                        <i class="fas fa-info-circle"></i> ${significant} (p=${item.p_value.toFixed(4)})
+                    </small>
+                </div>
+                <div class="text-end">
+                    <h4 class="mb-0" style="color: ${getCorrelationColor(item.correlation)};">
+                        r = ${item.correlation.toFixed(3)}
+                    </h4>
+                    <small class="text-muted">${item.strength}</small>
+                </div>
+            </div>
+        `;
+    });
+    
+    container.innerHTML = html;
+}
+
+async function analyzeContagion() {
+    const source = document.getElementById('sourceCountry').value;
+    const indicator = document.getElementById('indicatorSelect').value;
+    const years = document.getElementById('yearsSelect').value;
+    
+    const allCountries = ['SEN', 'CIV', 'BEN', 'GHA', 'NGA', 'BFA', 'MLI', 'NER', 'TGO'];
+    const targets = allCountries.filter(c => c !== source).join(',');
+    
+    showLoading(true);
+    
+    try {
+        const response = await fetch(`/dashboard/api/contagion-risk/?source=${source}&indicator=${indicator}&targets=${targets}&years=${years}`);
+        const data = await response.json();
+        
+        if (data.error) {
+            throw new Error(data.error);
+        }
+        
+        displayContagionResults(data);
+        showLoading(false);
+    } catch (error) {
+        console.error('Erreur:', error);
+        alert('Erreur lors de l\'analyse de contagion');
+        showLoading(false);
+    }
+}
+
+function displayContagionResults(data) {
+    const container = document.getElementById('contagionResults');
+    const analysis = data.contagion_analysis;
+    
+    // Trier par score décroissant
+    analysis.sort((a, b) => b.risk_score - a.risk_score);
+    
+    let html = `<h5>Impact d'une crise en <strong>${data.source_country}</strong></h5>`;
+    
+    analysis.forEach(item => {
+        const width = item.risk_score;
+        const riskClass = `risk-${item.risk_level}`;
+        
+        html += `
+            <div class="risk-bar ${riskClass}" style="width: ${width}%;">
+                ${item.target_country}: ${item.risk_score.toFixed(0)}% - ${item.risk_level.toUpperCase()}
+            </div>
+        `;
+    });
+    
+    if (data.countries_at_risk && data.countries_at_risk.length > 0) {
+        html += `
+            <div class="alert alert-danger mt-3">
+                <strong><i class="fas fa-exclamation-triangle"></i> Pays à risque élevé:</strong>
+                ${data.countries_at_risk.join(', ')}
+            </div>
+        `;
+    } else {
+        html += `
+            <div class="alert alert-success mt-3">
+                <i class="fas fa-check-circle"></i> Aucun pays avec risque élevé détecté
+            </div>
+        `;
+    }
+    
+    container.innerHTML = html;
+}
+
+function getSelectedCountries() {
+    const checkboxes = document.querySelectorAll('#countriesSelection input[type="checkbox"]:checked');
+    return Array.from(checkboxes).map(cb => cb.value);
+}
+
+function showLoading(show) {
+    document.getElementById('loadingOverlay').classList.toggle('active', show);
+}
+</script>
+{% endblock %}

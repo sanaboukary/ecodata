@@ -1,0 +1,53 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard World Bank</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        body { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; }
+        .wb-container { background: white; border-radius: 15px; padding: 30px; margin: 30px 0; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .indicator-card { background: #f8f9fa; border-radius: 10px; padding: 20px; margin-bottom: 15px; }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{% url 'dashboard:index' %}"><i class="bi bi-graph-up-arrow"></i> Plateforme BRVM</a>
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="{% url 'dashboard:dashboard_brvm' %}">BRVM</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="{% url 'dashboard:dashboard_worldbank' %}">World Bank</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'dashboard:dashboard_imf' %}">IMF</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="wb-container">
+            <h1 class="text-center mb-4"><i class="bi bi-bank"></i> Dashboard World Bank</h1>
+            <p class="text-center text-muted">Indicateurs économiques des pays d'Afrique de l'Ouest</p>
+
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle"></i> Les indicateurs World Bank seront affichés ici après la collecte des données.
+                Lancez une ingestion via <a href="{% url 'dashboard:administration' %}">Administration</a> pour voir les données.
+            </div>
+
+            <div class="text-center mt-4">
+                <a href="{% url 'dashboard:administration' %}" class="btn btn-primary">
+                    <i class="bi bi-download"></i> Collecter les Données
+                </a>
+                <a href="{% url 'dashboard:index' %}" class="btn btn-outline-secondary ms-2">
+                    Retour à l'Accueil
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,93 @@
+<!-- Boutons d'export PDF/Excel/CSV -->
+<div class="export-buttons" style="
+  position: fixed;
+  top: 100px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  z-index: 1000;
+">
+  <a href="{% url 'dashboard:export_dashboard_pdf' source %}?period={{ period|default:'30d' }}" 
+     class="export-btn export-pdf" 
+     title="Exporter en PDF"
+     style="
+       display: flex;
+       align-items: center;
+       justify-content: center;
+       width: 56px;
+       height: 56px;
+       background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+       color: #ffffff;
+       border-radius: 12px;
+       text-decoration: none;
+       box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+       transition: all 0.3s;
+       font-size: 1.5rem;
+     "
+     onmouseover="this.style.transform='translateX(-8px) scale(1.05)'; this.style.boxShadow='0 6px 20px rgba(239, 68, 68, 0.6)'"
+     onmouseout="this.style.transform=''; this.style.boxShadow='0 4px 12px rgba(239, 68, 68, 0.4)'">
+    📄
+  </a>
+  
+  <a href="{% url 'dashboard:export_dashboard_excel' source %}?period={{ period|default:'30d' }}" 
+     class="export-btn export-excel" 
+     title="Exporter en Excel"
+     style="
+       display: flex;
+       align-items: center;
+       justify-content: center;
+       width: 56px;
+       height: 56px;
+       background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+       color: #ffffff;
+       border-radius: 12px;
+       text-decoration: none;
+       box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+       transition: all 0.3s;
+       font-size: 1.5rem;
+     "
+     onmouseover="this.style.transform='translateX(-8px) scale(1.05)'; this.style.boxShadow='0 6px 20px rgba(16, 185, 129, 0.6)'"
+     onmouseout="this.style.transform=''; this.style.boxShadow='0 4px 12px rgba(16, 185, 129, 0.4)'">
+    📊
+  </a>
+  
+  <a href="{% url 'dashboard:export_dashboard_csv' source %}?period={{ period|default:'30d' }}" 
+     class="export-btn export-csv" 
+     title="Exporter en CSV"
+     style="
+       display: flex;
+       align-items: center;
+       justify-content: center;
+       width: 56px;
+       height: 56px;
+       background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+       color: #ffffff;
+       border-radius: 12px;
+       text-decoration: none;
+       box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+       transition: all 0.3s;
+       font-size: 1.5rem;
+     "
+     onmouseover="this.style.transform='translateX(-8px) scale(1.05)'; this.style.boxShadow='0 6px 20px rgba(99, 102, 241, 0.6)'"
+     onmouseout="this.style.transform=''; this.style.boxShadow='0 4px 12px rgba(99, 102, 241, 0.4)'">
+    📋
+  </a>
+</div>
+
+<style>
+@media (max-width: 768px) {
+  .export-buttons {
+    top: auto;
+    bottom: 20px;
+    right: 20px;
+    flex-direction: row;
+  }
+  
+  .export-btn {
+    width: 48px !important;
+    height: 48px !important;
+    font-size: 1.2rem !important;
+  }
+}
+</style>

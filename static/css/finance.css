@@ -1,0 +1,43 @@
+/* Finance Dashboard Professional CSS */
+:root {
+  --navy: #1E3A5F;
+  --gold: #C9A961;
+  --white: #FFFFFF;
+  --gray-50: #F8F9FA;
+  --gray-100: #E8EBF0;
+  --gray-800: #2D3748;
+}
+
+body { font-family: 'Inter', sans-serif; background: var(--gray-50); margin: 0; }
+.finance-dashboard { display: flex; min-height: 100vh; }
+.finance-sidebar { width: 280px; background: linear-gradient(180deg, var(--navy) 0%, #0F2540 100%); color: var(--white); padding: 2rem 1.5rem; position: fixed; height: 100vh; overflow-y: auto; }
+.platform-title { font-size: 1.25rem; font-weight: 700; margin-bottom: 2rem; }
+.search-input { width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; color: var(--white); margin-bottom: 2rem; }
+.nav-item { display: flex; align-items: center; padding: 0.875rem 1rem; margin-bottom: 0.5rem; border-radius: 8px; color: var(--white); text-decoration: none; transition: all 0.3s; }
+.nav-item:hover { background: rgba(255,255,255,0.1); }
+.nav-item.active { background: rgba(201,169,97,0.15); border-left: 3px solid var(--gold); }
+.filters-button { width: 100%; padding: 0.75rem; background: var(--gold); color: var(--navy); border: none; border-radius: 8px; font-weight: 600; cursor: pointer; margin-top: 2rem; }
+.finance-main { flex: 1; margin-left: 280px; }
+.top-nav { background: var(--white); display: flex; border-bottom: 1px solid var(--gray-100); }
+.top-nav-link { padding: 1.25rem 2rem; color: #4A5568; text-decoration: none; border-bottom: 3px solid transparent; }
+.top-nav-link:hover { border-bottom-color: var(--gold); }
+.main-header { background: linear-gradient(135deg, var(--navy) 0%, #2C5282 100%); padding: 2.5rem 3rem; }
+.section-title { font-size: 2rem; font-weight: 700; color: var(--white); margin: 0; }
+.indicators-section { padding: 2rem 3rem; }
+.indicators-table { width: 100%; background: var(--white); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+.indicators-table thead { background: linear-gradient(135deg, var(--navy) 0%, #2C5282 100%); }
+.indicators-table th { padding: 1.25rem 1.5rem; text-align: left; font-weight: 600; font-size: 0.875rem; text-transform: uppercase; color: var(--white); border-bottom: 2px solid var(--gold); }
+.indicators-table td { padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--gray-100); }
+.indicators-table tbody tr:hover { background: var(--gray-50); }
+.source-badge { padding: 0.35rem 0.875rem; border-radius: 20px; font-size: 0.8rem; font-weight: 600; color: var(--white); }
+.source-imf { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+.source-wb { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+.value-highlight { font-weight: 700; font-size: 1.05rem; color: var(--navy); }
+.bottom-section { display: grid; grid-template-columns: 1fr 1.5fr; gap: 2rem; padding: 0 3rem 3rem 3rem; }
+.sources-panel, .comparison-panel { background: var(--white); padding: 2rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+.panel-title { font-size: 1.125rem; font-weight: 700; color: var(--navy); margin-bottom: 1.5rem; padding-bottom: 0.75rem; border-bottom: 2px solid var(--gold); }
+.source-dropdown { width: 100%; padding: 0.875rem 1.25rem; background: var(--white); border: 2px solid var(--gray-100); border-radius: 8px; margin-bottom: 1rem; }
+.comparison-chart { height: 250px; }
+
+.header-content { display: flex; justify-content: space-between; align-items: center; }
+.trend-chart-mini { width: 200px; height: 80px; }

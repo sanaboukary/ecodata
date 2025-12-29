@@ -1,0 +1,138 @@
+version: '3.8'
+
+services:
+  # Base de données MongoDB
+  mongodb:
+    image: mongo:7.0
+    container_name: plateforme_mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER:-admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:-admin123}
+      MONGO_INITDB_DATABASE: ${MONGODB_NAME:-centralisation_db}
+    ports:
+      - "27018:27017"
+    volumes:
+      - mongodb_data:/data/db
+      - mongodb_config:/data/configdb
+    networks:
+      - plateforme_network
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # Application Django
+  web:
+    build: .
+    container_name: plateforme_web
+    restart: unless-stopped
+    command: gunicorn plateforme_centralisation.wsgi:application --bind 0.0.0.0:8000 --workers 3 --timeout 120
+    environment:
+      - DJANGO_SETTINGS_MODULE=plateforme_centralisation.settings
+      - MONGODB_URI=mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD:-admin123}@mongodb:27017/${MONGODB_NAME:-centralisation_db}?authSource=admin
+      - MONGODB_NAME=${MONGODB_NAME:-centralisation_db}
+      - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
+      - DJANGO_DEBUG=${DJANGO_DEBUG:-False}
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS:-localhost,127.0.0.1}
+      - TZ=Africa/Abidjan
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+      - static_volume:/app/staticfiles
+      - media_volume:/app/media
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - plateforme_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Airflow Scheduler (Collecte automatique)
+  airflow-scheduler:
+    build: .
+    container_name: plateforme_airflow_scheduler
+    restart: unless-stopped
+    command: airflow scheduler
+    environment:
+      - AIRFLOW_HOME=/app/airflow
+      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+      - AIRFLOW__CORE__SQL_ALCHEMY_CONN=sqlite:////app/airflow/airflow.db
+      - AIRFLOW__CORE__LOAD_EXAMPLES=False
+      - AIRFLOW__WEBSERVER__EXPOSE_CONFIG=True
+      - MONGODB_URI=mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD:-admin123}@mongodb:27017/${MONGODB_NAME:-centralisation_db}?authSource=admin
+      - MONGODB_NAME=${MONGODB_NAME:-centralisation_db}
+      - TZ=Africa/Abidjan
+    volumes:
+      - ./airflow:/app/airflow
+      - .:/app
+    depends_on:
+      - mongodb
+      - web
+    networks:
+      - plateforme_network
+
+  # Airflow Webserver (Interface de monitoring)
+  airflow-webserver:
+    build: .
+    container_name: plateforme_airflow_webserver
+    restart: unless-stopped
+    command: airflow webserver --port 8080
+    environment:
+      - AIRFLOW_HOME=/app/airflow
+      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+      - AIRFLOW__CORE__SQL_ALCHEMY_CONN=sqlite:////app/airflow/airflow.db
+      - AIRFLOW__CORE__LOAD_EXAMPLES=False
+      - AIRFLOW__WEBSERVER__EXPOSE_CONFIG=True
+      - TZ=Africa/Abidjan
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./airflow:/app/airflow
+      - .:/app
+    depends_on:
+      - airflow-scheduler
+    networks:
+      - plateforme_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Nginx (Reverse Proxy & Static Files)
+  nginx:
+    image: nginx:alpine
+    container_name: plateforme_nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - static_volume:/app/staticfiles:ro
+      - media_volume:/app/media:ro
+    depends_on:
+      - web
+    networks:
+      - plateforme_network
+
+volumes:
+  mongodb_data:
+    driver: local
+  mongodb_config:
+    driver: local
+  static_volume:
+    driver: local
+  media_volume:
+    driver: local
+
+networks:
+  plateforme_network:
+    driver: bridge

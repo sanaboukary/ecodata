@@ -1,0 +1,865 @@
+{% extends 'base_modern.html' %}
+
+{% block title %}Explorateur Financier | Plateforme Financière{% endblock %}
+
+{% block content %}
+<div class="container-fluid animate-fade-in">
+    <input type="hidden" id="csrf-token" value="{{ csrf_token }}">
+    <div id="autocomplete-live" class="visually-hidden" aria-live="polite" aria-atomic="true"></div>
+    
+    <!-- En-tête avec fonctionnalités avancées -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0">Explorateur Financier</h1>
+            <p class="text-muted mb-0">Analyse et comparaison des indicateurs économiques</p>
+        </div>
+        
+        <!-- Actions principales -->
+        <div class="d-flex gap-2">
+            <button class="btn btn-light" id="btn-save-workspace" title="Sauvegarder l'espace de travail">
+                <i class="ti ti-device-floppy me-2"></i>
+                Sauvegarder
+            </button>
+            <button class="btn btn-light" id="btn-share" title="Partager l'analyse">
+                <i class="ti ti-share me-2"></i>
+                Partager
+            </button>
+            <div class="dropdown">
+                <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                    <i class="ti ti-file-export me-2"></i>
+                    Exporter
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="#" id="export-excel"><i class="ti ti-table me-2"></i>Excel</a></li>
+                    <li><a class="dropdown-item" href="#" id="export-pdf"><i class="ti ti-file me-2"></i>PDF</a></li>
+                    <li><a class="dropdown-item" href="#" id="export-image"><i class="ti ti-photo me-2"></i>Image</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+        <div class="d-flex gap-3">
+            <div class="input-group">
+                <span class="input-group-text"><i class="ti ti-world"></i></span>
+                <div class="position-relative w-100">
+                    <input id="filter-country" class="form-control" placeholder="Pays (ex: Senegal)" autocomplete="off" role="combobox" aria-autocomplete="list" aria-haspopup="listbox" aria-expanded="false" aria-controls="countries-dropdown" aria-activedescendant="" />
+                    <div id="countries-dropdown" class="autocomplete-dropdown bg-white border rounded shadow-sm" role="listbox" aria-hidden="true" style="display:none;position:absolute;z-index:2000;left:0;right:0;"></div>
+                </div>
+            </div>
+            <div class="input-group">
+                <span class="input-group-text"><i class="ti ti-list-check"></i></span>
+                <div class="position-relative w-100">
+                    <input id="filter-indicator" class="form-control" placeholder="Indicateur (alias)" autocomplete="off" role="combobox" aria-autocomplete="list" aria-haspopup="listbox" aria-expanded="false" aria-controls="indicators-dropdown" aria-activedescendant="" />
+                    <div id="indicators-dropdown" class="autocomplete-dropdown bg-white border rounded shadow-sm" role="listbox" aria-hidden="true" style="display:none;position:absolute;z-index:2000;left:0;right:0;"></div>
+                </div>
+            </div>
+            <div class="input-group">
+                <span class="input-group-text"><i class="ti ti-calendar"></i></span>
+                <input id="filter-year-from" class="form-control" placeholder="Année début" />
+                <input id="filter-year-to" class="form-control" placeholder="Année fin" />
+            </div>
+            <div class="input-group">
+                <select id="filter-page-size" class="form-select">
+                    <option value="10">10</option>
+                    <option value="25" selected>25</option>
+                    <option value="50">50</option>
+                </select>
+            </div>
+            <button id="btn-search" class="btn btn-primary">
+                <i class="ti ti-search me-2"></i>Appliquer
+            </button>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Filtres et catégories -->
+        <div class="col-12 col-lg-3">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Filtres</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label">Type d'indicateur</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" checked id="macro">
+                            <label class="form-check-label" for="macro">Macroéconomique</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" checked id="monetary">
+                            <label class="form-check-label" for="monetary">Monétaire</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" checked id="financial">
+                            <label class="form-check-label" for="financial">Financier</label>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Source</label>
+                        <select class="form-select">
+                            <option value="all">Toutes les sources</option>
+                            <option value="worldbank">Banque Mondiale</option>
+                            <option value="imf">FMI</option>
+                            <option value="afdb">BAD</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Fréquence</label>
+                        <select class="form-select">
+                            <option value="yearly">Annuelle</option>
+                            <option value="quarterly">Trimestrielle</option>
+                            <option value="monthly">Mensuelle</option>
+                        </select>
+                    </div>
+                    
+                    <button class="btn btn-primary w-100">
+                        <i class="ti ti-filter me-2"></i>Appliquer les filtres
+                    </button>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Indicateurs favoris</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div id="favorites-list" class="list-group list-group-flush">
+                        <!-- Favoris chargés dynamiquement -->
+                        <div class="list-group-item text-muted">Chargement...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Zone principale avec options avancées -->
+        <div class="col-12 col-lg-9">
+            <!-- Options d'analyse avancées -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Méthode d'analyse</label>
+                            <select class="form-select" id="analysis-method">
+                                <option value="comparison">Comparaison directe</option>
+                                <option value="correlation">Corrélation</option>
+                                <option value="regression">Régression</option>
+                                <option value="trends">Tendances</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Période d'agrégation</label>
+                            <select class="form-select" id="aggregation-period">
+                                <option value="yearly">Annuelle</option>
+                                <option value="quarterly">Trimestrielle</option>
+                                <option value="monthly">Mensuelle</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Type de visualisation</label>
+                            <select class="form-select" id="chart-type">
+                                <option value="line">Ligne</option>
+                                <option value="bar">Barres</option>
+                                <option value="scatter">Nuage de points</option>
+                                <option value="area">Aires</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Graphique principal amélioré -->
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Analyse comparative</h5>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-light btn-sm" id="btn-add-series">
+                            <i class="ti ti-plus me-1"></i>Ajouter série
+                        </button>
+                        <button class="btn btn-light btn-sm" id="btn-customize">
+                            <i class="ti ti-adjustments me-1"></i>Personnaliser
+                        </button>
+                        <div class="dropdown">
+                            <button class="btn btn-light btn-sm dropdown-toggle" data-bs-toggle="dropdown">
+                                <i class="ti ti-chart-area me-1"></i>Analyses
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="#" id="analyze-trend">Analyse tendance</a></li>
+                                <li><a class="dropdown-item" href="#" id="analyze-seasonality">Saisonnalité</a></li>
+                                <li><a class="dropdown-item" href="#" id="analyze-forecast">Prévisions</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                    <div class="btn-group">
+                        <button class="btn btn-light active">
+                            <i class="ti ti-chart-line"></i>
+                        </button>
+                        <button class="btn btn-light">
+                            <i class="ti ti-chart-bar"></i>
+                        </button>
+                        <button class="btn btn-light">
+                            <i class="ti ti-table"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="explorer-chart" style="height: 400px;"></div>
+                </div>
+            </div>
+
+            <!-- Tableau de données -->
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Données détaillées</h5>
+                    <div>
+                        <button id="btn-export" class="btn btn-light me-2">
+                            <i class="ti ti-download me-2"></i>Exporter
+                        </button>
+                        <div class="btn-group" role="group" aria-label="pagination">
+                            <button id="btn-prev" class="btn btn-sm btn-outline-secondary">Préc</button>
+                            <span id="page-indicator" class="btn btn-sm btn-light">1</span>
+                            <button id="btn-next" class="btn btn-sm btn-outline-secondary">Suiv</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Pays</th>
+                                    <th>Indicateur</th>
+                                    <th>2023</th>
+                                    <th>2024</th>
+                                    <th>2025</th>
+                                    <th>Variation</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tbody id="explorer-table-body">
+                                <!-- Contenu chargé dynamiquement via JS -->
+                                </tbody>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ block.super }}
+<script>
+// Configuration des graphiques
+const chartOptions = {
+    line: {
+        type: 'line',
+        height: 400,
+        animations: {
+            enabled: true,
+            easing: 'easeinout',
+            speed: 800
+        },
+        toolbar: {
+            show: true,
+            tools: {
+                download: true,
+                selection: true,
+                zoom: true,
+                zoomin: true,
+                zoomout: true,
+                pan: true,
+                reset: true
+            }
+        },
+        zoom: {
+            enabled: true,
+            type: 'x'
+        }
+    },
+    bar: {
+        type: 'bar',
+        height: 400
+    },
+    scatter: {
+        type: 'scatter',
+        height: 400
+    },
+    area: {
+        type: 'area',
+        height: 400,
+        fill: {
+            type: 'gradient',
+            gradient: {
+                shadeIntensity: 1,
+                opacityFrom: 0.7,
+                opacityTo: 0.3
+            }
+        }
+    }
+};
+
+// Gestion de la sauvegarde de l'espace de travail
+document.getElementById('btn-save-workspace').addEventListener('click', () => {
+    const workspace = {
+        filters: {
+            country: document.getElementById('filter-country').value,
+            indicator: document.getElementById('filter-indicator').value,
+            yearFrom: document.getElementById('filter-year-from').value,
+            yearTo: document.getElementById('filter-year-to').value
+        },
+        analysis: {
+            method: document.getElementById('analysis-method').value,
+            period: document.getElementById('aggregation-period').value,
+            chartType: document.getElementById('chart-type').value
+        },
+        favorites: currentFavorites
+    };
+    
+    localStorage.setItem('explorer_workspace', JSON.stringify(workspace));
+    
+    // Feedback visuel
+    const btn = document.getElementById('btn-save-workspace');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="ti ti-check me-2"></i>Sauvegardé';
+    btn.classList.add('btn-success');
+    
+    setTimeout(() => {
+        btn.innerHTML = originalText;
+        btn.classList.remove('btn-success');
+    }, 2000);
+});
+
+// Restauration de l'espace de travail
+function restoreWorkspace() {
+    const saved = localStorage.getItem('explorer_workspace');
+    if (!saved) return;
+    
+    try {
+        const workspace = JSON.parse(saved);
+        
+        // Restaurer les filtres
+        if (workspace.filters) {
+            document.getElementById('filter-country').value = workspace.filters.country || '';
+            document.getElementById('filter-indicator').value = workspace.filters.indicator || '';
+            document.getElementById('filter-year-from').value = workspace.filters.yearFrom || '';
+            document.getElementById('filter-year-to').value = workspace.filters.yearTo || '';
+        }
+        
+        // Restaurer les paramètres d'analyse
+        if (workspace.analysis) {
+            document.getElementById('analysis-method').value = workspace.analysis.method || 'comparison';
+            document.getElementById('aggregation-period').value = workspace.analysis.period || 'yearly';
+            document.getElementById('chart-type').value = workspace.analysis.chartType || 'line';
+        }
+        
+        // Restaurer les favoris
+        if (workspace.favorites) {
+            currentFavorites = workspace.favorites;
+            renderFavorites(currentFavorites);
+        }
+        
+        // Relancer l'analyse
+        loadExplorer();
+        
+    } catch (err) {
+        console.error('Erreur restauration workspace:', err);
+    }
+}
+
+// Gestion du partage
+document.getElementById('btn-share').addEventListener('click', () => {
+    const currentUrl = new URL(window.location.href);
+    const filters = {
+        country: document.getElementById('filter-country').value,
+        indicator: document.getElementById('filter-indicator').value,
+        yearFrom: document.getElementById('filter-year-from').value,
+        yearTo: document.getElementById('filter-year-to').value,
+        method: document.getElementById('analysis-method').value,
+        period: document.getElementById('aggregation-period').value,
+        chart: document.getElementById('chart-type').value
+    };
+    
+    // Mettre à jour l'URL avec les paramètres
+    Object.entries(filters).forEach(([key, value]) => {
+        if (value) currentUrl.searchParams.set(key, value);
+    });
+    
+    // Copier l'URL dans le presse-papier
+    navigator.clipboard.writeText(currentUrl.toString()).then(() => {
+        const btn = document.getElementById('btn-share');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="ti ti-check me-2"></i>URL copiée';
+        
+        setTimeout(() => {
+            btn.innerHTML = originalText;
+        }, 2000);
+    });
+});
+
+// Personnalisation du graphique
+document.getElementById('btn-customize').addEventListener('click', () => {
+    const customizeModal = new bootstrap.Modal(document.getElementById('customize-modal'));
+    customizeModal.show();
+});
+
+// Types de graphiques
+document.getElementById('chart-type').addEventListener('change', (e) => {
+    const type = e.target.value;
+    if (!explorerChart) return;
+    
+    explorerChart.updateOptions({
+        ...chartOptions[type],
+        series: explorerChart.w.config.series
+    });
+});
+
+// Gestion des analyses avancées
+document.getElementById('analyze-trend').addEventListener('click', async () => {
+    try {
+        const data = explorerChart.w.config.series[0].data;
+        // Exemple simple: calcul de la tendance linéaire
+        const n = data.length;
+        const xSum = (n * (n + 1)) / 2;
+        const ySum = data.reduce((a, b) => a + b, 0);
+        const xySum = data.reduce((a, v, i) => a + v * (i + 1), 0);
+        const x2Sum = (n * (n + 1) * (2 * n + 1)) / 6;
+        
+        const slope = (n * xySum - xSum * ySum) / (n * x2Sum - xSum * xSum);
+        const intercept = (ySum - slope * xSum) / n;
+        
+        // Ajouter la ligne de tendance
+        const trendData = Array.from({length: n}, (_, i) => intercept + slope * (i + 1));
+        
+        explorerChart.updateSeries([
+            ...explorerChart.w.config.series,
+            {
+                name: 'Tendance',
+                data: trendData,
+                type: 'line',
+                dashArray: 5
+            }
+        ]);
+    } catch (err) {
+        console.error('Erreur analyse tendance:', err);
+    }
+});
+
+// Analyses saisonnières
+document.getElementById('analyze-seasonality').addEventListener('click', async () => {
+    if (!explorerChart?.w?.config?.series?.[0]?.data) return;
+    
+    const data = explorerChart.w.config.series[0].data;
+    const period = document.getElementById('aggregation-period').value;
+    let seasonality;
+    
+    if (period === 'monthly') {
+        // Analyse sur 12 mois
+        seasonality = Array(12).fill(0);
+        for (let i = 0; i < data.length; i++) {
+            const month = i % 12;
+            seasonality[month] += data[i];
+        }
+        // Moyenne par mois
+        const yearsCount = Math.ceil(data.length / 12);
+        seasonality = seasonality.map(v => v / yearsCount);
+    } else if (period === 'quarterly') {
+        // Analyse sur 4 trimestres
+        seasonality = Array(4).fill(0);
+        for (let i = 0; i < data.length; i++) {
+            const quarter = i % 4;
+            seasonality[quarter] += data[i];
+        }
+        const yearsCount = Math.ceil(data.length / 4);
+        seasonality = seasonality.map(v => v / yearsCount);
+    }
+    
+    if (seasonality) {
+        // Afficher le graphique de saisonnalité
+        const modal = new bootstrap.Modal(document.getElementById('seasonality-modal'));
+        const ctx = document.getElementById('seasonality-chart').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: period === 'monthly' 
+                    ? ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc']
+                    : ['T1', 'T2', 'T3', 'T4'],
+                datasets: [{
+                    label: 'Profil saisonnier',
+                    data: seasonality,
+                    backgroundColor: 'rgba(79, 70, 229, 0.2)',
+                    borderColor: 'rgb(79, 70, 229)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Analyse de saisonnalité'
+                    }
+                }
+            }
+        });
+        modal.show();
+    }
+});
+
+// Initialisation
+document.addEventListener('DOMContentLoaded', () => {
+    // Restaurer l'espace de travail
+    restoreWorkspace();
+    
+    // Initialiser les tooltips
+    const tooltips = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    tooltips.forEach(tooltip => new bootstrap.Tooltip(tooltip));
+});
+// Utilitaires
+function formatNumber(n){
+    if(n===null||n===undefined) return '-';
+    return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+}
+
+const chartEl = document.querySelector('#explorer-chart');
+let explorerChart = null;
+let currentFavorites = [];
+
+    // Etat UI
+    let currentPage = 1;
+    let currentPageSize = 25;
+    let currentParams = {};
+
+    async function fetchExplorerData(params = {}){
+    const qs = new URLSearchParams(params).toString();
+    const url = 'explorer/data/' + (qs ? ('?' + qs) : '');
+    const res = await fetch(url);
+    if(!res.ok) throw new Error('Erreur chargement données');
+    return res.json();
+}
+
+function renderChartFromSeries(series){
+    if(!series || series.length===0){
+        if(explorerChart) explorerChart.updateOptions({series: []});
+        return;
+    }
+    const categories = series[0].categories || [];
+    const s = series.map(sx => ({name: sx.name, data: sx.data}));
+    const options = {
+        chart: {type: 'line', height: 400},
+        stroke: {curve: 'smooth', width: 3},
+        series: s,
+        xaxis: {categories: categories},
+        colors: ['#2563eb', '#64748b', '#a3e635', '#f97316'],
+        tooltip: {theme: 'light'},
+        legend: {position: 'top', horizontalAlign: 'right'},
+        grid: {borderColor: '#f1f5f9', strokeDashArray: 4}
+    };
+    if(!explorerChart){
+        explorerChart = new ApexCharts(chartEl, options);
+        explorerChart.render();
+    } else {
+        explorerChart.updateOptions(options);
+        explorerChart.updateSeries(s);
+    }
+}
+
+function renderTableRows(table){
+    const tbody = document.querySelector('#explorer-table-body');
+    tbody.innerHTML = '';
+    if(!table || table.length===0){
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-3">Aucune donnée</td></tr>';
+        return;
+    }
+    for(const row of table){
+        const tr = document.createElement('tr');
+        const alias = row.indicator || '';
+        const isFav = currentFavorites.includes(alias);
+        const starClass = isFav ? 'text-warning ti-star-filled' : 'text-muted ti-star';
+        tr.innerHTML = `
+            <td>${row.country || '-'}</td>
+            <td>
+                <button class="btn btn-sm btn-link toggle-fav" data-alias="${alias}" title="Favori">
+                    <i class="ti ${isFav ? 'ti-star' : 'ti-star'} ${isFav ? 'text-warning' : 'text-muted'}"></i>
+                </button>
+                ${alias}
+            </td>
+            <td>${formatNumber(row.year===2023 ? row.value : '')}</td>
+            <td>${formatNumber(row.year===2024 ? row.value : '')}</td>
+            <td>${formatNumber(row.year===2025 ? row.value : '')}</td>
+            <td>-</td>
+        `;
+        tbody.appendChild(tr);
+    }
+
+    // attach toggle handlers
+    const toggles = document.querySelectorAll('.toggle-fav');
+    toggles.forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+            const alias = btn.getAttribute('data-alias');
+            try{
+                await toggleFavorite(alias);
+                await loadFavorites();
+                loadExplorer();
+            } catch(err){ console.error(err); }
+        });
+    });
+}
+
+// FAVORITES: load and render
+async function loadFavorites(){
+    try{
+        const res = await fetch('explorer/favorites/');
+        if(!res.ok) throw new Error('Erreur chargement favoris');
+        const data = await res.json();
+        currentFavorites = data.favorites || [];
+        renderFavorites(currentFavorites);
+    } catch(err){
+        console.error(err);
+        document.getElementById('favorites-list').innerHTML = '<div class="list-group-item text-danger">Erreur chargement</div>';
+    }
+}
+
+function renderFavorites(list){
+    const el = document.getElementById('favorites-list');
+    el.innerHTML = '';
+    if(!list || list.length===0){
+        el.innerHTML = '<div class="list-group-item text-muted">Aucun favori</div>';
+        return;
+    }
+    for(const a of list){
+        const item = document.createElement('a');
+        item.href = '#';
+        item.className = 'list-group-item list-group-item-action d-flex justify-content-between align-items-center';
+        item.innerHTML = `<span>${a.replace(/_/g,' ')}</span><button class="btn btn-sm btn-link remove-fav" data-alias="${a}"><i class="ti ti-x text-danger"></i></button>`;
+        el.appendChild(item);
+    }
+    // attach remove handlers
+    const rems = el.querySelectorAll('.remove-fav');
+    rems.forEach(b => b.addEventListener('click', async (e)=>{
+        e.preventDefault();
+        const alias = b.getAttribute('data-alias');
+        try{ await toggleFavorite(alias); await loadFavorites(); loadExplorer(); } catch(err){ console.error(err); }
+    }));
+}
+
+async function toggleFavorite(alias){
+    const token = document.getElementById('csrf-token').value || '';
+    const body = new URLSearchParams();
+    body.append('indicator_alias', alias);
+    const res = await fetch('explorer/favorite/', {method: 'POST', headers: {'X-CSRFToken': token}, body});
+    if(!res.ok) throw new Error('Erreur toggle favori');
+    return res.json();
+}
+
+// Autocomplete helpers (datalist population)
+function debounce(fn, wait){
+    let t;
+    return function(...args){
+        clearTimeout(t);
+        t = setTimeout(()=>fn.apply(this, args), wait);
+    };
+}
+
+async function fetchAndPopulateDatalist(url, q, datalistId){
+    const qs = new URLSearchParams({q, limit: 50}).toString();
+    const res = await fetch(url + '?' + qs);
+    if(!res.ok) return;
+    const data = await res.json();
+    const listEl = document.getElementById(datalistId);
+    listEl.innerHTML = '';
+    for(const it of (data.items || [])){
+        const opt = document.createElement('option');
+        opt.value = it;
+        listEl.appendChild(opt);
+    }
+}
+
+const debouncedIndicators = debounce((q)=>fetchAndPopulateDatalist('explorer/autocomplete/indicators/', q, 'indicators-list'), 250);
+const debouncedCountries = debounce((q)=>fetchAndPopulateDatalist('explorer/autocomplete/countries/', q, 'countries-list'), 250);
+
+// Replace datalist usage with custom dropdowns
+const debouncedIndicators = debounce((q)=>fetchAndPopulateDropdown('explorer/autocomplete/indicators/', q, 'indicators-dropdown'), 200);
+const debouncedCountries = debounce((q)=>fetchAndPopulateDropdown('explorer/autocomplete/countries/', q, 'countries-dropdown'), 200);
+
+async function fetchAndPopulateDropdown(url, q, dropdownId){
+    const qs = new URLSearchParams({q, limit: 20}).toString();
+    const res = await fetch(url + '?' + qs);
+    if(!res.ok) return;
+    const data = await res.json();
+    const dd = document.getElementById(dropdownId);
+    dd.innerHTML = '';
+    const items = data.items || [];
+    if(items.length === 0){
+        dd.style.display = 'none';
+        dd.setAttribute('aria-hidden','true');
+        // announce no results
+        const live = document.getElementById('autocomplete-live');
+        if(live) live.textContent = `Aucun résultat pour ${q}`;
+        return;
+    }
+    items.forEach((it, idx) => {
+        const div = document.createElement('div');
+        div.className = 'px-3 py-2 autocomplete-item';
+        div.setAttribute('role','option');
+        const itemId = `${dropdownId}-item-${idx}`;
+        div.id = itemId;
+        div.setAttribute('data-value', it);
+        div.setAttribute('aria-selected', 'false');
+        div.setAttribute('tabindex', '-1');
+        // highlight match
+        const re = new RegExp('(' + q.replace(/[.*+?^${}()|[\]\\]/g, "\\$1") + ')', 'i');
+        const label = String(it).replace(re, '<strong>$1</strong>');
+        div.innerHTML = label;
+        div.addEventListener('mousedown', (ev)=>{
+            // mousedown to avoid losing focus before click
+            ev.preventDefault();
+            selectDropdownValue(dropdownId, it);
+        });
+        dd.appendChild(div);
+    });
+    dd.style.display = 'block';
+    dd.setAttribute('aria-hidden','false');
+    // set combobox input aria-expanded
+    const inputId = dropdownId === 'indicators-dropdown' ? 'filter-indicator' : 'filter-country';
+    const input = document.getElementById(inputId);
+    if(input){ input.setAttribute('aria-expanded','true'); }
+    // announce number of results for screen readers
+    const live = document.getElementById('autocomplete-live');
+    if(live) live.textContent = `${items.length} résultat(s) pour ${q}`;
+    // set first as active by default
+    setActiveDropdownIndex(dropdownId, 0);
+}
+
+function setActiveDropdownIndex(dropdownId, idx){
+    const dd = document.getElementById(dropdownId);
+    if(!dd) return;
+    const items = dd.querySelectorAll('.autocomplete-item');
+    items.forEach((el,i)=>{
+        const isActive = i===idx;
+        el.classList.toggle('active', isActive);
+        el.setAttribute('aria-selected', isActive ? 'true' : 'false');
+    });
+    dd.dataset.activeIndex = String(idx);
+    const active = items[idx];
+    const inputId = dropdownId === 'indicators-dropdown' ? 'filter-indicator' : 'filter-country';
+    const input = document.getElementById(inputId);
+    if(active && input){
+        input.setAttribute('aria-activedescendant', active.id);
+    } else if(input){
+        input.removeAttribute('aria-activedescendant');
+    }
+}
+
+function getActiveDropdownIndex(dropdownId){
+    const dd = document.getElementById(dropdownId);
+    if(!dd) return -1;
+    return parseInt(dd.dataset.activeIndex || '-1',10);
+}
+
+function selectDropdownValue(dropdownId, value){
+    if(dropdownId === 'indicators-dropdown'){
+        document.getElementById('filter-indicator').value = value;
+    } else if(dropdownId === 'countries-dropdown'){
+        document.getElementById('filter-country').value = value;
+    }
+    const dd = document.getElementById(dropdownId);
+    dd.style.display = 'none';
+    dd.setAttribute('aria-hidden','true');
+    // update combobox attributes
+    const inputId = dropdownId === 'indicators-dropdown' ? 'filter-indicator' : 'filter-country';
+    const input = document.getElementById(inputId);
+    if(input){ input.setAttribute('aria-expanded','false'); input.removeAttribute('aria-activedescendant'); }
+    const live = document.getElementById('autocomplete-live');
+    if(live) live.textContent = `${value} sélectionné`;
+}
+
+function attachAutocompleteHandlers(inputId, dropdownId, fetchFn){
+    const input = document.getElementById(inputId);
+    const dd = document.getElementById(dropdownId);
+    input.addEventListener('input', (e)=>{
+        const v = e.target.value.trim();
+        if(!v){ dd.style.display='none'; dd.setAttribute('aria-hidden','true'); return; }
+        if(dropdownId === 'indicators-dropdown') debouncedIndicators(v);
+        else debouncedCountries(v);
+    });
+    input.addEventListener('keydown', (e)=>{
+        const items = dd.querySelectorAll('.autocomplete-item');
+        if(!items || items.length===0) return;
+        let ai = getActiveDropdownIndex(dropdownId);
+        if(e.key === 'ArrowDown'){
+            e.preventDefault(); ai = Math.min(ai+1, items.length-1); setActiveDropdownIndex(dropdownId, ai); items[ai].scrollIntoView({block:'nearest'});
+        } else if(e.key === 'ArrowUp'){
+            e.preventDefault(); ai = Math.max(ai-1, 0); setActiveDropdownIndex(dropdownId, ai); items[ai].scrollIntoView({block:'nearest'});
+        } else if(e.key === 'Enter'){
+            e.preventDefault(); const v = items[ai] && items[ai].getAttribute('data-value'); if(v) selectDropdownValue(dropdownId, v);
+        } else if(e.key === 'Escape'){
+            dd.style.display='none'; dd.setAttribute('aria-hidden','true');
+            // update combobox aria attributes
+            input.setAttribute('aria-expanded','false');
+            input.removeAttribute('aria-activedescendant');
+        }
+    });
+    // click outside to close
+    document.addEventListener('click', (ev)=>{
+        if(!input.contains(ev.target) && !dd.contains(ev.target)){
+            dd.style.display='none'; dd.setAttribute('aria-hidden','true');
+        }
+    });
+}
+
+attachAutocompleteHandlers('filter-indicator','indicators-dropdown', debouncedIndicators);
+attachAutocompleteHandlers('filter-country','countries-dropdown', debouncedCountries);
+
+    async function loadExplorer(){
+        try{
+            const params = Object.assign({}, currentParams, {page: currentPage, page_size: currentPageSize});
+            const data = await fetchExplorerData(params);
+            renderChartFromSeries(data.series);
+            renderTableRows(data.table);
+            document.getElementById('page-indicator').textContent = data.page || currentPage;
+        } catch(err){
+            console.error(err);
+        }
+    }
+
+// Export with current filters
+document.getElementById('btn-export').addEventListener('click', ()=>{
+    const params = Object.assign({}, currentParams, {page: currentPage, page_size: currentPageSize});
+    const qs = new URLSearchParams(params).toString();
+    const url = 'explorer/export/' + (qs ? ('?' + qs) : '');
+    window.location = url;
+});
+
+// Pagination
+document.getElementById('btn-prev').addEventListener('click', ()=>{
+    if(currentPage>1){ currentPage -= 1; loadExplorer(); }
+});
+document.getElementById('btn-next').addEventListener('click', ()=>{ currentPage += 1; loadExplorer(); });
+
+// Search / filters
+document.getElementById('btn-search').addEventListener('click', ()=>{
+    const country = document.getElementById('filter-country').value.trim();
+    const indicator = document.getElementById('filter-indicator').value.trim();
+    const yf = document.getElementById('filter-year-from').value.trim();
+    const yt = document.getElementById('filter-year-to').value.trim();
+    currentPageSize = parseInt(document.getElementById('filter-page-size').value, 10) || 25;
+    currentParams = {};
+    if(country) currentParams.country = country;
+    if(indicator) currentParams.indicator = indicator;
+    if(yf) currentParams.year_from = yf;
+    if(yt) currentParams.year_to = yt;
+    currentPage = 1;
+    loadExplorer();
+});
+
+// Chargement initial
+loadExplorer();
+
+// Chargement initial
+loadExplorer();
+</script>
+{% endblock %}

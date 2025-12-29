@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mon Profil - Plateforme de Centralisation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 24px;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            margin-left: 20px;
+            padding: 8px 16px;
+            border-radius: 6px;
+            transition: background 0.3s;
+        }
+
+        .nav-links a:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .profile-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 20px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .card h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 20px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .profile-photo {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .profile-photo h3 {
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .role-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-top: 8px;
+        }
+
+        .role-admin_platform {
+            background: #dc3545;
+            color: white;
+        }
+
+        .role-data_engineer {
+            background: #28a745;
+            color: white;
+        }
+
+        .role-analyst_economist {
+            background: #007bff;
+            color: white;
+        }
+
+        .role-reader_stakeholder {
+            background: #6c757d;
+            color: white;
+        }
+
+        .role-api_client {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .info-grid {
+            display: grid;
+            gap: 15px;
+        }
+
+        .info-row {
+            display: grid;
+            grid-template-columns: 140px 1fr;
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #666;
+        }
+
+        .info-value {
+            color: #333;
+        }
+
+        .permissions-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .permission-item {
+            padding: 10px 12px;
+            background: #f8f9fa;
+            border-left: 3px solid #667eea;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+
+        .permission-category {
+            font-weight: 600;
+            color: #667eea;
+            margin-bottom: 5px;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .data-sources {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .source-badge {
+            padding: 8px 14px;
+            background: #667eea;
+            color: white;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .alert {
+            padding: 12px 16px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            color: #155724;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .actions {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            opacity: 0.9;
+        }
+
+        .security-info {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 15px;
+            font-size: 13px;
+            color: #856404;
+        }
+
+        @media (max-width: 768px) {
+            .profile-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .permissions-list {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <h1>📊 Plateforme de Centralisation</h1>
+            <div class="nav-links">
+                <a href="/">🏠 Accueil</a>
+                <a href="/dashboard/brvm/">📈 Dashboard BRVM</a>
+                <a href="{% url 'users:logout' %}">🚪 Déconnexion</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value">{{ user.role.permissions.count }}</div>
+                <div class="stat-label">Permissions actives</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">{{ user.datasourceaccess_set.count }}</div>
+                <div class="stat-label">Sources de données</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">{{ user.auditlog_set.count|default:"0" }}</div>
+                <div class="stat-label">Actions auditées</div>
+            </div>
+        </div>
+
+        <div class="profile-grid">
+            <div>
+                <div class="card">
+                    <div class="profile-photo">
+                        <div class="avatar">{{ user.username|slice:":1"|upper }}</div>
+                        <h3>{{ user.get_full_name|default:user.username }}</h3>
+                        <span class="role-badge role-{{ user.role.code }}">
+                            {{ user.role.name }}
+                        </span>
+                    </div>
+
+                    <div class="info-grid">
+                        <div class="info-row">
+                            <span class="info-label">Email :</span>
+                            <span class="info-value">{{ user.email|default:"Non renseigné" }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Organisation :</span>
+                            <span class="info-value">{{ user.organization|default:"Non renseignée" }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Compte actif :</span>
+                            <span class="info-value">{% if user.is_active %}✅ Oui{% else %}❌ Non{% endif %}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">MFA activé :</span>
+                            <span class="info-value">{% if user.mfa_enabled %}🔐 Oui{% else %}⚠️ Non{% endif %}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Dernière connexion :</span>
+                            <span class="info-value">{{ user.last_login|date:"d/m/Y H:i"|default:"Jamais" }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">IP dernière connexion :</span>
+                            <span class="info-value">{{ user.last_login_ip|default:"N/A" }}</span>
+                        </div>
+                    </div>
+
+                    <div class="actions">
+                        <a href="#" class="btn btn-primary">✏️ Modifier profil</a>
+                        <a href="#" class="btn btn-secondary">🔑 Changer mot de passe</a>
+                    </div>
+
+                    {% if not user.mfa_enabled %}
+                        <div class="security-info">
+                            <strong>⚠️ Sécurité recommandée :</strong><br>
+                            Activez l'authentification à deux facteurs (MFA) pour renforcer la sécurité de votre compte.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div>
+                <div class="card">
+                    <h2>🔐 Mes Permissions ({{ user.role.permissions.count }})</h2>
+                    <div class="permissions-list">
+                        {% for perm in user.role.permissions.all %}
+                            <div class="permission-item">
+                                <div class="permission-category">{{ perm.category }}</div>
+                                {{ perm.description }}
+                            </div>
+                        {% empty %}
+                            <p>Aucune permission assignée.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="card" style="margin-top: 20px;">
+                    <h2>📊 Sources de Données Autorisées</h2>
+                    <div class="data-sources">
+                        {% for access in user.datasourceaccess_set.all %}
+                            <div class="source-badge">{{ access.get_source_display }}</div>
+                        {% empty %}
+                            <p>Aucune source de données autorisée.</p>
+                        {% endfor %}
+                    </div>
+
+                    {% if user.role.code == 'api_client' %}
+                        <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #e0e0e0;">
+                            <h3 style="margin-bottom: 10px;">🔑 Mes Jetons API</h3>
+                            {% for token in user.apitoken_set.all %}
+                                <div style="background: #f8f9fa; padding: 12px; border-radius: 6px; margin-bottom: 10px;">
+                                    <strong>{{ token.name }}</strong><br>
+                                    <code style="font-size: 12px; color: #667eea;">{{ token.key }}</code><br>
+                                    <small style="color: #666;">
+                                        Créé le {{ token.created_at|date:"d/m/Y" }} - 
+                                        {% if token.is_active %}✅ Actif{% else %}❌ Inactif{% endif %}
+                                    </small>
+                                </div>
+                            {% empty %}
+                                <p>Aucun jeton API créé.</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="card" style="margin-top: 20px;">
+                    <h2>📋 Dernières Actions (Journal d'Audit)</h2>
+                    {% for log in user.auditlog_set.all|slice:":5" %}
+                        <div style="padding: 10px 0; border-bottom: 1px solid #f0f0f0;">
+                            <strong>{{ log.action }}</strong> - {{ log.resource }}<br>
+                            <small style="color: #666;">
+                                {{ log.timestamp|date:"d/m/Y H:i" }} - IP: {{ log.ip_address }}
+                            </small>
+                        </div>
+                    {% empty %}
+                        <p>Aucune action enregistrée.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

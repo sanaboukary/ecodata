@@ -1,0 +1,43 @@
+<div class="search-box">
+  <input type="text" class="form-control" placeholder="Chercher...">
+</div>
+
+<div class="menu">
+  <a href="?source=brvm" {% if source == 'brvm' %}class="active"{% endif %}>BRVM</a>
+  <a href="?source=fmi" {% if source == 'fmi' %}class="active"{% endif %}>FMI</a>
+  <a href="?source=bad" {% if source == 'bad' %}class="active"{% endif %}>BAD</a>
+  <a href="?source=onu" {% if source == 'onu' %}class="active"{% endif %}>ONU</a>
+  <a href="?source=worldbank" {% if source == 'worldbank' %}class="active"{% endif %}>Banque Mondiale</a>
+</div>
+
+<hr>
+
+<div class="section-title">Filtres</div>
+<form method="get" id="filters-form">
+  <input type="hidden" name="source" value="{{ source|default:'' }}">
+  
+  <div class="mb-3">
+    <label class="form-label">Pays</label>
+    <select class="form-select" name="country">
+      <option value="">Tous les pays</option>
+      {% for country in countries %}
+        <option value="{{ country.code }}" {% if country.code == selected_country %}selected{% endif %}>
+          {{ country.name }}
+        </option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label">Année</label>
+    <select class="form-select" name="year">
+      <option value="">Toutes les années</option>
+      {% for year in years %}
+        <option value="{{ year }}" {% if year == selected_year %}selected{% endif %}>{{ year }}</option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <button type="submit" class="btn btn-primary w-100">Appliquer les filtres</button>
+</form>
+

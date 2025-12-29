@@ -1,0 +1,77 @@
+[
+  {
+    "source": "BRVM_PUBLICATION",
+    "dataset": "COMMUNIQUE",
+    "key": "Communiqué :  CREPMF – Communiqué relatif à l’entrée en vigueur des normes IFRS",
+    "ts": "2025-12-04T12:23:57Z",
+    "value": 1,
+    "attrs": {
+      "titre": "Communiqué :  CREPMF – Communiqué relatif à l’entrée en vigueur des normes IFRS",
+      "url": "https://www.brvm.org/fr/communique-crepmf-communique-relatif-lentree-en-vigueur-des-normes-ifrs",
+      "category": "Communiqué",
+      "emetteur": "BRVM",
+      "snippet": "...              Langue  \nFrançais               20181003_-_communique_relatif_a_lentree_en_vigueur_des_normes_ifrs_-_crepmf.pdf            ...akone2- 03/10/2018 - 18:35",
+      "date": "04/12/2025"
+    }
+  },
+  {
+    "source": "BRVM_PUBLICATION",
+    "dataset": "COMMUNIQUE_RESULTATS",
+    "key": "COMMUNIQUE - BANK OF AFRICA BN - Exercice 2009 (Groupe BOA)",
+    "ts": "2025-12-04T12:23:57Z",
+    "value": 1,
+    "attrs": {
+      "titre": "COMMUNIQUE - BANK OF AFRICA BN - Exercice 2009 (Groupe BOA)",
+      "url": "https://www.brvm.org/fr/communique-bank-africa-bn-exercice-2009-groupe-boa",
+      "category": "Résultats Financiers",
+      "emetteur": "BANK OF AFRICA BN            T",
+      "snippet": "Date annonce:         13/10/2009            Emetteur:         BANK OF AFRICA BN            Type annonce:         Communiqués            fichier:              20091013_-_cm_-_bank_of_africa_bn_-_exerci",
+      "date": "04/12/2025"
+    }
+  },
+  {
+    "source": "BRVM_PUBLICATION",
+    "dataset": "COMMUNIQUE_RESULTATS",
+    "key": "COMMUNIQUE - ONATEL BF - Exercice 2010 (Renouvellement anticipé de licence avecTELMOB)",
+    "ts": "2025-12-04T12:23:57Z",
+    "value": 1,
+    "attrs": {
+      "titre": "COMMUNIQUE - ONATEL BF - Exercice 2010 (Renouvellement anticipé de licence avecTELMOB)",
+      "url": "https://www.brvm.org/fr/communique-onatel-bf-exercice-2010-renouvellement-anticipe-de-licence-avectelmob",
+      "category": "Résultats Financiers",
+      "emetteur": "ONATEL BF            T",
+      "snippet": "Date annonce:         12/07/2010            Emetteur:         ONATEL BF            Type annonce:         Communiqués            fichier:              20100712_-_cm_-_onatel_bf_-_exercice_2010_renouvel",
+      "date": "04/12/2025"
+    }
+  },
+  {
+    "source": "BRVM_PUBLICATION",
+    "dataset": "COMMUNIQUE_RESULTATS",
+    "key": "COMMUNIQUE - ECOBANK TG - Exercice 2011 (Annonce du plan de succession)",
+    "ts": "2025-12-04T12:23:57Z",
+    "value": 1,
+    "attrs": {
+      "titre": "COMMUNIQUE - ECOBANK TG - Exercice 2011 (Annonce du plan de succession)",
+      "url": "https://www.brvm.org/fr/communique-ecobank-tg-exercice-2011-annonce-du-plan-de-succession",
+      "category": "Résultats Financiers",
+      "emetteur": "ECOBANK TG            T",
+      "snippet": "Date annonce:         23/12/2011            Emetteur:         ECOBANK TG            Type annonce:         Communiqués            fichier:              20111223_-_cm_-_ecobank_tg_-_exercice_2011_annonc",
+      "date": "04/12/2025"
+    }
+  },
+  {
+    "source": "BRVM_PUBLICATION",
+    "dataset": "COMMUNIQUE_SUSPENSION",
+    "key": "COMMUNIQUE - ONATEL BF - Exercice 2013 (Reprise de service)",
+    "ts": "2025-12-04T12:23:57Z",
+    "value": 1,
+    "attrs": {
+      "titre": "COMMUNIQUE - ONATEL BF - Exercice 2013 (Reprise de service)",
+      "url": "https://www.brvm.org/fr/communique-onatel-bf-exercice-2013-reprise-de-service",
+      "category": "Suspension/Reprise Cotation",
+      "emetteur": "ONATEL BF            T",
+      "snippet": "Date annonce:         05/03/2013            Emetteur:         ONATEL BF            Type annonce:         Communiqués            fichier:              20130305_-_cm_-_onatel_bf_-_exercice_2013_reprise_",
+      "date": "04/12/2025"
+    }
+  }
+]

@@ -1,0 +1,532 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Santé Économique CEDEAO - Plateforme Centralisation{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dashboard-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 15px;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+    }
+
+    .controls-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .gauge-container {
+        position: relative;
+        width: 300px;
+        height: 300px;
+        margin: 0 auto;
+    }
+
+    .score-label {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+    }
+
+    .score-value {
+        font-size: 3rem;
+        font-weight: bold;
+        color: #667eea;
+    }
+
+    .score-rating {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-top: 0.5rem;
+    }
+
+    .ratio-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .ratio-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .ratio-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+    }
+
+    .ratio-name {
+        font-size: 0.9rem;
+        color: #6c757d;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .ratio-value {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #2c3e50;
+    }
+
+    .ratio-unit {
+        font-size: 1rem;
+        color: #7f8c8d;
+        margin-left: 0.5rem;
+    }
+
+    .level-badge {
+        display: inline-block;
+        padding: 0.3rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .level-excellent {
+        background: #d4edda;
+        color: #155724;
+    }
+
+    .level-good {
+        background: #cce5ff;
+        color: #004085;
+    }
+
+    .level-moderate {
+        background: #fff3cd;
+        color: #856404;
+    }
+
+    .level-high {
+        background: #f8d7da;
+        color: #721c24;
+    }
+
+    .level-low {
+        background: #f8d7da;
+        color: #721c24;
+    }
+
+    .comparison-table {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .comparison-table table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .comparison-table th {
+        background: #667eea;
+        color: white;
+        padding: 1rem;
+        text-align: left;
+        font-weight: 600;
+    }
+
+    .comparison-table td {
+        padding: 0.8rem 1rem;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .comparison-table tr:hover {
+        background: #f8f9fa;
+    }
+
+    .rank-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        font-weight: bold;
+        color: white;
+    }
+
+    .rank-1 {
+        background: #ffd700;
+        color: #333;
+    }
+
+    .rank-2 {
+        background: #c0c0c0;
+        color: #333;
+    }
+
+    .rank-3 {
+        background: #cd7f32;
+        color: white;
+    }
+
+    .rank-other {
+        background: #95a5a6;
+    }
+
+    .loading-spinner {
+        display: none;
+        text-align: center;
+        padding: 2rem;
+    }
+
+    .loading-spinner.active {
+        display: block;
+    }
+
+    .info-tooltip {
+        cursor: help;
+        color: #667eea;
+        margin-left: 0.3rem;
+    }
+
+    .section-title {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #2c3e50;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 3px solid #667eea;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <h1><i class="fas fa-heartbeat"></i> Santé Économique CEDEAO</h1>
+    <p class="mb-0">Scoring souverain et ratios financiers des pays de la région</p>
+</div>
+
+<!-- Contrôles -->
+<div class="controls-card">
+    <div class="row align-items-end">
+        <div class="col-md-4">
+            <label for="countrySelect" class="form-label fw-bold">
+                <i class="fas fa-flag"></i> Pays
+            </label>
+            <select id="countrySelect" class="form-select">
+                <option value="SEN" selected>Sénégal (SEN)</option>
+                <option value="CIV">Côte d'Ivoire (CIV)</option>
+                <option value="BEN">Bénin (BEN)</option>
+                <option value="BFA">Burkina Faso (BFA)</option>
+                <option value="MLI">Mali (MLI)</option>
+                <option value="NER">Niger (NER)</option>
+                <option value="TGO">Togo (TGO)</option>
+                <option value="GHA">Ghana (GHA)</option>
+                <option value="NGA">Nigeria (NGA)</option>
+                <option value="GIN">Guinée (GIN)</option>
+                <option value="GMB">Gambie (GMB)</option>
+                <option value="LBR">Liberia (LBR)</option>
+                <option value="SLE">Sierra Leone (SLE)</option>
+                <option value="CPV">Cap-Vert (CPV)</option>
+                <option value="GNB">Guinée-Bissau (GNB)</option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label for="yearsRange" class="form-label fw-bold">
+                <i class="fas fa-calendar-alt"></i> Période
+            </label>
+            <select id="yearsRange" class="form-select">
+                <option value="1">1 an</option>
+                <option value="3">3 ans</option>
+                <option value="5" selected>5 ans</option>
+                <option value="10">10 ans</option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <button id="refreshBtn" class="btn btn-primary w-100">
+                <i class="fas fa-sync-alt"></i> Actualiser
+            </button>
+        </div>
+        <div class="col-md-2">
+            <button id="exportBtn" class="btn btn-outline-secondary w-100">
+                <i class="fas fa-file-pdf"></i> Exporter
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Loading Spinner -->
+<div id="loadingSpinner" class="loading-spinner">
+    <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+        <span class="visually-hidden">Chargement...</span>
+    </div>
+    <p class="mt-3 text-muted">Calcul des ratios en cours...</p>
+</div>
+
+<!-- Contenu principal -->
+<div id="mainContent" style="display: none;">
+    <!-- Score de santé global -->
+    <div class="row mb-4">
+        <div class="col-md-5">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h3 class="section-title">Score de Santé Économique</h3>
+                    <div class="gauge-container">
+                        <canvas id="healthGauge"></canvas>
+                        <div class="score-label">
+                            <div id="scoreValue" class="score-value">--</div>
+                            <div id="scoreRating" class="score-rating">-</div>
+                        </div>
+                    </div>
+                    <p id="scoreInterpretation" class="text-muted mt-3"></p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-7">
+            <h3 class="section-title">Ratios Clés</h3>
+            <div id="ratiosContainer" class="row">
+                <!-- Ratios cards dynamiques -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Comparaison régionale -->
+    <div class="comparison-table">
+        <h3 class="section-title">Classement Régional CEDEAO</h3>
+        <table id="comparisonTable">
+            <thead>
+                <tr>
+                    <th>Rang</th>
+                    <th>Pays</th>
+                    <th>Score</th>
+                    <th>Rating</th>
+                    <th>Dette/PIB</th>
+                    <th>Balance Fiscale</th>
+                    <th>Inflation</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Lignes dynamiques -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+let healthGaugeChart = null;
+
+// Charger données au démarrage
+document.addEventListener('DOMContentLoaded', function() {
+    loadFinancialHealth();
+    loadComparison();
+});
+
+// Event listeners
+document.getElementById('refreshBtn').addEventListener('click', function() {
+    loadFinancialHealth();
+    loadComparison();
+});
+
+document.getElementById('countrySelect').addEventListener('change', loadFinancialHealth);
+
+async function loadFinancialHealth() {
+    const country = document.getElementById('countrySelect').value;
+    
+    showLoading(true);
+    
+    try {
+        const response = await fetch(`/dashboard/api/financial-health/${country}/`);
+        const data = await response.json();
+        
+        if (data.error) {
+            throw new Error(data.error);
+        }
+        
+        displayHealthScore(data);
+        displayRatios(data.ratios);
+        
+        showLoading(false);
+    } catch (error) {
+        console.error('Erreur chargement données:', error);
+        alert('Erreur lors du chargement des données. Veuillez réessayer.');
+        showLoading(false);
+    }
+}
+
+function displayHealthScore(data) {
+    const scoreValue = document.getElementById('scoreValue');
+    const scoreRating = document.getElementById('scoreRating');
+    const scoreInterpretation = document.getElementById('scoreInterpretation');
+    
+    const score = data.health_score.score;
+    const rating = data.health_score.rating;
+    
+    scoreValue.textContent = score.toFixed(1);
+    scoreRating.textContent = rating;
+    scoreInterpretation.textContent = data.health_score.interpretation;
+    
+    // Couleur rating
+    const ratingColors = {
+        'A+': '#28a745', 'A': '#28a745',
+        'B+': '#17a2b8', 'B': '#17a2b8',
+        'C': '#ffc107',
+        'D': '#fd7e14',
+        'F': '#dc3545'
+    };
+    scoreRating.style.color = ratingColors[rating] || '#6c757d';
+    
+    // Créer gauge chart
+    createGaugeChart(score);
+}
+
+function createGaugeChart(score) {
+    const ctx = document.getElementById('healthGauge');
+    
+    if (healthGaugeChart) {
+        healthGaugeChart.destroy();
+    }
+    
+    healthGaugeChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            datasets: [{
+                data: [score, 100 - score],
+                backgroundColor: [
+                    getScoreColor(score),
+                    '#e9ecef'
+                ],
+                borderWidth: 0,
+                circumference: 180,
+                rotation: 270
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            cutout: '75%',
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    enabled: false
+                }
+            }
+        }
+    });
+}
+
+function getScoreColor(score) {
+    if (score >= 80) return '#28a745';
+    if (score >= 60) return '#17a2b8';
+    if (score >= 40) return '#ffc107';
+    return '#dc3545';
+}
+
+function displayRatios(ratios) {
+    const container = document.getElementById('ratiosContainer');
+    container.innerHTML = '';
+    
+    const ratiosList = [
+        { key: 'debt_to_gdp', icon: 'fa-chart-line' },
+        { key: 'fiscal_balance', icon: 'fa-balance-scale' },
+        { key: 'inflation', icon: 'fa-fire' },
+        { key: 'current_account', icon: 'fa-exchange-alt' },
+        { key: 'reserves_months', icon: 'fa-piggy-bank' },
+        { key: 'gdp_growth', icon: 'fa-chart-area' }
+    ];
+    
+    ratiosList.forEach(({key, icon}) => {
+        const ratio = ratios[key];
+        if (!ratio) return;
+        
+        const card = document.createElement('div');
+        card.className = 'col-md-6 mb-3';
+        card.innerHTML = `
+            <div class="ratio-card">
+                <div class="ratio-header">
+                    <span class="ratio-name">
+                        <i class="fas ${icon}"></i> ${ratio.description || key}
+                    </span>
+                    <span class="level-badge level-${ratio.level}">
+                        ${ratio.level}
+                    </span>
+                </div>
+                <div class="ratio-value">
+                    ${ratio.value !== null ? ratio.value.toFixed(2) : 'N/A'}
+                    <span class="ratio-unit">${ratio.unit}</span>
+                </div>
+                <small class="text-muted">
+                    <i class="fas fa-calendar"></i> ${ratio.date ? new Date(ratio.date).toLocaleDateString('fr-FR') : 'Date inconnue'}
+                </small>
+            </div>
+        `;
+        container.appendChild(card);
+    });
+}
+
+async function loadComparison() {
+    try {
+        const response = await fetch('/dashboard/api/countries-health/');
+        const data = await response.json();
+        
+        displayComparisonTable(data.comparison);
+    } catch (error) {
+        console.error('Erreur chargement comparaison:', error);
+    }
+}
+
+function displayComparisonTable(comparison) {
+    const tbody = document.querySelector('#comparisonTable tbody');
+    tbody.innerHTML = '';
+    
+    comparison.forEach(country => {
+        const row = document.createElement('tr');
+        
+        const rankClass = country.rank <= 3 ? `rank-${country.rank}` : 'rank-other';
+        
+        row.innerHTML = `
+            <td>
+                <span class="rank-badge ${rankClass}">${country.rank}</span>
+            </td>
+            <td><strong>${country.country}</strong></td>
+            <td><strong>${country.score.toFixed(1)}</strong></td>
+            <td>
+                <span class="badge" style="background: ${getScoreColor(country.score)}; color: white;">
+                    ${country.rating}
+                </span>
+            </td>
+            <td>${country.debt_to_gdp ? country.debt_to_gdp.toFixed(1) + '%' : 'N/A'}</td>
+            <td>${country.fiscal_balance ? country.fiscal_balance.toFixed(1) + '%' : 'N/A'}</td>
+            <td>${country.inflation ? country.inflation.toFixed(1) + '%' : 'N/A'}</td>
+        `;
+        
+        tbody.appendChild(row);
+    });
+}
+
+function showLoading(show) {
+    document.getElementById('loadingSpinner').classList.toggle('active', show);
+    document.getElementById('mainContent').style.display = show ? 'none' : 'block';
+}
+
+// Export PDF (future)
+document.getElementById('exportBtn').addEventListener('click', function() {
+    alert('Fonctionnalité d\'export en cours de développement');
+});
+</script>
+{% endblock %}

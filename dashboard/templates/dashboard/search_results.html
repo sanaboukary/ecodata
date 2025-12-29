@@ -1,0 +1,79 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recherche - Plateforme BRVM</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        body { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; }
+        .search-container { background: white; border-radius: 15px; padding: 30px; margin: 30px 0; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .result-card { background: #f8f9fa; border-radius: 8px; padding: 15px; margin-bottom: 15px; border-left: 4px solid #3b82f6; }
+        .result-card:hover { transform: translateX(5px); transition: all 0.3s; }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{% url 'dashboard:index' %}"><i class="bi bi-graph-up-arrow"></i> Plateforme BRVM</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="search-container">
+            <h1 class="text-center mb-4"><i class="bi bi-search"></i> Recherche Globale</h1>
+            
+            <form method="get" action="{% url 'dashboard:global_search' %}">
+                <div class="input-group input-group-lg mb-4">
+                    <input type="text" class="form-control" name="q" value="{{ query }}" placeholder="Rechercher actions, indicateurs, pays..." autofocus>
+                    <button class="btn btn-primary" type="submit"><i class="bi bi-search"></i> Rechercher</button>
+                </div>
+            </form>
+
+            {% if query %}
+            <h4 class="mb-3">Résultats pour "{{ query }}" ({{ total }} trouvés)</h4>
+
+            {% if results.stocks %}
+            <h5 class="mt-4"><i class="bi bi-building"></i> Actions BRVM ({{ results.stocks|length }})</h5>
+            {% for stock in results.stocks %}
+            <div class="result-card">
+                <h6>{{ stock.symbol }} - {{ stock.name }}</h6>
+                <small class="text-muted">{{ stock.sector }}</small>
+            </div>
+            {% endfor %}
+            {% endif %}
+
+            {% if results.indicators %}
+            <h5 class="mt-4"><i class="bi bi-graph-up"></i> Indicateurs ({{ results.indicators|length }})</h5>
+            {% for indicator in results.indicators %}
+            <div class="result-card">
+                <h6>{{ indicator.label }}</h6>
+                <small class="text-muted">{{ indicator.category }}</small>
+            </div>
+            {% endfor %}
+            {% endif %}
+
+            {% if results.countries %}
+            <h5 class="mt-4"><i class="bi bi-globe"></i> Pays ({{ results.countries|length }})</h5>
+            {% for country in results.countries %}
+            <div class="result-card">
+                <h6>{{ country.name }}</h6>
+                <small class="text-muted">{{ country.code }}</small>
+            </div>
+            {% endfor %}
+            {% endif %}
+
+            {% if not results.stocks and not results.indicators and not results.countries %}
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle"></i> Aucun résultat trouvé pour "{{ query }}".
+            </div>
+            {% endif %}
+            {% endif %}
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

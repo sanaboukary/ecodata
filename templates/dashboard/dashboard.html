@@ -1,0 +1,264 @@
+{% extends 'base_modern.html' %}
+{% load humanize %}
+
+{% block title %}Tableau de Bord | Plateforme Financière{% endblock %}
+
+{% block content %}
+<div class="container-fluid animate-fade-in">
+    <!-- En-tête avec filtres -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0">Tableau de Bord</h1>
+        <div class="d-flex gap-3">
+            <select class="form-select" name="period" id="period">
+                <option value="day">Aujourd'hui</option>
+                <option value="week">Cette semaine</option>
+                <option value="month" selected>Ce mois</option>
+                <option value="quarter">Ce trimestre</option>
+                <option value="year">Cette année</option>
+            </select>
+            <select class="form-select" name="org_id" id="org_id">
+                <option value="ORG01" {% if org_id == 'ORG01' %}selected{% endif %}>Organisation 01</option>
+                <option value="ORG02" {% if org_id == 'ORG02' %}selected{% endif %}>Organisation 02</option>
+            </select>
+            <button class="btn btn-primary" id="refresh-data">
+                <i class="ti ti-refresh me-2"></i>Actualiser
+            </button>
+        </div>
+    </div>
+
+    <!-- KPIs principaux -->
+    <div class="row g-4 mb-4">
+        <div class="col-12 col-md-6 col-xl-3">
+            <div class="card">
+                <div class="kpi-card">
+                    <div class="kpi-label">Chiffre d'Affaires</div>
+                    <div class="kpi-value">
+                        {{ ca_mensuel|default:'0'|floatformat:0|intcomma }} €
+                    </div>
+                    <div class="kpi-trend">
+                        <i class="ti {% if ca_trend > 0 %}ti-trend-up trend-up{% elif ca_trend < 0 %}ti-trend-down trend-down{% else %}ti-minus trend-flat{% endif %}"></i>
+                        <span class="{% if ca_trend > 0 %}trend-up{% elif ca_trend < 0 %}trend-down{% else %}trend-flat{% endif %}">
+                            {% if ca_trend %}{{ ca_trend|floatformat:1 }}%{% else %}0%{% endif %}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-12 col-md-6 col-xl-3">
+            <div class="card">
+                <div class="kpi-card">
+                    <div class="kpi-label">Clients Actifs</div>
+                    <div class="kpi-value">{{ nb_clients|default:'0'|intcomma }}</div>
+                    <div class="kpi-trend">
+                        <i class="ti ti-users"></i>
+                        <span class="text-secondary">Total ce mois</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-12 col-md-6 col-xl-3">
+            <div class="card">
+                <div class="kpi-card">
+                    <div class="kpi-label">Taux de Conversion</div>
+                    <div class="kpi-value">{{ taux_conv|default:'0' }}%</div>
+                    <div class="kpi-trend">
+                        <i class="ti ti-chart-bar"></i>
+                        <span class="text-secondary">Moyenne mensuelle</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-12 col-md-6 col-xl-3">
+            <div class="card">
+                <div class="kpi-card">
+                    <div class="kpi-label">Performance</div>
+                    <div class="kpi-value">94.8%</div>
+                    <div class="kpi-trend">
+                        <i class="ti ti-activity trend-up"></i>
+                        <span class="trend-up">+2.4%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Graphiques et tableaux -->
+    <div class="row g-4">
+        <!-- Évolution CA -->
+        <div class="col-12 col-xl-8">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Évolution du Chiffre d'Affaires</h5>
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-sm btn-light active">Mensuel</button>
+                        <button type="button" class="btn btn-sm btn-light">Trimestriel</button>
+                        <button type="button" class="btn btn-sm btn-light">Annuel</button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="revenue-chart" style="height: 300px;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Indicateurs économiques -->
+        <div class="col-12 col-xl-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Indicateurs Économiques</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Indicateur</th>
+                                    <th class="text-end">Valeur</th>
+                                    <th class="text-end">Variation</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for indicator in indicators_table %}
+                                <tr>
+                                    <td>{{ indicator.indicateur }}</td>
+                                    <td class="text-end">{{ indicator.valeur }}</td>
+                                    <td class="text-end">
+                                        <span class="{% if indicator.variation > 0 %}trend-up{% elif indicator.variation < 0 %}trend-down{% else %}trend-flat{% endif %}">
+                                            {{ indicator.variation|default:"0" }}%
+                                        </span>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="3" class="text-center text-muted py-3">
+                                        Aucune donnée disponible
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Activité récente -->
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Activité Récente</h5>
+                    <button class="btn btn-sm btn-light">
+                        <i class="ti ti-download me-1"></i>
+                        Exporter
+                    </button>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Source</th>
+                                    <th>Date</th>
+                                    <th>Statut</th>
+                                    <th class="text-end">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for run in last_runs %}
+                                <tr>
+                                    <td>
+                                        <i class="ti ti-database me-2"></i>
+                                        {{ run.source_name }}
+                                    </td>
+                                    <td>{{ run.started_at|date:"d/m/Y H:i" }}</td>
+                                    <td>
+                                        <span class="badge {% if run.status == 'success' %}bg-success{% elif run.status == 'error' %}bg-danger{% else %}bg-warning{% endif %}">
+                                            {{ run.status }}
+                                        </span>
+                                    </td>
+                                    <td class="text-end">
+                                        <button class="btn btn-sm btn-light" data-bs-toggle="tooltip" title="Voir les détails">
+                                            <i class="ti ti-eye"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="4" class="text-center text-muted py-3">
+                                        Aucune activité récente
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ block.super }}
+<script>
+// Configuration du graphique d'évolution CA
+const revenueChart = new ApexCharts(document.querySelector("#revenue-chart"), {
+    chart: {
+        type: 'area',
+        height: 300,
+        toolbar: {
+            show: false
+        },
+        zoom: {
+            enabled: false
+        }
+    },
+    series: [{
+        name: 'Chiffre d\'affaires',
+        data: {{ ca_series.values|default:'[]'|safe }}
+    }],
+    xaxis: {
+        categories: {{ ca_series.labels|default:'[]'|safe }},
+        tooltip: {
+            enabled: false
+        }
+    },
+    stroke: {
+        curve: 'smooth',
+        width: 3
+    },
+    fill: {
+        type: 'gradient',
+        gradient: {
+            shadeIntensity: 1,
+            opacityFrom: 0.7,
+            opacityTo: 0.2
+        }
+    },
+    colors: ['#2563eb'],
+    dataLabels: {
+        enabled: false
+    },
+    tooltip: {
+        y: {
+            formatter: function(value) {
+                return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ") + ' €';
+            }
+        }
+    }
+});
+
+revenueChart.render();
+
+// Actualisation des données
+document.getElementById('refresh-data').addEventListener('click', function() {
+    const period = document.getElementById('period').value;
+    const orgId = document.getElementById('org_id').value;
+    window.location.href = `?period=${period}&org_id=${orgId}`;
+});
+</script>
+{% endblock %}

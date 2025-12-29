@@ -1,0 +1,978 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Plateforme de Centralisation des Données Économiques - CEDEAO{% endblock %}
+
+{% block head_extra %}
+<link rel="stylesheet" href="{% static 'css/finance.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #f5f7fa;
+  }
+
+  /* ===== HEADER PRINCIPAL ===== */
+  .main-header {
+    background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #2563eb 100%);
+    color: white;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+  }
+
+  .header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.4rem 0.8rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .logo-section {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .logo-box {
+    background: white;
+    padding: 0.3rem 0.6rem;
+    border-radius: 4px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .logo-title {
+    font-size: 1.1rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: -0.2px;
+  }
+
+  .logo-subtitle {
+    font-size: 0.55rem;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-top: -2px;
+  }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .auth-button {
+    background: #fbbf24;
+    color: #1e3a8a;
+    padding: 0.35rem 0.85rem;
+    border-radius: 4px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-size: 0.8rem;
+  }
+
+  .auth-button:hover {
+    background: #f59e0b;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(251, 191, 36, 0.4);
+  }
+
+  .lang-selector {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 0.3rem 0.55rem;
+    border-radius: 3px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 0.75rem;
+  }
+
+  .social-links {
+    display: flex;
+    gap: 0.25rem;
+  }
+
+  .social-link {
+    width: 26px;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 3px;
+    color: white;
+    transition: all 0.3s;
+    text-decoration: none;
+    font-size: 0.75rem;
+  }
+
+  .social-link.facebook { background: #1877f2; }
+  .social-link.twitter { background: #1da1f2; }
+  .social-link.youtube { background: #ff0000; }
+  .social-link.linkedin { background: #0077b5; }
+
+  .social-link:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+
+  /* ===== BARRE DE MARCHÉ EN TEMPS RÉEL ===== */
+  .market-ticker {
+    background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+    padding: 0.4rem 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .market-status {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .status-badge {
+    background: #10b981;
+    color: white;
+    padding: 0.2rem 0.55rem;
+    border-radius: 12px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  .status-badge.live {
+    background: #dc2626;
+  }
+
+  .status-dot {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: white;
+    animation: blink 1.5s ease-in-out infinite;
+  }
+    animation: blink 1.5s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+
+  .ticker-scroll {
+    flex: 1;
+    display: flex;
+    gap: 2rem;
+    overflow: hidden;
+  }
+
+  .ticker-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: white;
+    font-size: 0.9rem;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .ticker-value {
+    font-size: 0.9rem;
+    font-weight: 700;
+  }
+
+  .ticker-change {
+    font-size: 0.65rem;
+    padding: 0.1rem 0.3rem;
+    border-radius: 2px;
+  }
+
+  .ticker-change.positive {
+    background: rgba(255, 255, 255, 0.2);
+    color: #10b981;
+  }
+
+  .ticker-change.negative {
+    background: rgba(255, 255, 255, 0.2);
+    color: #ef4444;
+  }
+
+  /* ===== NAVIGATION PRINCIPALE ===== */
+  .main-nav {
+    background: #1e3a8a;
+    padding: 0 0.8rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .nav-list {
+    display: flex;
+    list-style: none;
+    gap: 0.1rem;
+    margin: 0;
+    padding: 0;
+  }
+
+  .nav-item {
+    position: relative;
+  }
+
+  .nav-link {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.5rem 0.65rem;
+    color: rgba(255, 255, 255, 0.9);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.75rem;
+    transition: all 0.3s;
+    position: relative;
+  }
+
+  .nav-link:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fbbf24;
+  }
+
+  .nav-link.active {
+    background: rgba(251, 191, 36, 0.2);
+    color: #fbbf24;
+  }
+
+  .nav-link.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: #fbbf24;
+  }
+
+  .badge-prestige {
+    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+    color: #1e3a8a;
+    padding: 0.18rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.6rem;
+    font-weight: 700;
+    margin-left: auto;
+  }
+
+  /* ===== CONTENU PRINCIPAL ===== */
+  .main-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem;
+  }
+
+  .hero-section {
+    text-align: center;
+    margin-bottom: 2.5rem;
+  }
+
+  .hero-title {
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: #1e3a8a;
+    margin-bottom: 0.75rem;
+    line-height: 1.2;
+  }
+
+  .hero-subtitle {
+    font-size: 1.05rem;
+    color: #64748b;
+    font-weight: 300;
+    margin-bottom: 1.5rem;
+  }
+
+  .hero-stats {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin-top: 1.5rem;
+  }
+
+  .hero-stat {
+    text-align: center;
+  }
+
+  .hero-stat-value {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #1e3a8a;
+    display: block;
+  }
+
+  .hero-stat-label {
+    font-size: 0.8rem;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-top: 0.4rem;
+  }
+
+  /* ===== GRILLE DES SOURCES DE DONNÉES ===== */
+  .data-sources-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.25rem;
+    margin-bottom: 2rem;
+  }
+
+  .source-card {
+    background: white;
+    border-radius: 10px;
+    padding: 1rem;
+    box-shadow: 0 3px 5px rgba(0, 0, 0, 0.05);
+    border: 2px solid transparent;
+    transition: all 0.3s;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .source-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #1e3a8a, #2563eb);
+    transform: scaleX(0);
+    transition: transform 0.3s;
+  }
+
+  .source-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 24px rgba(30, 58, 138, 0.15);
+    border-color: #2563eb;
+  }
+
+  .source-card:hover::before {
+    transform: scaleX(1);
+  }
+
+  .source-icon {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    color: white;
+    margin-bottom: 0.75rem;
+  }
+
+  .source-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #1e3a8a;
+    margin-bottom: 0.4rem;
+  }
+
+  .source-description {
+    color: #64748b;
+    font-size: 0.8rem;
+    line-height: 1.4;
+    margin-bottom: 0.75rem;
+  }
+
+  .source-stats {
+    display: flex;
+    gap: 1.25rem;
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid #e2e8f0;
+  }
+
+  .source-stat {
+    flex: 1;
+  }
+
+  .source-stat-value {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #2563eb;
+    display: block;
+  }
+
+  .source-stat-label {
+    font-size: 0.7rem;
+    color: #64748b;
+    margin-top: 0.15rem;
+  }
+
+  .source-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    color: #2563eb;
+    font-weight: 600;
+    text-decoration: none;
+    margin-top: 0.6rem;
+    transition: all 0.3s;
+    font-size: 0.8rem;
+  }
+
+  .source-link:hover {
+    gap: 0.75rem;
+    color: #1e3a8a;
+  }
+
+  /* ===== SECTION FONCTIONNALITÉS ===== */
+  .features-section {
+    background: white;
+    border-radius: 16px;
+    padding: 3rem;
+    margin-bottom: 3rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  }
+
+  .section-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1e3a8a;
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    max-width: 760px;
+    margin: 0 auto;
+  }
+
+  .feature-item {
+    text-align: center;
+    padding: 0.5rem;
+  }
+
+  .feature-icon {
+    width: 44px;
+    height: 44px;
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 0.6rem;
+    font-size: 1.1rem;
+    color: #2563eb;
+  }
+
+  .feature-title {
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: #1e3a8a;
+    margin-bottom: 0.3rem;
+  }
+
+  .feature-description {
+    color: #64748b;
+    font-size: 0.7rem;
+    line-height: 1.35;
+  }
+
+  /* ===== FOOTER ===== */
+  .main-footer {
+    background: #1e3a8a;
+    color: white;
+    padding: 2rem;
+    text-align: center;
+    margin-top: 4rem;
+  }
+
+  .footer-content {
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 768px) {
+    .header-top {
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .nav-list {
+      flex-direction: column;
+    }
+
+    .hero-title {
+      font-size: 2rem;
+    }
+
+    .hero-stats {
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .data-sources-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- HEADER PRINCIPAL -->
+<header class="main-header">
+  <!-- Top bar -->
+  <div class="header-top">
+    <div class="logo-section">
+      <div class="logo-box">
+        <div class="logo-title">ECODATA</div>
+        <div class="logo-subtitle">CEDEAO Platform</div>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <button class="auth-button">
+        <i class="fas fa-user"></i> Se connecter
+      </button>
+      
+      <select class="lang-selector">
+        <option value="fr">FR</option>
+        <option value="en">EN</option>
+      </select>
+
+      <div class="social-links">
+        <a href="#" class="social-link facebook"><i class="fab fa-facebook-f"></i></a>
+        <a href="#" class="social-link twitter"><i class="fab fa-twitter"></i></a>
+        <a href="#" class="social-link youtube"><i class="fab fa-youtube"></i></a>
+        <a href="#" class="social-link linkedin"><i class="fab fa-linkedin-in"></i></a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Barre de marché en temps réel -->
+  <div class="market-ticker">
+    <div class="market-status">
+      <div class="status-badge">
+        <span class="status-dot"></span>
+        Marché Actif
+      </div>
+      <div class="status-badge live">
+        <i class="fas fa-clock"></i>
+        Données en temps réel
+      </div>
+    </div>
+
+    <div class="ticker-scroll" id="marketTicker">
+      {% for stock in brvm_summary.top_stocks %}
+      <div class="ticker-item">
+        <span>{{ stock.symbol }}</span>
+        <span class="ticker-value">{{ stock.price|floatformat:0 }}</span>
+        <span class="ticker-change {% if stock.change_pct >= 0 %}positive{% else %}negative{% endif %}">
+          <i class="fas fa-arrow-{% if stock.change_pct >= 0 %}up{% else %}down{% endif %}"></i> 
+          {{ stock.change_pct|floatformat:2 }}%
+        </span>
+      </div>
+      {% endfor %}
+      {% if recent_indicators %}
+        {% for indicator in recent_indicators %}
+        <div class="ticker-item">
+          <span>{{ indicator.name }}</span>
+          <span class="ticker-value">{{ indicator.value }}</span>
+          <span class="ticker-change positive"><i class="fas fa-info-circle"></i> {{ indicator.source }}</span>
+        </div>
+        {% endfor %}
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Navigation principale -->
+  <nav class="main-nav">
+    <ul class="nav-list">
+      <li class="nav-item">
+        <a href="{% url 'dashboard:index' %}" class="nav-link active">
+          <i class="fas fa-home"></i> Accueil
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="{% url 'dashboard:dashboard_brvm' %}" class="nav-link">
+          <i class="fas fa-chart-line"></i> BRVM
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="{% url 'dashboard:dashboard_worldbank' %}" class="nav-link">
+          <i class="fas fa-globe-africa"></i> Banque Mondiale
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="{% url 'dashboard:dashboard_imf' %}" class="nav-link">
+          <i class="fas fa-landmark"></i> FMI
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="{% url 'dashboard:dashboard_un' %}" class="nav-link">
+          <i class="fas fa-flag"></i> ONU SDG
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="{% url 'dashboard:dashboard_afdb' %}" class="nav-link">
+          <i class="fas fa-university"></i> BAD
+        </a>
+      </li>
+      <li class="nav-item">
+        <span class="badge-prestige">Premium Analytics</span>
+      </li>
+    </ul>
+  </nav>
+</header>
+
+<!-- CONTENU PRINCIPAL -->
+<main class="main-content">
+  <!-- Section Hero -->
+  <section class="hero-section">
+    <h1 class="hero-title">Plateforme de Centralisation<br>des Données Économiques</h1>
+    <p class="hero-subtitle">
+      Accédez en temps réel aux indicateurs économiques de la CEDEAO<br>
+      5 sources de données · 15 pays · {{ total_observations|default:"20,000+" }} observations
+    </p>
+
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <span class="hero-stat-value">{{ total_observations|default:"0" }}</span>
+        <span class="hero-stat-label">Observations Totales</span>
+      </div>
+      <div class="hero-stat">
+        <span class="hero-stat-value">{{ sources_overview|length }}</span>
+        <span class="hero-stat-label">Sources de Données</span>
+      </div>
+      <div class="hero-stat">
+        <span class="hero-stat-value">15</span>
+        <span class="hero-stat-label">Pays CEDEAO</span>
+      </div>
+      <div class="hero-stat">
+        <span class="hero-stat-value">24/7</span>
+        <span class="hero-stat-label">Mise à jour</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Grille des sources de données -->
+  <section class="data-sources-grid">
+    {% for source in sources_overview %}
+    <!-- {{ source.name }} -->
+    <div class="source-card" onclick="window.location.href='{{ source.url }}'">
+      <div class="source-icon" style="background: linear-gradient(135deg, {{ source.color }} 0%, {{ source.color }}dd 100%);">
+        {{ source.icon }}
+      </div>
+      <h3 class="source-title">{{ source.name }}</h3>
+      <p class="source-description">
+        {{ source.description }}
+      </p>
+      <div class="source-stats">
+        <div class="source-stat">
+          <span class="source-stat-value">{{ source.obs_count }}</span>
+          <span class="source-stat-label">Observations</span>
+        </div>
+        <div class="source-stat">
+          <span class="source-stat-value">{{ source.datasets }}</span>
+          <span class="source-stat-label">Indicateurs</span>
+        </div>
+      </div>
+      <a href="{{ source.url }}" class="source-link">
+        Accéder au dashboard <i class="fas fa-arrow-right"></i>
+      </a>
+    </div>
+    {% endfor %}
+
+    <!-- ML Predictions -->
+    <div class="source-card" onclick="window.location.href='/predictions/'">
+      <div class="source-icon" style="background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);">
+        <i class="fas fa-brain"></i>
+      </div>
+      <h3 class="source-title">Prédictions ML</h3>
+      <p class="source-description">
+        Modèles d'apprentissage automatique pour la prévision des indicateurs économiques. ARIMA, Prophet, Random Forest.
+      </p>
+      <div class="source-stats">
+        <div class="source-stat">
+          <span class="source-stat-value">6</span>
+          <span class="source-stat-label">Modèles</span>
+        </div>
+        <div class="source-stat">
+          <span class="source-stat-value">85%</span>
+          <span class="source-stat-label">Précision</span>
+        </div>
+      </div>
+      <a href="/predictions/" class="source-link">
+        Accéder aux prédictions <i class="fas fa-arrow-right"></i>
+      </a>
+    </div>
+  </section>
+
+  <!-- Section Fonctionnalités -->
+  <section class="features-section">
+    <h2 class="section-title">Fonctionnalités Avancées</h2>
+    <div class="features-grid">
+      <div class="feature-item">
+        <div class="feature-icon">
+          <i class="fas fa-sync-alt"></i>
+        </div>
+        <h3 class="feature-title">Mise à jour automatique</h3>
+        <p class="feature-description">
+          Collecte automatique des données avec APScheduler. Actualisation en temps réel.
+        </p>
+      </div>
+
+      <div class="feature-item">
+        <div class="feature-icon">
+          <i class="fas fa-chart-bar"></i>
+        </div>
+        <h3 class="feature-title">Visualisations interactives</h3>
+        <p class="feature-description">
+          Graphiques dynamiques Chart.js. Tableaux de bord personnalisables par source.
+        </p>
+      </div>
+
+      <div class="feature-item">
+        <div class="feature-icon">
+          <i class="fas fa-download"></i>
+        </div>
+        <h3 class="feature-title">Export de données</h3>
+        <p class="feature-description">
+          Exportez vos données en CSV, Excel ou JSON. API REST disponible.
+        </p>
+      </div>
+
+      <div class="feature-item">
+        <div class="feature-icon">
+          <i class="fas fa-filter"></i>
+        </div>
+        <h3 class="feature-title">Filtres avancés</h3>
+        <p class="feature-description">
+          Filtrez par pays, période, secteur. Recherche multicritères puissante.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section Publications BRVM -->
+  {% if brvm_publications %}
+  <section class="publications-section" style="background: white; border-radius: 16px; padding: 2.5rem; margin-bottom: 3rem; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+      <h2 style="font-size: 1.8rem; font-weight: 700; color: #1e3a8a; margin: 0;">
+        <i class="fas fa-newspaper" style="color: #C9A961; margin-right: 0.5rem;"></i>
+        Publications Officielles BRVM
+      </h2>
+      <div style="display: flex; align-items: center; gap: 0.8rem;">
+        <span style="background: #C9A961; color: white; padding: 0.4rem 0.8rem; border-radius: 6px; font-size: 0.85rem; font-weight: 600;">
+          {{ brvm_publications|length }} Publications
+        </span>
+        <div class="dropdown" style="position: relative;">
+          <button onclick="toggleExportMenu()" style="background: #10b981; color: white; padding: 0.4rem 0.8rem; border-radius: 6px; font-size: 0.85rem; font-weight: 600; border: none; cursor: pointer; display: flex; align-items: center; gap: 0.4rem; transition: all 0.3s;"
+                  onmouseover="this.style.background='#059669'"
+                  onmouseout="this.style.background='#10b981'">
+            <i class="fas fa-download"></i>
+            Télécharger
+            <i class="fas fa-chevron-down" style="font-size: 0.7rem;"></i>
+          </button>
+          <div id="exportMenu" style="display: none; position: absolute; top: 110%; right: 0; background: white; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); min-width: 180px; z-index: 1000; overflow: hidden;">
+            <a href="{% url 'dashboard:export_brvm_publications' %}?format=csv" style="display: flex; align-items: center; gap: 0.6rem; padding: 0.8rem 1rem; color: #1e3a8a; text-decoration: none; transition: all 0.2s; border-bottom: 1px solid #f1f5f9;"
+               onmouseover="this.style.background='#f8fafc'"
+               onmouseout="this.style.background='white'">
+              <i class="fas fa-file-csv" style="color: #10b981; width: 20px;"></i>
+              <span style="font-weight: 500;">Format CSV</span>
+            </a>
+            <a href="{% url 'dashboard:export_brvm_publications' %}?format=json" style="display: flex; align-items: center; gap: 0.6rem; padding: 0.8rem 1rem; color: #1e3a8a; text-decoration: none; transition: all 0.2s;"
+               onmouseover="this.style.background='#f8fafc'"
+               onmouseout="this.style.background='white'">
+              <i class="fas fa-file-code" style="color: #3b82f6; width: 20px;"></i>
+              <span style="font-weight: 500;">Format JSON</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div style="display: grid; gap: 1rem;">
+      {% for pub in brvm_publications %}
+      <div class="publication-card" style="border: 1px solid #e2e8f0; border-radius: 10px; padding: 1.5rem; transition: all 0.3s; background: white;" 
+           onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)'; this.style.borderColor='#C9A961'"
+           onmouseout="this.style.boxShadow='none'; this.style.borderColor='#e2e8f0'">
+        <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 1.5rem;">
+          <div style="flex: 1;">
+            <div style="display: flex; align-items: center; gap: 0.8rem; margin-bottom: 0.8rem;">
+              <div style="background: linear-gradient(135deg, #C9A961 0%, #b09050 100%); color: white; width: 48px; height: 48px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">
+                <i class="fas fa-file-pdf"></i>
+              </div>
+              <div style="flex: 1;">
+                <h3 style="font-size: 1.1rem; font-weight: 600; color: #1e3a8a; margin: 0 0 0.3rem 0; line-height: 1.3;">
+                  {{ pub.title }}
+                </h3>
+                <div style="display: flex; align-items: center; gap: 1rem; font-size: 0.8rem; color: #64748b; flex-wrap: wrap;">
+                  <span style="display: flex; align-items: center; gap: 0.3rem;">
+                    <i class="fas fa-calendar-alt"></i>
+                    {{ pub.date }}
+                  </span>
+                  <span style="display: flex; align-items: center; gap: 0.3rem;">
+                    <i class="fas fa-tag"></i>
+                    {{ pub.category }}
+                  </span>
+                  {% if pub.file_type %}
+                  <span style="display: flex; align-items: center; gap: 0.3rem;">
+                    <i class="fas fa-file"></i>
+                    {{ pub.file_type }}
+                  </span>
+                  {% endif %}
+                  {% if pub.file_size and pub.file_size != 'N/A' %}
+                  <span style="display: flex; align-items: center; gap: 0.3rem;">
+                    <i class="fas fa-database"></i>
+                    {{ pub.file_size }}
+                  </span>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+            {% if pub.description %}
+            <p style="color: #64748b; font-size: 0.9rem; line-height: 1.5; margin: 0.8rem 0 0 56px;">
+              {{ pub.description }}
+            </p>
+            {% endif %}
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 0.6rem; align-items: flex-end;">
+            {% if pub.url and pub.url != '#' %}
+            <a href="{{ pub.url }}" target="_blank" style="background: #C9A961; color: white; padding: 0.6rem 1.2rem; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 0.85rem; white-space: nowrap; transition: all 0.3s; display: flex; align-items: center; gap: 0.5rem;"
+               onclick="event.stopPropagation()"
+               onmouseover="this.style.background='#b09050'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 8px rgba(201,169,97,0.3)'"
+               onmouseout="this.style.background='#C9A961'; this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+              <i class="fas fa-external-link-alt"></i>
+              Consulter
+            </a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    
+    <div style="text-align: center; margin-top: 2.5rem; display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap;">
+      <a href="{% url 'dashboard:brvm_publications_page' %}" style="display: inline-flex; align-items: center; gap: 0.5rem; background: #1e3a8a; color: white; padding: 0.9rem 1.8rem; border-radius: 8px; text-decoration: none; font-weight: 600; transition: all 0.3s; font-size: 0.95rem;"
+         onmouseover="this.style.background='#1e40af'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(30,58,138,0.3)'"
+         onmouseout="this.style.background='#1e3a8a'; this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+        <i class="fas fa-newspaper"></i>
+        Voir Toutes les Publications BRVM
+        <i class="fas fa-arrow-right"></i>
+      </a>
+      <a href="/brvm/" style="display: inline-flex; align-items: center; gap: 0.5rem; background: #C9A961; color: white; padding: 0.9rem 1.8rem; border-radius: 8px; text-decoration: none; font-weight: 600; transition: all 0.3s; font-size: 0.95rem;"
+         onmouseover="this.style.background='#b09050'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(201,169,97,0.3)'"
+         onmouseout="this.style.background='#C9A961'; this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+        <i class="fas fa-chart-line"></i>
+        Dashboard BRVM Complet
+      </a>
+      <a href="{% url 'dashboard:brvm_publications_api' %}" target="_blank" style="display: inline-flex; align-items: center; gap: 0.5rem; background: white; color: #1e3a8a; border: 2px solid #1e3a8a; padding: 0.9rem 1.8rem; border-radius: 8px; text-decoration: none; font-weight: 600; transition: all 0.3s; font-size: 0.95rem;"
+         onmouseover="this.style.background='#f8fafc'; this.style.transform='translateY(-2px)'"
+         onmouseout="this.style.background='white'; this.style.transform='translateY(0)'">
+        <i class="fas fa-code"></i>
+        API Publications
+      </a>
+    </div>
+  </section>
+  {% endif %}
+</main>
+
+<!-- FOOTER -->
+<footer class="main-footer">
+  <div class="footer-content">
+    <p>&copy; 2025 ECODATA Platform - Plateforme de Centralisation des Données Économiques CEDEAO</p>
+    <p style="margin-top: 0.5rem; opacity: 0.8;">
+      Dernière mise à jour: {{ last_update|default:"25 Nov 2025" }}
+    </p>
+  </div>
+</footer>
+
+<script>
+// Animation du ticker
+function animateTicker() {
+  const ticker = document.getElementById('marketTicker');
+  if (!ticker) return;
+  
+  const scroll = ticker.querySelector('.ticker-scroll');
+  if (!scroll) return;
+  
+  // Clone items for infinite scroll
+  const items = scroll.innerHTML;
+  scroll.innerHTML += items;
+  
+  let scrollPos = 0;
+  setInterval(() => {
+    scrollPos -= 1;
+    if (Math.abs(scrollPos) >= scroll.scrollWidth / 2) {
+      scrollPos = 0;
+    }
+    scroll.style.transform = `translateX(${scrollPos}px)`;
+  }, 50);
+}
+
+// Actualiser les données du ticker
+async function updateTicker() {
+  try {
+    // Simuler la mise à jour (à remplacer par vos vraies API)
+    console.log('Ticker updated');
+  } catch (error) {
+    console.error('Error updating ticker:', error);
+  }
+}
+
+// Toggle export menu
+function toggleExportMenu() {
+  const menu = document.getElementById('exportMenu');
+  if (menu.style.display === 'none' || menu.style.display === '') {
+    menu.style.display = 'block';
+  } else {
+    menu.style.display = 'none';
+  }
+}
+
+// Fermer le menu si on clique ailleurs
+document.addEventListener('click', function(event) {
+  const menu = document.getElementById('exportMenu');
+  const button = event.target.closest('button');
+  
+  if (menu && !button && menu.style.display === 'block') {
+    menu.style.display = 'none';
+  }
+});
+
+// Initialisation
+document.addEventListener('DOMContentLoaded', () => {
+  animateTicker();
+  
+  // Mise à jour toutes les 30 secondes
+  setInterval(updateTicker, 30000);
+});
+</script>
+{% endblock %}

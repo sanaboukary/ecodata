@@ -1,0 +1,16 @@
+DATE,SYMBOL,CLOSE,VOLUME,VARIATION
+# Format des colonnes:
+# DATE: YYYY-MM-DD (ex: 2025-12-15)
+# SYMBOL: Code action BRVM (ex: SNTS, SGBC, UNLC)
+# CLOSE: Cours de clôture en FCFA (ex: 25500)
+# VOLUME: Volume échangé (optionnel, ex: 8500)
+# VARIATION: Variation en % (optionnel, ex: 2.3)
+#
+# IMPORTANT: Supprimer ces lignes de commentaires avant l'import
+# Exemples de données (à remplacer par vos vraies données):
+2025-12-15,SNTS,25500,8500,2.3
+2025-12-15,SGBC,29490,1200,-1.2
+2025-12-15,UNLC,43290,950,0.5
+2025-12-14,SNTS,24900,7800,1.8
+2025-12-14,SGBC,29850,1500,-0.8
+2025-12-14,UNLC,43080,1100,1.2

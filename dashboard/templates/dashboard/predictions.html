@@ -1,0 +1,654 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Prédictions IA des prix BRVM - Machine Learning et analyse prédictive professionnelle">
+    <title>Prédictions IA - Prix BRVM | Machine Learning</title>
+    
+    <!-- Bootstrap 5.3 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    
+    <!-- Chart.js pour graphiques -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    
+    <!-- CSS Expert -->
+    <link rel="stylesheet" href="{% static 'css/expert-responsive.css' %}">
+    
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .prediction-header {
+            background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+            color: white;
+            padding: 2.5rem 0;
+            margin-bottom: 2rem;
+            border-radius: 0 0 30px 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+        
+        .prediction-card {
+            background: rgba(255,255,255,0.98);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            margin-bottom: 1.5rem;
+            transition: all 0.3s ease;
+        }
+        
+        .prediction-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 45px rgba(59, 130, 246, 0.3);
+        }
+        
+        .stock-selector {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .prediction-chart {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            min-height: 400px;
+        }
+        
+        .signal-badge {
+            padding: 0.75rem 1.5rem;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        
+        .signal-strong-buy {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+        }
+        
+        .signal-buy {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+        }
+        
+        .signal-hold {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+        }
+        
+        .signal-sell {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+        }
+        
+        .signal-strong-sell {
+            background: linear-gradient(135deg, #991b1b, #7f1d1d);
+            color: white;
+        }
+        
+        .metric-box {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(30, 58, 138, 0.1));
+            border-radius: 15px;
+            padding: 1.5rem;
+            text-align: center;
+            border: 2px solid rgba(59, 130, 246, 0.2);
+        }
+        
+        .metric-value {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #1e3a8a;
+            margin-bottom: 0.5rem;
+        }
+        
+        .metric-label {
+            font-size: 0.9rem;
+            color: #64748b;
+            font-weight: 600;
+        }
+        
+        .method-badge {
+            background: rgba(59, 130, 246, 0.1);
+            color: #1e3a8a;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            border: 2px solid rgba(59, 130, 246, 0.3);
+        }
+        
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+        
+        .spinner-pro {
+            width: 60px;
+            height: 60px;
+            border: 6px solid rgba(59, 130, 246, 0.2);
+            border-top-color: #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .confidence-bar {
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 0.5rem;
+        }
+        
+        .confidence-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3b82f6, #10b981);
+            transition: width 0.5s ease;
+        }
+        
+        @media (max-width: 768px) {
+            .prediction-header {
+                padding: 1.5rem 0;
+            }
+            
+            .metric-value {
+                font-size: 1.5rem;
+            }
+            
+            .signal-badge {
+                font-size: 1rem;
+                padding: 0.5rem 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light navbar-professional sticky-top">
+        <div class="container-fluid">
+            <a class="navbar-brand-pro" href="{% url 'dashboard:index' %}">
+                <i class="bi bi-graph-up-arrow"></i> Plateforme BRVM
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link-pro" href="{% url 'dashboard:index' %}">
+                            <i class="bi bi-house"></i> Accueil
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link-pro" href="{% url 'dashboard:dashboard_brvm' %}">
+                            <i class="bi bi-graph-up"></i> BRVM
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link-pro" href="{% url 'dashboard:brvm_recommendations_page' %}">
+                            <i class="bi bi-lightbulb"></i> Recommandations
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link-pro active" href="{% url 'dashboard:predictions_page' %}">
+                            <i class="bi bi-cpu"></i> Prédictions IA
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link-pro" href="{% url 'dashboard:administration' %}">
+                            <i class="bi bi-gear"></i> Admin
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header -->
+    <div class="prediction-header">
+        <div class="container-responsive">
+            <div class="text-center">
+                <h1 class="display-4 fw-bold mb-3">
+                    <i class="bi bi-cpu-fill"></i> Prédictions IA - Prix BRVM
+                </h1>
+                <p class="lead mb-0">
+                    Machine Learning & Analyse Prédictive Avancée
+                    <br>
+                    <span class="badge bg-light text-dark mt-2">
+                        <i class="bi bi-check-circle-fill text-success"></i> 
+                        Modèles : ARIMA · Lissage Exponentiel · Régression Polynomiale · Ensemble
+                    </span>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+        <div class="text-center text-white">
+            <div class="spinner-pro mx-auto mb-3"></div>
+            <h4>Analyse en cours...</h4>
+            <p>Calcul des prédictions par IA</p>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container-responsive mb-5">
+        <!-- Stock Selector -->
+        <div class="prediction-card animate-fade-in-up">
+            <h3 class="mb-4">
+                <i class="bi bi-search"></i> Sélectionner une Action
+            </h3>
+            
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label fw-bold">Action à analyser</label>
+                    <select id="stockSymbol" class="form-select form-select-lg">
+                        <option value="">-- Choisir une action --</option>
+                        <!-- Options chargées dynamiquement -->
+                    </select>
+                </div>
+                
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">Horizon de prédiction</label>
+                    <select id="predictionDays" class="form-select form-select-lg">
+                        <option value="7">7 jours</option>
+                        <option value="30" selected>30 jours</option>
+                        <option value="90">90 jours</option>
+                    </select>
+                </div>
+                
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">Méthode ML</label>
+                    <select id="predictionMethod" class="form-select form-select-lg">
+                        <option value="ensemble" selected>Ensemble (Recommandé)</option>
+                        <option value="arima">ARIMA</option>
+                        <option value="ema">Lissage Exponentiel</option>
+                        <option value="polynomial">Régression Polynomiale</option>
+                    </select>
+                </div>
+                
+                <div class="col-md-2 d-flex align-items-end">
+                    <button id="predictBtn" class="btn-pro btn-pro-primary w-100" disabled>
+                        <i class="bi bi-lightning-fill"></i> Prédire
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Section (Hidden by default) -->
+        <div id="resultsSection" style="display: none;">
+            <!-- Signal & Metrics -->
+            <div class="prediction-card animate-fade-in-up">
+                <div class="row align-items-center">
+                    <div class="col-md-4 text-center">
+                        <h4 class="mb-3">Signal de Trading</h4>
+                        <div id="tradingSignal" class="signal-badge signal-hold">
+                            <i class="bi bi-clock-fill"></i> En attente
+                        </div>
+                        <div class="mt-3">
+                            <span class="method-badge" id="methodBadge">Méthode : Ensemble</span>
+                        </div>
+                        <div class="confidence-bar mt-3">
+                            <div id="confidenceFill" class="confidence-fill" style="width: 0%"></div>
+                        </div>
+                        <p class="mt-2 text-muted small">
+                            <i class="bi bi-info-circle"></i> Confiance : <strong id="confidenceText">0%</strong>
+                        </p>
+                    </div>
+                    
+                    <div class="col-md-8">
+                        <div class="row g-3">
+                            <div class="col-6 col-md-3">
+                                <div class="metric-box">
+                                    <div class="metric-value" id="currentPrice">-</div>
+                                    <div class="metric-label">Prix Actuel</div>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <div class="metric-box">
+                                    <div class="metric-value text-success" id="target7d">-</div>
+                                    <div class="metric-label">Cible 7J</div>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <div class="metric-box">
+                                    <div class="metric-value text-primary" id="target30d">-</div>
+                                    <div class="metric-label">Cible 30J</div>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <div class="metric-box">
+                                    <div class="metric-value" id="expectedReturn">-</div>
+                                    <div class="metric-label">Rendement Attendu</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chart -->
+            <div class="prediction-card animate-fade-in-up">
+                <h3 class="mb-4">
+                    <i class="bi bi-graph-up"></i> Graphique de Prédiction
+                    <span class="float-end">
+                        <span class="badge bg-success">
+                            <i class="bi bi-check-circle"></i> Intervalle 80%
+                        </span>
+                        <span class="badge bg-primary ms-2">
+                            <i class="bi bi-check-circle-fill"></i> Intervalle 95%
+                        </span>
+                    </span>
+                </h3>
+                <div class="prediction-chart">
+                    <canvas id="predictionChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Additional Info -->
+            <div class="prediction-card animate-fade-in-up">
+                <h3 class="mb-4">
+                    <i class="bi bi-info-circle"></i> Informations Complémentaires
+                </h3>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="alert alert-info">
+                            <h5><i class="bi bi-shield-check"></i> Stop Loss & Take Profit</h5>
+                            <p class="mb-1">
+                                <strong>Stop Loss:</strong> <span id="stopLoss" class="text-danger">-</span>
+                            </p>
+                            <p class="mb-0">
+                                <strong>Take Profit:</strong> <span id="takeProfit" class="text-success">-</span>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="alert alert-warning">
+                            <h5><i class="bi bi-exclamation-triangle"></i> Avertissement</h5>
+                            <p class="mb-0 small">
+                                Les prédictions sont basées sur des modèles statistiques et ne garantissent pas les performances futures.
+                                Utilisez ces informations comme aide à la décision, pas comme unique critère d'investissement.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="text-center text-white mt-5 pb-4" style="background: rgba(255,255,255,0.1); backdrop-filter: blur(10px);">
+        <div class="container">
+            <p class="mb-0">&copy; 2025 Plateforme BRVM - Prédictions IA</p>
+            <p class="small">Powered by Machine Learning & Advanced Analytics</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let predictionChart = null;
+        
+        // Charger les actions disponibles
+        async function loadStocks() {
+            try {
+                const response = await fetch('/api/brvm/stocks/');
+                const data = await response.json();
+                
+                const select = document.getElementById('stockSymbol');
+                // L'API retourne {items: [...]}
+                const stocks = data.items || [];
+                
+                // Trier par symbole
+                stocks.sort((a, b) => a.symbol.localeCompare(b.symbol));
+                
+                stocks.forEach(stock => {
+                    const option = document.createElement('option');
+                    option.value = stock.symbol;
+                    const price = stock.latest || 0;
+                    const change = stock.change_pct || 0;
+                    const arrow = change >= 0 ? '▲' : '▼';
+                    const sign = change >= 0 ? '+' : '';
+                    option.textContent = `${stock.symbol} - ${price.toLocaleString('fr-FR')} FCFA ${arrow} ${sign}${change.toFixed(2)}%`;
+                    select.appendChild(option);
+                });
+                
+                console.log(`✅ ${stocks.length} actions BRVM chargées`);
+            } catch (error) {
+                console.error('❌ Erreur chargement actions:', error);
+                alert('Impossible de charger la liste des actions BRVM');
+            }
+        }
+        
+        // Activer bouton prédiction
+        document.getElementById('stockSymbol').addEventListener('change', (e) => {
+            document.getElementById('predictBtn').disabled = !e.target.value;
+        });
+        
+        // Lancer prédiction
+        document.getElementById('predictBtn').addEventListener('click', async () => {
+            const symbol = document.getElementById('stockSymbol').value;
+            const days = document.getElementById('predictionDays').value;
+            const method = document.getElementById('predictionMethod').value;
+            
+            if (!symbol) return;
+            
+            // Afficher loading
+            document.getElementById('loadingOverlay').style.display = 'flex';
+            
+            try {
+                const response = await fetch(`/api/predictions/${symbol}/?days=${days}&method=${method}`);
+                const data = await response.json();
+                
+                if (data.error) {
+                    alert(data.error);
+                    return;
+                }
+                
+                // Afficher résultats
+                displayResults(data);
+                
+            } catch (error) {
+                alert('Erreur lors de la prédiction: ' + error.message);
+            } finally {
+                document.getElementById('loadingOverlay').style.display = 'none';
+            }
+        });
+        
+        function displayResults(data) {
+            // Afficher section résultats
+            document.getElementById('resultsSection').style.display = 'block';
+            document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            
+            // Signal de trading
+            const signal = data.trading_signals;
+            const signalBadge = document.getElementById('tradingSignal');
+            signalBadge.className = `signal-badge signal-${signal.signal.toLowerCase().replace('_', '-')}`;
+            signalBadge.innerHTML = `<i class="bi bi-${getSignalIcon(signal.signal)}"></i> ${signal.signal_text}`;
+            
+            // Méthode
+            document.getElementById('methodBadge').textContent = `Méthode : ${data.method}`;
+            
+            // Confiance
+            document.getElementById('confidenceFill').style.width = `${signal.confidence}%`;
+            document.getElementById('confidenceText').textContent = `${signal.confidence}%`;
+            
+            // Métriques
+            document.getElementById('currentPrice').textContent = `${data.current_price.toFixed(0)} F`;
+            document.getElementById('target7d').textContent = `${signal.target_price_7d.toFixed(0)} F`;
+            document.getElementById('target30d').textContent = `${signal.target_price_30d.toFixed(0)} F`;
+            document.getElementById('expectedReturn').textContent = `${signal.expected_change_pct > 0 ? '+' : ''}${signal.expected_change_pct}%`;
+            document.getElementById('expectedReturn').className = `metric-value ${signal.expected_change_pct > 0 ? 'text-success' : 'text-danger'}`;
+            
+            // Stop Loss & Take Profit
+            document.getElementById('stopLoss').textContent = `${signal.stop_loss.toFixed(0)} F (-5%)`;
+            document.getElementById('takeProfit').textContent = `${signal.take_profit.toFixed(0)} F (+10%)`;
+            
+            // Créer graphique
+            createPredictionChart(data);
+        }
+        
+        function createPredictionChart(data) {
+            const ctx = document.getElementById('predictionChart').getContext('2d');
+            
+            // Détruire ancien graphique
+            if (predictionChart) {
+                predictionChart.destroy();
+            }
+            
+            // Combiner toutes les dates (historiques + prédictions)
+            const allDates = [...(data.historical?.dates || []), ...data.dates];
+            
+            // Préparer les datasets
+            const datasets = [];
+            
+            // 1. Données historiques en ROUGE
+            if (data.historical && data.historical.prices) {
+                datasets.push({
+                    label: 'Historique',
+                    data: data.historical.prices,
+                    borderColor: '#ef4444',
+                    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                    borderWidth: 2,
+                    fill: false,
+                    tension: 0.3,
+                    pointRadius: 2,
+                    pointBackgroundColor: '#ef4444'
+                });
+            }
+            
+            // 2. Prédictions en VERT
+            // Ajouter null pour combler l'espace des données historiques
+            const histLength = data.historical?.dates?.length || 0;
+            const predData = Array(histLength - 1).fill(null).concat([
+                data.historical?.prices[histLength - 1] || null
+            ]).concat(data.predictions);
+            
+            datasets.push({
+                label: 'Prédiction',
+                data: predData,
+                borderColor: '#22c55e',
+                backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                borderWidth: 3,
+                fill: false,
+                tension: 0.4,
+                pointRadius: 3,
+                pointBackgroundColor: '#22c55e'
+            });
+            
+            // 3. Intervalle de confiance 80% supérieur
+            const upperData = Array(histLength - 1).fill(null).concat([
+                data.historical?.prices[histLength - 1] || null
+            ]).concat(data.confidence_80.upper);
+            
+            datasets.push({
+                label: 'Intervalle 80% (supérieur)',
+                data: upperData,
+                borderColor: '#86efac',
+                backgroundColor: 'rgba(134, 239, 172, 0.1)',
+                borderWidth: 1,
+                borderDash: [5, 5],
+                fill: false,
+                pointRadius: 0,
+                tension: 0.4
+            });
+            
+            // 4. Intervalle de confiance 80% inférieur
+            const lowerData = Array(histLength - 1).fill(null).concat([
+                data.historical?.prices[histLength - 1] || null
+            ]).concat(data.confidence_80.lower);
+            
+            datasets.push({
+                label: 'Intervalle 80% (inférieur)',
+                data: lowerData,
+                borderColor: '#86efac',
+                backgroundColor: 'rgba(134, 239, 172, 0.15)',
+                borderWidth: 1,
+                borderDash: [5, 5],
+                fill: '-1',
+                pointRadius: 0,
+                tension: 0.4
+            });
+            
+            predictionChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: allDates,
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    aspectRatio: 2,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Prédiction des Prix avec Intervalles de Confiance',
+                            font: { size: 16, weight: 'bold' }
+                        },
+                        legend: {
+                            position: 'top'
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            callbacks: {
+                                label: function(context) {
+                                    if (context.parsed.y === null) return null;
+                                    return `${context.dataset.label}: ${context.parsed.y.toFixed(0)} FCFA`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            ticks: {
+                                callback: function(value) {
+                                    return value.toFixed(0) + ' F';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function getSignalIcon(signal) {
+            const icons = {
+                'STRONG_BUY': 'arrow-up-circle-fill',
+                'BUY': 'arrow-up-circle',
+                'HOLD': 'dash-circle',
+                'SELL': 'arrow-down-circle',
+                'STRONG_SELL': 'arrow-down-circle-fill'
+            };
+            return icons[signal] || 'circle';
+        }
+        
+        // Charger au démarrage
+        loadStocks();
+    </script>
+</body>
+</html>

@@ -1,0 +1,142 @@
+<!-- Navigation principale -->
+<nav class="nav-menu">
+    <a class="nav-link{% if request.path == '/' %} active{% endif %}" href="/">
+        <i class="ti ti-dashboard"></i>
+        Tableau de bord
+    </a>
+    <a class="nav-link{% if 'explorer' in request.path %} active{% endif %}" href="{% url 'explorer' %}">
+        <i class="ti ti-chart-dots"></i>
+        Explorateur
+    </a>
+    <a class="nav-link{% if 'comparateur' in request.path %} active{% endif %}" href="{% url 'comparateur' %}">
+        <i class="ti ti-arrows-diff"></i>
+        Comparateur
+    </a>
+</nav>
+
+<!-- Actions rapides -->
+<div class="quick-actions ms-3">
+    <div class="dropdown">
+        <button class="btn btn-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+            <i class="ti ti-plus me-1"></i>Nouveau
+        </button>
+        <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="#"><i class="ti ti-chart-line me-2"></i>Analyse</a></li>
+            <li><a class="dropdown-item" href="#"><i class="ti ti-report me-2"></i>Rapport</a></li>
+            <li><a class="dropdown-item" href="#"><i class="ti ti-dashboard me-2"></i>Dashboard</a></li>
+        </ul>
+    </div>
+
+    <div class="dropdown ms-2">
+        <button class="btn btn-light btn-sm" type="button" data-bs-toggle="dropdown">
+            <i class="ti ti-bell"></i>
+            <span class="badge bg-danger">3</span>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end notification-menu">
+            <li><h6 class="dropdown-header">Notifications</h6></li>
+            <li><a class="dropdown-item" href="#">
+                <div class="notification-item">
+                    <i class="ti ti-refresh text-primary"></i>
+                    <div class="ms-2">
+                        <div class="notification-title">Mise à jour des données</div>
+                        <div class="notification-desc text-muted">Les données FMI ont été mises à jour</div>
+                        <small class="text-muted">Il y a 5 min</small>
+                    </div>
+                </div>
+            </a></li>
+            <li><a class="dropdown-item" href="#">
+                <div class="notification-item">
+                    <i class="ti ti-alert-circle text-warning"></i>
+                    <div class="ms-2">
+                        <div class="notification-title">Alerte seuil dépassé</div>
+                        <div class="notification-desc text-muted">Inflation > 2% pour UEMOA</div>
+                        <small class="text-muted">Il y a 1 heure</small>
+                    </div>
+                </div>
+            </a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item text-center" href="#">Voir toutes les notifications</a></li>
+        </ul>
+    </div>
+
+    <div class="dropdown ms-2">
+        <button class="btn btn-light btn-sm" type="button" data-bs-toggle="dropdown">
+            <i class="ti ti-user-circle"></i>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end">
+            <li><a class="dropdown-item" href="#"><i class="ti ti-settings me-2"></i>Paramètres</a></li>
+            <li><a class="dropdown-item" href="#"><i class="ti ti-user me-2"></i>Profil</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" href="#"><i class="ti ti-logout me-2"></i>Déconnexion</a></li>
+        </ul>
+    </div>
+</div>
+
+<style>
+/* Styles pour la navigation */
+.nav-menu {
+    display: flex;
+    gap: 1rem;
+}
+
+.nav-link {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    color: var(--text-secondary);
+    text-decoration: none;
+    border-radius: 0.5rem;
+    transition: all 0.2s;
+}
+
+.nav-link:hover {
+    background: var(--gray-50);
+    color: var(--primary);
+}
+
+.nav-link.active {
+    background: var(--primary-light);
+    color: var(--primary-dark);
+}
+
+.nav-link i {
+    font-size: 1.25rem;
+}
+
+/* Styles pour les notifications */
+.notification-menu {
+    width: 300px;
+    padding: 0;
+}
+
+.notification-item {
+    display: flex;
+    align-items: start;
+    padding: 0.75rem 1rem;
+    transition: background-color 0.2s;
+}
+
+.notification-item:hover {
+    background-color: var(--gray-50);
+}
+
+.notification-title {
+    font-weight: 500;
+    font-size: 0.875rem;
+    margin-bottom: 0.25rem;
+}
+
+.notification-desc {
+    font-size: 0.8125rem;
+}
+
+/* Badges */
+.badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    font-size: 0.675rem;
+    padding: 0.25rem 0.45rem;
+}
+</style>

@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% block title %}Comparateur — Plateforme{% endblock %}
+{% block nav_explorer %}{% endblock %}
+
+{% block sidebar %}
+  {% include 'partials/_sidebar_explorer.html' %}
+{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm mb-3">
+  <div class="card-header bg-white fw-semibold">Comparaison d’indicateurs</div>
+  <div class="card-body">
+    <form class="row g-3" method="get">
+      <div class="col-md-4">
+        <label class="form-label">Indicateur A</label>
+        <select class="form-select" name="a">
+          <option value="PIB_total_USD_courant" {% if alias_a == "PIB_total_USD_courant" %}selected{% endif %}>PIB (USD courant)</option>
+          <option value="Inflation_CPI_annuelle_pct" {% if alias_a == "Inflation_CPI_annuelle_pct" %}selected{% endif %}>Inflation (%)</option>
+          <option value="Dette_publique_pctPIB" {% if alias_a == "Dette_publique_pctPIB" %}selected{% endif %}>Dette publique (% du PIB)</option>
+        </select>
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Indicateur B</label>
+        <select class="form-select" name="b">
+          <option value="PIB_total_USD_courant" {% if alias_b == "PIB_total_USD_courant" %}selected{% endif %}>PIB (USD courant)</option>
+          <option value="Inflation_CPI_annuelle_pct" {% if alias_b == "Inflation_CPI_annuelle_pct" %}selected{% endif %}>Inflation (%)</option>
+          <option value="Dette_publique_pctPIB" {% if alias_b == "Dette_publique_pctPIB" %}selected{% endif %}>Dette publique (% du PIB)</option>
+        </select>
+      </div>
+      <div class="col-md-4 d-flex align-items-end">
+        <button class="btn btn-primary w-100" type="submit">Comparer</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="card shadow-sm">
+  <div class="card-header bg-white fw-semibold">Résultat</div>
+  <div class="card-body">
+    <canvas id="cmpChart"></canvas>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const ctx = document.getElementById('cmpChart');
+      if (!ctx) return;
+      const labelsA = {{ series_a.labels|default:'[]'|safe }};
+      const valuesA = {{ series_a.values|default:'[]'|safe }};
+      const labelsB = {{ series_b.labels|default:'[]'|safe }};
+      const valuesB = {{ series_b.values|default:'[]'|safe }};
+      const labels = labelsA.length >= labelsB.length ? labelsA : labelsB;
+      new Chart(ctx, {
+        type: 'line',
+        data: { labels,
+          datasets: [
+            { label: '{{ alias_a }}', data: valuesA, borderColor: '#0d6efd', tension: .25 },
+            { label: '{{ alias_b }}', data: valuesB, borderColor: '#6c757d', tension: .25 }
+          ]
+        },
+        options: { responsive: true }
+      });
+    });
+  </script>
+</div>
+{% endblock %}
+
+

@@ -1,0 +1,146 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}BRVM - Tableau de Bord{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/finance.css' %}">
+<style>
+  body { background: #0B0F14; }
+  .finance-sidebar { background: #0B0F14; }
+  .finance-main { background: #0B0F14; color: #E6E6E6; }
+  .card-dark { background: #0F141B; border: 1px solid #1E293B; border-radius: 12px; }
+  .muted { color: #94A3B8; }
+  .accent { color: #C9A961; }
+  .kpi { font-size: 2.25rem; font-weight: 800; }
+  .kpi-sub { font-size: 0.9rem; }
+  .period-btn { background:#1E293B; color:#E6E6E6; border:1px solid #334155; padding:.4rem .9rem; border-radius:6px; cursor:pointer; font-size:.75rem; }
+  .period-btn.active { background:#C9A961; color:#0B0F14; border-color:#C9A961; }
+  .sort-btn { background:#1E293B; color:#E6E6E6; border:1px solid #334155; padding:.35rem .7rem; border-radius:4px; cursor:pointer; font-size:.65rem; }
+  .sort-btn.active { background:#C9A961; color:#0B0F14; }
+  .mini-title { font-size:.65rem; letter-spacing:.5px; text-transform:uppercase; color:#64748B; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="finance-dashboard">
+  <aside class="finance-sidebar">
+    <h1 class="platform-title">Plateforme de Centralisation<br><span style="font-weight:400;font-size:.9rem;">de Données Financières</span></h1>
+    <input type="text" class="search-input" placeholder="Rechercher...">
+    <nav class="sidebar-nav">
+      <a href="{% url 'dashboard:dashboard_brvm' %}" class="nav-item active">📈 BRVM</a>
+      <a href="{% url 'dashboard:dashboard_imf' %}" class="nav-item">💰 FMI</a>
+      <a href="{% url 'dashboard:dashboard_afdb' %}" class="nav-item">🏦 BAD</a>
+      <a href="{% url 'dashboard:dashboard_un' %}" class="nav-item">🌍 ONU</a>
+      <a href="{% url 'dashboard:dashboard_worldbank' %}" class="nav-item">🌐 Banque Mondiale</a>
+    </nav>
+  </aside>
+
+  <main class="finance-main">
+    <nav class="top-nav">
+      <a href="{% url 'dashboard:explorer' %}" class="top-nav-link">Explorateur</a>
+      <a href="{% url 'dashboard:comparateur' %}" class="top-nav-link">Comparateur</a>
+      <a href="{% url 'dashboard:index' %}" class="top-nav-link">Tableaux de bord</a>
+      <a href="/admin/" class="top-nav-link">Administration</a>
+    </nav>
+
+    <div class="main-header" style="background: linear-gradient(135deg,#0F141B,#121826);">
+      <h2 class="section-title" style="color:#E6E6E6;">TABLEAU DE BORD – BRVM</h2>
+      <div class="muted">Mise à jour: <span id="brvm-last-update">--</span></div>
+    </div>
+
+    <div class="indicators-section">
+      <!-- Sélecteur de période -->
+      <div style="display:flex; gap:.5rem; margin-bottom:.75rem; align-items:center;">
+        <span class="muted" style="font-size:.75rem; text-transform:uppercase;">Période</span>
+        <button class="period-btn" data-period="day">Jour</button>
+        <button class="period-btn" data-period="week">Semaine</button>
+        <button class="period-btn" data-period="month">Mois</button>
+        <button class="period-btn" data-period="" style="margin-left:auto;">Tout</button>
+      </div>
+      <!-- Tri -->
+      <div style="display:flex; gap:.4rem; margin-bottom:.5rem; align-items:center;">
+        <span class="mini-title">Tri</span>
+        <button class="sort-btn active" data-sort="symbol">Symbole</button>
+        <button class="sort-btn" data-sort="change">Variation</button>
+        <span class="mini-title" style="margin-left:auto;">Dernier refresh: <span id="brvm-refresh-ts">--:--:--</span></span>
+      </div>
+      <!-- Top KPIs (BRVM10 / Composite) -->
+      <div style="display:grid;grid-template-columns: repeat(2, 1fr); gap:1rem; margin-bottom:1rem;">
+        <div class="card-dark" style="padding:1rem;">
+          <div class="muted">BRVM 10 <span id="brvm10-change" class="accent"></span></div>
+          <div id="brvm10-value" class="kpi">--</div>
+        </div>
+        <div class="card-dark" style="padding:1rem;">
+          <div class="muted">BRVM Composite <span id="compo-change" class="accent"></span></div>
+          <div id="compo-value" class="kpi">--</div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns: 1.2fr 1fr; gap:1rem;">
+        <!-- Sparklines + winners/losers -->
+        <div class="card-dark" style="padding:1rem;">
+          <div class="muted" style="margin-bottom:.5rem;">Cours moyens journaliers des actions</div>
+          <div id="sparklines" style="display:grid;grid-template-columns: repeat(4,1fr); gap:.75rem;"></div>
+          <div id="loading-indicator" style="display:none; text-align:center; font-size:.7rem; color:#64748B;">Chargement...</div>
+        </div>
+
+        <!-- Candlestick chart -->
+        <div class="card-dark" style="padding:1rem;">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div class="muted">Cours (Chandelier)</div>
+            <select id="symbol-select" class="source-dropdown" style="width:auto;background:#0B0F14;color:#E6E6E6;border-color:#1E293B;">
+            </select>
+          </div>
+          <canvas id="candles" style="height:300px"></canvas>
+        </div>
+      </div>
+
+      <!-- Winners / Losers -->
+      <div style="display:grid;grid-template-columns: 1fr 1fr; gap:1rem; margin-top:1rem;">
+        <div class="card-dark" style="padding:1rem;">
+          <div class="muted" style="margin-bottom:.5rem;">Gagnants</div>
+          <div id="winners"></div>
+        </div>
+        <div class="card-dark" style="padding:1rem;">
+          <div class="muted" style="margin-bottom:.5rem;">Perdants</div>
+          <div id="losers"></div>
+        </div>
+      </div>
+
+      <!-- Bottom KPIs -->
+      <div style="display:grid;grid-template-columns: repeat(3,1fr); gap:1rem; margin-top:1rem;">
+        <div class="card-dark" style="padding:1rem;">
+          <div class="kpi" id="kpi-traded">--</div>
+          <div class="kpi-sub muted">Valeur Négociée (proxy)</div>
+        </div>
+        <div class="card-dark" style="padding:1rem;">
+          <div class="kpi" id="kpi-cap">--</div>
+          <div class="kpi-sub muted">Capitalisation (proxy)</div>
+        </div>
+        <div class="card-dark" style="padding:1rem;">
+          <div class="kpi" id="kpi-sector">--</div>
+          <div class="kpi-sub muted">Taux de variation moyen sectoriel</div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-chart-financial"></script>
+<script src="{% static 'js/dashboard_brvm.js' %}"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', ()=> {
+    BrvmDashboard.initBrvmDashboard({
+      urls: {
+        summary: '{% url "dashboard:brvm_summary_api" %}',
+        stocks: '{% url "dashboard:brvm_stocks_api" %}',
+        candles: '{% url "dashboard:brvm_candlestick_api" %}',
+        winnersLosers: '{% url "dashboard:brvm_winners_losers_api" %}'
+      }
+    });
+  });
+</script>
+{% endblock %}

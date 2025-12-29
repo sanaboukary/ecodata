@@ -1,0 +1,946 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Plateforme de Centralisation des Données Économiques{% endblock %}
+
+{% block head_extra %}
+<link rel="stylesheet" href="{% static 'css/finance.css' %}">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+<style>
+  .platform-dashboard {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    min-height: 100vh;
+    padding: 2rem;
+    color: #ffffff;
+    position: relative;
+  }
+  
+  /* Effet de fond animé */
+  .platform-dashboard::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at 20% 50%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.1) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+  
+  .platform-dashboard > * {
+    position: relative;
+    z-index: 1;
+  }
+  
+  .dashboard-header {
+    text-align: center;
+    margin-bottom: 3rem;
+    padding: 2rem 0;
+  }
+  
+  .dashboard-title {
+    font-size: 3.5rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 50%, #ec4899 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 1rem;
+    letter-spacing: -1px;
+    text-shadow: 0 0 40px rgba(59, 130, 246, 0.3);
+  }
+  
+  .dashboard-subtitle {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 1.3rem;
+    font-weight: 300;
+    letter-spacing: 0.5px;
+  }
+  
+  .stats-overview {
+    background: rgba(30, 41, 59, 0.6);
+    backdrop-filter: blur(20px);
+    border-radius: 20px;
+    padding: 2.5rem;
+    margin-bottom: 3rem;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    text-align: center;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .stats-overview::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899, #3b82f6);
+    background-size: 200% 100%;
+    animation: shimmer 3s linear infinite;
+  }
+  
+  @keyframes shimmer {
+    0% { background-position: 0% 0%; }
+    100% { background-position: 200% 0%; }
+  }
+  
+  .stats-overview h2 {
+    color: #60a5fa;
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+  }
+  
+  .stats-overview p {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 1.1rem;
+  }
+  
+  .sources-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+  }
+  
+  .source-card {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(139, 92, 246, 0.05) 100%);
+    border-radius: 16px;
+    padding: 1.5rem;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    backdrop-filter: blur(10px);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .source-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(90deg, #3b82f6 0%, #8b5cf6 100%);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .source-card::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(59, 130, 246, 0.1) 0%, transparent 70%);
+    transform: translate(-50%, -50%) scale(0);
+    transition: transform 0.6s ease-out;
+  }
+  
+  .source-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 20px 60px rgba(59, 130, 246, 0.4);
+    border-color: rgba(59, 130, 246, 0.6);
+  }
+  
+  .source-card:hover::before {
+    transform: scaleX(1);
+  }
+  
+  .source-card:hover::after {
+    transform: translate(-50%, -50%) scale(1);
+  }
+  
+  .source-icon {
+    width: 56px;
+    height: 56px;
+    background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.6rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 8px 24px rgba(59, 130, 246, 0.3);
+    transition: all 0.3s;
+  }
+  
+  .source-card:hover .source-icon {
+    transform: rotate(5deg) scale(1.1);
+    box-shadow: 0 12px 36px rgba(59, 130, 246, 0.5);
+  }
+  
+  .source-name {
+    font-size: 1.3rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 1rem;
+  }
+  
+  .source-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+  
+  .stat-item {
+    background: rgba(15, 23, 42, 0.6);
+    padding: 0.75rem;
+    border-radius: 12px;
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    transition: all 0.3s;
+  }
+  
+  .stat-item:hover {
+    background: rgba(15, 23, 42, 0.8);
+    border-color: rgba(59, 130, 246, 0.4);
+    transform: translateY(-2px);
+  }
+  
+  .stat-label {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.7rem;
+    margin-bottom: 0.25rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+  }
+  
+  .stat-value {
+    color: #ffffff;
+    font-size: 1.2rem;
+    font-weight: 700;
+  }
+  
+  .source-link {
+    display: inline-block;
+    margin-top: 0.75rem;
+    padding: 0.625rem 1.5rem;
+    background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+    color: #ffffff;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-decoration: none;
+    transition: all 0.3s;
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .source-link::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+  }
+  
+  .source-link:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.5);
+  }
+  
+  .source-link:hover::before {
+    left: 100%;
+  }
+  
+  .brvm-highlights {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(139, 92, 246, 0.05) 100%);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 2.5rem;
+    margin-bottom: 3rem;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  }
+  
+  .brvm-highlights h2 {
+    background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+  }
+  
+  .stock-table {
+    width: 100%;
+    border-collapse: collapse;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  
+  .stock-table th {
+    background: rgba(59, 130, 246, 0.2);
+    padding: 1rem;
+    text-align: left;
+    color: #60a5fa;
+    font-weight: 700;
+    border-bottom: 2px solid rgba(59, 130, 246, 0.4);
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+  }
+  
+  .stock-table td {
+    padding: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.95rem;
+  }
+  
+  .stock-table tbody tr {
+    transition: all 0.3s;
+  }
+  
+  .stock-table tbody tr:hover {
+    background: rgba(59, 130, 246, 0.15);
+    transform: scale(1.01);
+  }
+  
+  .change-positive {
+    color: #22c55e;
+    font-weight: 700;
+  }
+  
+  .change-negative {
+    color: #ef4444;
+    font-weight: 700;
+  }
+  
+  .indicators-section {
+    background: rgba(30, 41, 59, 0.6);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 2.5rem;
+    margin-bottom: 3rem;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  }
+  
+  .indicators-section h2 {
+    background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+  }
+  
+  .indicators-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+  }
+  
+  .indicator-card {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(139, 92, 246, 0.05) 100%);
+    padding: 1.5rem;
+    border-radius: 12px;
+    border-left: 4px solid #3b82f6;
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    transition: all 0.3s;
+  }
+  
+  .indicator-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
+    border-left-color: #8b5cf6;
+  }
+  
+  .indicator-source {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.85rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .indicator-name {
+    color: #ffffff;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+  
+  .indicator-value {
+    background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 0.3rem;
+  }
+  
+  .indicator-date {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.85rem;
+  }
+  
+  .activity-section {
+    background: rgba(30, 41, 59, 0.6);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 2.5rem;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  }
+  
+  .activity-section h2 {
+    background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+  }
+  
+  .activity-timeline {
+    position: relative;
+    padding-left: 2rem;
+  }
+  
+  .activity-timeline::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: linear-gradient(180deg, #3b82f6 0%, rgba(59, 130, 246, 0.1) 100%);
+    border-radius: 2px;
+  }
+  
+  .activity-item {
+    position: relative;
+    margin-bottom: 1.5rem;
+    padding: 1rem 1.5rem;
+    background: rgba(15, 23, 42, 0.6);
+    border-radius: 12px;
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    transition: all 0.3s;
+  }
+  
+  .activity-item:hover {
+    background: rgba(15, 23, 42, 0.8);
+    border-color: rgba(59, 130, 246, 0.4);
+    transform: translateX(5px);
+  }
+  
+  .activity-item::before {
+    content: '';
+    position: absolute;
+    left: -2.5rem;
+    top: 1.5rem;
+    width: 12px;
+    height: 12px;
+    background: #3b82f6;
+    border-radius: 50%;
+    border: 3px solid #0f172a;
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+  }
+  
+  .activity-source {
+    font-weight: 700;
+    color: #60a5fa;
+    margin-right: 0.5rem;
+  }
+  
+  .activity-status {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-left: 0.5rem;
+  }
+  
+  .status-success {
+    background: rgba(34, 197, 94, 0.2);
+    color: #22c55e;
+    border: 1px solid rgba(34, 197, 94, 0.4);
+  }
+  
+  .status-error {
+    background: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.4);
+  }
+  
+  .activity-meta {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+  }
+  
+  .refresh-btn {
+    position: fixed;
+    top: 2rem;
+    right: 2rem;
+    padding: 0.875rem 1.75rem;
+    background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+    color: #ffffff;
+    border: none;
+    border-radius: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s;
+    z-index: 1000;
+    box-shadow: 0 8px 24px rgba(59, 130, 246, 0.4);
+    font-size: 1rem;
+  }
+  
+  .refresh-btn:hover {
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 12px 36px rgba(59, 130, 246, 0.6);
+  }
+  
+  .refresh-btn.loading {
+    opacity: 0.6;
+    pointer-events: none;
+  }
+  
+  .auto-refresh-badge {
+    position: fixed;
+    top: 5rem;
+    right: 2rem;
+    padding: 0.625rem 1.25rem;
+    background: rgba(34, 197, 94, 0.2);
+    backdrop-filter: blur(10px);
+    color: #22c55e;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    z-index: 1000;
+    border: 1px solid rgba(34, 197, 94, 0.4);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  }
+  
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+  
+  .updating {
+    animation: pulse 1s ease-in-out;
+  }
+  
+  .live-indicator {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    background: #22c55e;
+    border-radius: 50%;
+    margin-right: 0.5rem;
+    box-shadow: 0 0 10px rgba(34, 197, 94, 0.6);
+    animation: pulse 2s ease-in-out infinite;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="platform-dashboard">
+  <!-- Bouton de rafraîchissement -->
+  <button id="refreshBtn" class="refresh-btn" onclick="refreshAllData()">
+    🔄 Rafraîchir
+  </button>
+  
+  <!-- Badge de mise à jour automatique -->
+  <div class="auto-refresh-badge">
+    <span class="live-indicator"></span>
+    Auto-refresh: 2 min
+  </div>
+  <!-- En-tête -->
+  <div class="dashboard-header">
+    <h1 class="dashboard-title">Plateforme de Centralisation des Données Économiques</h1>
+    <p class="dashboard-subtitle">
+      Accès unifié aux données BRVM, Banque Mondiale, FMI, ONU (SDG) et BAD
+    </p>
+    <div style="margin-top: 1.5rem;">
+      <a href="{% url 'dashboard:alerts_management' %}" style="
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.875rem 1.75rem;
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        color: #ffffff;
+        text-decoration: none;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 1rem;
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        transition: all 0.3s;
+      " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 20px rgba(239, 68, 68, 0.4)'" onmouseout="this.style.transform=''; this.style.boxShadow='0 4px 12px rgba(239, 68, 68, 0.3)'">
+        🔔 Alertes Personnalisées
+      </a>
+      <a href="{% url 'dashboard:countries_comparison' %}" style="
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.875rem 1.75rem;
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        color: #ffffff;
+        text-decoration: none;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 1rem;
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        transition: all 0.3s;
+        margin-left: 1rem;
+      " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 20px rgba(59, 130, 246, 0.4)'" onmouseout="this.style.transform=''; this.style.boxShadow='0 4px 12px rgba(59, 130, 246, 0.3)'">
+        📊 Comparaison Pays
+      </a>
+    </div>
+  </div>
+  
+  <!-- Statistiques globales -->
+  <div class="stats-overview">
+    <h2>{{ total_observations|default:0 }} Observations</h2>
+    <p>Collectées depuis {{ sources_overview|length }} sources de données internationales</p>
+  </div>
+  
+  <!-- Grille des sources -->
+  <div class="sources-grid">
+    {% for source in sources_overview %}
+    <div class="source-card" {% if source.url %}onclick="window.location.href='{{ source.url }}'"{% endif %}>
+      <div class="source-icon">
+        {% if source.key == 'BRVM' %}📈
+        {% elif source.key == 'WorldBank' %}🌍
+        {% elif source.key == 'IMF' %}💰
+        {% elif source.key == 'UN_SDG' %}🎯
+        {% elif source.key == 'AfDB' %}🏦
+        {% endif %}
+      </div>
+      
+      <h3 class="source-name">{{ source.name }}</h3>
+      
+      <div class="source-stats">
+        <div class="stat-item">
+          <div class="stat-label">Observations</div>
+          <div class="stat-value">{{ source.obs_count|default:0 }}</div>
+        </div>
+        
+        <div class="stat-item">
+          <div class="stat-label">Indicateurs</div>
+          <div class="stat-value">{{ source.datasets|default:0 }}</div>
+        </div>
+        
+        <div class="stat-item">
+          <div class="stat-label">Pays/Actions</div>
+          <div class="stat-value">{{ source.keys|default:0 }}</div>
+        </div>
+        
+        <div class="stat-item">
+          <div class="stat-label">Dernière MAJ</div>
+          <div class="stat-value">{{ source.last_update|slice:":10"|default:"N/A" }}</div>
+        </div>
+      </div>
+      
+      <a href="{{ source.url }}" class="source-link">
+        Accéder au Dashboard →
+      </a>
+    </div>
+    {% endfor %}
+    
+    <!-- Carte Comparaison Multi-Pays -->
+    <div class="source-card" onclick="window.location.href='{% url 'dashboard:countries_comparison' %}'">
+      <div class="source-icon">🌍</div>
+      <h3 class="source-name">Comparaison Multi-Pays</h3>
+      <div class="source-stats">
+        <div class="stat-item">
+          <div class="stat-label">Pays CEDEAO</div>
+          <div class="stat-value">15</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">Indicateurs</div>
+          <div class="stat-value">9</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">Type</div>
+          <div class="stat-value">Comparatif</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">Graphiques</div>
+          <div class="stat-value">6</div>
+        </div>
+      </div>
+      <a href="{% url 'dashboard:countries_comparison' %}" class="source-link">
+        Comparer les Pays →
+      </a>
+    </div>
+  </div>
+  
+  <!-- Highlights BRVM -->
+  {% if brvm_summary.total_stocks > 0 %}
+  <div class="brvm-highlights">
+    <h2>📊 BRVM - Marché Boursier Régional</h2>
+    <table class="stock-table">
+      <thead>
+        <tr>
+          <th>Symbole</th>
+          <th>Nom</th>
+          <th>Prix (XOF)</th>
+          <th>Variation (%)</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for stock in brvm_summary.top_stocks %}
+        <tr>
+          <td><strong>{{ stock.symbol }}</strong></td>
+          <td>{{ stock.name }}</td>
+          <td>{{ stock.price|floatformat:0 }}</td>
+          <td class="{% if stock.change_pct >= 0 %}change-positive{% else %}change-negative{% endif %}">
+            {{ stock.change_pct|floatformat:2 }}%
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+  
+  <!-- Indicateurs récents -->
+  {% if recent_indicators %}
+  <div class="indicators-section">
+    <h2>📈 Indicateurs Récents</h2>
+    <div class="indicators-grid">
+      {% for indicator in recent_indicators %}
+      <div class="indicator-card">
+        <div class="indicator-source">{{ indicator.source }}</div>
+        <div class="indicator-name">{{ indicator.name }}</div>
+        <div class="indicator-value">{{ indicator.value }}</div>
+        <div class="indicator-date">{{ indicator.date }}</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+  
+  <!-- Activité récente -->
+  {% if activity_log %}
+  <div class="activity-section">
+    <h2>⏱️ Activité Récente</h2>
+    <div class="activity-timeline">
+      {% for activity in activity_log %}
+      <div class="activity-item">
+        <span class="activity-source">{{ activity.source }}</span>
+        <span class="activity-status {% if activity.status == 'success' %}status-success{% else %}status-error{% endif %}">
+          {{ activity.status|upper }}
+        </span>
+        <div class="activity-meta">
+          {{ activity.obs_count }} observations · {{ activity.duration|floatformat:1 }}s · 
+          {{ activity.date|slice:":19"|default:"N/A" }}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+</div>
+
+<script>
+// Variables globales
+let autoRefreshInterval = null;
+let countdownInterval = null;
+let secondsRemaining = 120; // 2 minutes
+
+// Initialisation
+document.addEventListener('DOMContentLoaded', function() {
+  startAutoRefresh();
+  startCountdown();
+});
+
+// Rafraîchir toutes les données
+async function refreshAllData() {
+  const btn = document.getElementById('refreshBtn');
+  btn.classList.add('loading');
+  btn.innerHTML = '⏳ Mise à jour...';
+  
+  try {
+    // Récupérer les données de toutes les sources en parallèle
+    const [brvmData, wbData, imfData] = await Promise.all([
+      fetch('/api/brvm/summary/').then(r => r.json()).catch(() => null),
+      fetch('/api/worldbank/summary/').then(r => r.json()).catch(() => null),
+      fetch('/api/data/list/?source=IMF&limit=10').then(r => r.json()).catch(() => null)
+    ]);
+    
+    // Mettre à jour les cartes sources
+    updateSourceCards();
+    
+    // Mettre à jour les highlights BRVM
+    if (brvmData) {
+      updateBRVMHighlights(brvmData);
+    }
+    
+    // Mettre à jour les indicateurs récents
+    updateRecentIndicators();
+    
+    // Mettre à jour l'activité
+    updateActivityLog();
+    
+    // Réinitialiser le compte à rebours
+    secondsRemaining = 120;
+    
+    showNotification('✅ Données actualisées avec succès', 'success');
+    
+  } catch (error) {
+    console.error('Erreur lors du rafraîchissement:', error);
+    showNotification('❌ Erreur lors de la mise à jour', 'error');
+  } finally {
+    btn.classList.remove('loading');
+    btn.innerHTML = '🔄 Rafraîchir';
+  }
+}
+
+// Mettre à jour les cartes des sources
+function updateSourceCards() {
+  const sourceCards = document.querySelectorAll('.source-card');
+  sourceCards.forEach(card => {
+    card.classList.add('updating');
+    setTimeout(() => card.classList.remove('updating'), 800);
+  });
+}
+
+// Mettre à jour les highlights BRVM
+function updateBRVMHighlights(data) {
+  const brvmSection = document.querySelector('.brvm-highlights');
+  if (brvmSection && data.top_stocks) {
+    brvmSection.classList.add('updating');
+    setTimeout(() => brvmSection.classList.remove('updating'), 800);
+  }
+}
+
+// Mettre à jour les indicateurs récents
+function updateRecentIndicators() {
+  const indicatorsSection = document.querySelector('.indicators-section');
+  if (indicatorsSection) {
+    indicatorsSection.classList.add('updating');
+    setTimeout(() => indicatorsSection.classList.remove('updating'), 800);
+  }
+}
+
+// Mettre à jour le journal d'activité
+function updateActivityLog() {
+  const activitySection = document.querySelector('.activity-section');
+  if (activitySection) {
+    activitySection.classList.add('updating');
+    setTimeout(() => activitySection.classList.remove('updating'), 800);
+  }
+}
+
+// Démarrer le rafraîchissement automatique
+function startAutoRefresh() {
+  autoRefreshInterval = setInterval(() => {
+    refreshAllData();
+  }, 2 * 60 * 1000); // 2 minutes
+}
+
+// Démarrer le compte à rebours
+function startCountdown() {
+  countdownInterval = setInterval(() => {
+    secondsRemaining--;
+    
+    if (secondsRemaining <= 0) {
+      secondsRemaining = 120;
+    }
+    
+    updateCountdownDisplay();
+  }, 1000);
+}
+
+// Mettre à jour l'affichage du compte à rebours
+function updateCountdownDisplay() {
+  const badge = document.querySelector('.auto-refresh-badge');
+  if (badge) {
+    const minutes = Math.floor(secondsRemaining / 60);
+    const seconds = secondsRemaining % 60;
+    badge.innerHTML = `
+      <span class="live-indicator"></span>
+      Prochaine MAJ: ${minutes}:${seconds.toString().padStart(2, '0')}
+    `;
+  }
+}
+
+// Afficher une notification
+function showNotification(message, type) {
+  const notification = document.createElement('div');
+  notification.style.cssText = `
+    position: fixed;
+    top: 8rem;
+    right: 2rem;
+    padding: 1rem 1.5rem;
+    background: ${type === 'success' ? 'rgba(0, 255, 136, 0.2)' : 'rgba(255, 68, 68, 0.2)'};
+    color: ${type === 'success' ? '#00ff88' : '#ff4444'};
+    border: 1px solid ${type === 'success' ? '#00ff88' : '#ff4444'};
+    border-radius: 8px;
+    font-weight: 600;
+    z-index: 2000;
+    animation: slideIn 0.3s ease-out;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  `;
+  notification.textContent = message;
+  document.body.appendChild(notification);
+  
+  setTimeout(() => {
+    notification.style.animation = 'slideOut 0.3s ease-out';
+    setTimeout(() => notification.remove(), 300);
+  }, 3000);
+}
+
+// Animations CSS
+const style = document.createElement('style');
+style.textContent = `
+  @keyframes slideIn {
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+  
+  @keyframes slideOut {
+    from {
+      transform: translateX(0);
+      opacity: 1;
+    }
+    to {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+  }
+`;
+document.head.appendChild(style);
+
+// Nettoyer au déchargement
+window.addEventListener('beforeunload', function() {
+  if (autoRefreshInterval) clearInterval(autoRefreshInterval);
+  if (countdownInterval) clearInterval(countdownInterval);
+});
+
+// Gérer la visibilité de la page (pause auto-refresh si page cachée)
+document.addEventListener('visibilitychange', function() {
+  if (document.hidden) {
+    if (autoRefreshInterval) clearInterval(autoRefreshInterval);
+    if (countdownInterval) clearInterval(countdownInterval);
+  } else {
+    startAutoRefresh();
+    startCountdown();
+  }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}BAD - Tableau de Bord{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/finance.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="finance-dashboard">
+  <aside class="finance-sidebar">
+    <h1 class="platform-title">Plateforme de Centralisation<br><span style="font-weight: 400; font-size: 0.9rem;">de Données Financières</span></h1>
+    <input type="text" class="search-input" placeholder="Rechercher...">
+    <nav class="sidebar-nav">
+      <a href="{% url 'dashboard:dashboard_brvm' %}" class="nav-item">📈 BRVM</a>
+      <a href="{% url 'dashboard:dashboard_imf' %}" class="nav-item">💰 FMI</a>
+      <a href="{% url 'dashboard:dashboard_afdb' %}" class="nav-item active">🏦 BAD</a>
+      <a href="{% url 'dashboard:dashboard_un' %}" class="nav-item">🌍 ONU</a>
+      <a href="{% url 'dashboard:dashboard_worldbank' %}" class="nav-item">🌐 Banque Mondiale</a>
+    </nav>
+  </aside>
+
+  <main class="finance-main">
+    <nav class="top-nav">
+      <a href="{% url 'dashboard:explorer' %}" class="top-nav-link">Explorateur</a>
+      <a href="{% url 'dashboard:comparateur' %}" class="top-nav-link">Comparateur</a>
+      <a href="{% url 'dashboard:index' %}" class="top-nav-link">Tableaux de bord</a>
+      <a href="/admin/" class="top-nav-link">Administration</a>
+    </nav>
+
+    <div class="main-header">
+      <h2 class="section-title">🏦 BAD - Banque Africaine de Développement</h2>
+      <p style="color: rgba(255,255,255,0.8); margin: 0.5rem 0 0 0;">
+        <strong>{{ total_observations }} observations</strong> collectées depuis la BAD uniquement • {{ countries|length }} pays • Dernière mise à jour: {{ last_update }}
+      </p>
+      <p style="color: #C9A961; margin: 0.25rem 0 0 0; font-size: 0.9rem;">
+        ℹ️ Ce tableau de bord affiche UNIQUEMENT les données de la source BAD (Banque Africaine de Développement)
+      </p>
+    </div>
+
+    <div style="padding: 2rem 3rem;">
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+        {% for country, data in countries.items %}
+        <div class="kpi-card">
+          <div class="kpi-label">{{ country }}</div>
+          <div class="kpi-value">{{ data.latest_value|floatformat:0 }}M</div>
+          <div style="font-size: 0.75rem; color: #718096;">{{ data.count }} observations</div>
+        </div>
+        {% endfor %}
+      </div>
+
+      <div style="background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+        <h3 style="color: #1E3A5F; margin: 0 0 1.5rem 0;">Données Récentes</h3>
+        <table class="indicators-table">
+          <thead>
+            <tr>
+              <th>Pays</th>
+              <th>Indicateur</th>
+              <th>Date</th>
+              <th>Valeur</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in afdb_data %}
+            <tr>
+              <td>{{ item.metadata.country|default:"N/A" }}</td>
+              <td>{{ item.key }}</td>
+              <td>{{ item.ts|slice:":10" }}</td>
+              <td class="value-highlight">{{ item.value|floatformat:2 }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</div>
+
+<style>
+.kpi-card { background: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+.kpi-label { font-size: 0.875rem; color: #718096; margin-bottom: 0.5rem; }
+.kpi-value { font-size: 2rem; font-weight: 700; color: #1E3A5F; }
+</style>
+{% endblock %}

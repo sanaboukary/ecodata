@@ -1,0 +1,872 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dashboard Personnalisable{% endblock %}
+
+{% block extra_head %}
+<!-- Gridster.js CSS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery.gridster/0.5.6/jquery.gridster.min.css">
+<style>
+    .custom-dashboard-page {
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        min-height: 100vh;
+        padding: 2rem;
+    }
+    
+    .dashboard-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+    
+    .dashboard-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #60a5fa;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    
+    .dashboard-actions {
+        display: flex;
+        gap: 1rem;
+    }
+    
+    .btn-custom {
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 500;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .btn-add {
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        color: white;
+    }
+    
+    .btn-add:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 16px rgba(59, 130, 246, 0.4);
+    }
+    
+    .btn-layouts {
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .btn-layouts:hover {
+        background: rgba(255, 255, 255, 0.15);
+    }
+    
+    .btn-save {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+    }
+    
+    .btn-save:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 16px rgba(16, 185, 129, 0.4);
+    }
+    
+    .btn-reset {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        color: white;
+    }
+    
+    .btn-reset:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 16px rgba(239, 68, 68, 0.4);
+    }
+    
+    /* Gridster container */
+    .gridster {
+        margin: 0 auto;
+    }
+    
+    .gridster ul {
+        background: transparent;
+    }
+    
+    .gridster li {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        padding: 1rem;
+        transition: all 0.3s;
+        list-style: none;
+    }
+    
+    .gridster li:hover {
+        border-color: rgba(96, 165, 250, 0.5);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    }
+    
+    .widget-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .widget-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: white;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .widget-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+    
+    .widget-btn {
+        background: none;
+        border: none;
+        color: rgba(255, 255, 255, 0.6);
+        cursor: pointer;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        transition: all 0.2s;
+        font-size: 1.2rem;
+    }
+    
+    .widget-btn:hover {
+        color: white;
+        background: rgba(255, 255, 255, 0.1);
+    }
+    
+    .widget-body {
+        color: white;
+        min-height: 100px;
+    }
+    
+    .kpi-value {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #60a5fa;
+        margin: 1rem 0;
+    }
+    
+    .kpi-label {
+        font-size: 0.9rem;
+        color: rgba(255, 255, 255, 0.7);
+    }
+    
+    .kpi-variation {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+    
+    .kpi-variation.positive {
+        background: rgba(16, 185, 129, 0.2);
+        color: #10b981;
+    }
+    
+    .kpi-variation.negative {
+        background: rgba(239, 68, 68, 0.2);
+        color: #ef4444;
+    }
+    
+    .widget-chart {
+        width: 100%;
+        height: 250px;
+    }
+    
+    /* Modal */
+    .modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.7);
+        z-index: 9998;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .modal-overlay.active {
+        display: flex;
+    }
+    
+    .modal-content {
+        background: #1e293b;
+        border-radius: 16px;
+        padding: 2rem;
+        max-width: 600px;
+        width: 90%;
+        max-height: 80vh;
+        overflow-y: auto;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+    }
+    
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+    
+    .modal-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: white;
+    }
+    
+    .modal-close {
+        background: none;
+        border: none;
+        color: white;
+        font-size: 1.5rem;
+        cursor: pointer;
+        padding: 0.5rem;
+        border-radius: 4px;
+        transition: background 0.2s;
+    }
+    
+    .modal-close:hover {
+        background: rgba(255, 255, 255, 0.1);
+    }
+    
+    .modal-body {
+        color: white;
+    }
+    
+    .widget-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 1rem;
+    }
+    
+    .widget-card {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        padding: 1.5rem;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-align: center;
+    }
+    
+    .widget-card:hover {
+        border-color: rgba(96, 165, 250, 0.5);
+        transform: translateY(-4px);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    }
+    
+    .widget-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+    }
+    
+    .widget-name {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: white;
+        margin-bottom: 0.5rem;
+    }
+    
+    .widget-description {
+        font-size: 0.9rem;
+        color: rgba(255, 255, 255, 0.7);
+    }
+    
+    .layout-card {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        padding: 1.5rem;
+        cursor: pointer;
+        transition: all 0.3s;
+        margin-bottom: 1rem;
+    }
+    
+    .layout-card:hover {
+        border-color: rgba(96, 165, 250, 0.5);
+        transform: translateX(4px);
+    }
+    
+    .layout-name {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: white;
+        margin-bottom: 0.5rem;
+    }
+    
+    .layout-description {
+        color: rgba(255, 255, 255, 0.7);
+    }
+    
+    .empty-dashboard {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: rgba(255, 255, 255, 0.7);
+    }
+    
+    .empty-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+    }
+    
+    .loading {
+        text-align: center;
+        padding: 2rem;
+        color: rgba(255, 255, 255, 0.7);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="custom-dashboard-page">
+    <div class="dashboard-header">
+        <h1 class="dashboard-title">
+            <span>🎨</span>
+            Mon Dashboard Personnalisé
+        </h1>
+        
+        <div class="dashboard-actions">
+            <button class="btn-custom btn-add" onclick="openAddWidgetModal()">
+                <span>➕</span>
+                Ajouter Widget
+            </button>
+            <button class="btn-custom btn-layouts" onclick="openLayoutsModal()">
+                <span>📐</span>
+                Layouts Prédéfinis
+            </button>
+            <button class="btn-custom btn-save" onclick="saveLayout()">
+                <span>💾</span>
+                Sauvegarder
+            </button>
+            <button class="btn-custom btn-reset" onclick="resetLayout()">
+                <span>🔄</span>
+                Réinitialiser
+            </button>
+        </div>
+    </div>
+    
+    <div class="gridster" id="gridster-container">
+        <ul id="gridster-list">
+            <!-- Widgets chargés dynamiquement -->
+        </ul>
+    </div>
+    
+    <div id="emptyState" class="empty-dashboard" style="display: none;">
+        <div class="empty-icon">📊</div>
+        <h3>Votre dashboard est vide</h3>
+        <p>Cliquez sur "Ajouter Widget" pour commencer à construire votre dashboard</p>
+    </div>
+</div>
+
+<!-- Modal Ajouter Widget -->
+<div id="addWidgetModal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title">Choisir un Widget</h2>
+            <button class="modal-close" onclick="closeModal('addWidgetModal')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="widget-grid" id="widgetsList">
+                <div class="loading">Chargement...</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Layouts Prédéfinis -->
+<div id="layoutsModal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title">Layouts Prédéfinis</h2>
+            <button class="modal-close" onclick="closeModal('layoutsModal')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div id="layoutsList">
+                <div class="loading">Chargement...</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Configuration Widget -->
+<div id="configWidgetModal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title">Configuration Widget</h2>
+            <button class="modal-close" onclick="closeModal('configWidgetModal')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="widgetConfigForm">
+                <!-- Formulaire dynamique selon type widget -->
+            </form>
+            <div style="margin-top: 1.5rem; text-align: right;">
+                <button class="btn-custom btn-save" onclick="saveWidgetConfig()">Enregistrer</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<!-- jQuery requis pour Gridster -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!-- Gridster.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.gridster/0.5.6/jquery.gridster.min.js"></script>
+
+<script>
+let gridster;
+let availableWidgets = {{ available_widgets|safe }};
+let currentLayout = {{ user_layout|safe }};
+let widgetCounter = 0;
+
+// Initialisation
+$(document).ready(function() {
+    initGridster();
+    loadWidgets();
+    fetchAvailableWidgets();
+});
+
+function initGridster() {
+    gridster = $('.gridster ul').gridster({
+        widget_margins: [10, 10],
+        widget_base_dimensions: [100, 100],
+        min_cols: 12,
+        max_cols: 12,
+        draggable: {
+            handle: '.widget-header'
+        },
+        resize: {
+            enabled: true
+        }
+    }).data('gridster');
+}
+
+function loadWidgets() {
+    if (!currentLayout || currentLayout.length === 0) {
+        $('#emptyState').show();
+        return;
+    }
+    
+    $('#emptyState').hide();
+    
+    currentLayout.forEach((widget, index) => {
+        addWidgetToGrid(widget, index);
+    });
+}
+
+function addWidgetToGrid(widget, id) {
+    const pos = widget.position;
+    const html = generateWidgetHTML(widget, id);
+    
+    const $widget = gridster.add_widget(html, pos.w, pos.h, pos.x, pos.y);
+    
+    // Charger données widget
+    loadWidgetData(id, widget.type, widget.config);
+}
+
+function generateWidgetHTML(widget, id) {
+    const widgetInfo = availableWidgets.find(w => w.type === widget.type) || {};
+    
+    return `
+        <li data-widget-id="${id}" data-widget-type="${widget.type}">
+            <div class="widget-header">
+                <div class="widget-title">
+                    <span>${widgetInfo.icon || '📊'}</span>
+                    <span>${widgetInfo.name || widget.type}</span>
+                </div>
+                <div class="widget-actions">
+                    <button class="widget-btn" onclick="configureWidget(${id})" title="Configurer">⚙️</button>
+                    <button class="widget-btn" onclick="refreshWidget(${id})" title="Actualiser">🔄</button>
+                    <button class="widget-btn" onclick="removeWidget(${id})" title="Supprimer">🗑️</button>
+                </div>
+            </div>
+            <div class="widget-body" id="widget-body-${id}">
+                <div class="loading">Chargement...</div>
+            </div>
+        </li>
+    `;
+}
+
+function loadWidgetData(id, type, config) {
+    const configStr = encodeURIComponent(JSON.stringify(config));
+    
+    fetch(`/api/widget/${type}/data/?config=${configStr}`)
+        .then(res => res.json())
+        .then(data => {
+            renderWidget(id, type, data, config);
+        })
+        .catch(err => {
+            console.error('Erreur chargement widget:', err);
+            $(`#widget-body-${id}`).html('<p style="color: #ef4444;">Erreur chargement</p>');
+        });
+}
+
+function renderWidget(id, type, data, config) {
+    const $body = $(`#widget-body-${id}`);
+    
+    if (type === 'kpi') {
+        renderKPI($body, data, config);
+    } else if (type === 'line_chart') {
+        renderLineChart($body, data, config, id);
+    } else if (type === 'bar_chart') {
+        renderBarChart($body, data, config, id);
+    } else if (type === 'pie_chart') {
+        renderPieChart($body, data, config, id);
+    } else if (type === 'data_table') {
+        renderTable($body, data);
+    } else if (type === 'stock_ticker') {
+        renderStockTicker($body, data);
+    } else {
+        $body.html('<p>Type widget non supporté</p>');
+    }
+}
+
+function renderKPI($body, data, config) {
+    const variation = data.variation || 0;
+    const variationClass = variation >= 0 ? 'positive' : 'negative';
+    const variationIcon = variation >= 0 ? '↑' : '↓';
+    
+    const html = `
+        <div class="kpi-value">${formatNumber(data.value)}</div>
+        <div class="kpi-label">${data.indicator} - ${data.country || 'All'}</div>
+        ${config.show_variation && data.variation !== undefined ? `
+            <div class="kpi-variation ${variationClass}">
+                <span>${variationIcon}</span>
+                <span>${Math.abs(variation).toFixed(2)}%</span>
+            </div>
+        ` : ''}
+        <div style="margin-top: 0.5rem; font-size: 0.85rem; color: rgba(255,255,255,0.5);">
+            ${data.date}
+        </div>
+    `;
+    
+    $body.html(html);
+}
+
+function renderLineChart($body, data, config, id) {
+    $body.html(`<canvas id="chart-${id}" class="widget-chart"></canvas>`);
+    
+    const ctx = document.getElementById(`chart-${id}`).getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: data.labels,
+            datasets: [{
+                label: data.indicator,
+                data: data.values,
+                borderColor: config.color || '#3b82f6',
+                backgroundColor: `${config.color || '#3b82f6'}33`,
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: { color: 'white' }
+                }
+            },
+            scales: {
+                x: { ticks: { color: 'white' }, grid: { color: 'rgba(255,255,255,0.1)' } },
+                y: { ticks: { color: 'white' }, grid: { color: 'rgba(255,255,255,0.1)' } }
+            }
+        }
+    });
+}
+
+function renderBarChart($body, data, config, id) {
+    $body.html(`<canvas id="chart-${id}" class="widget-chart"></canvas>`);
+    
+    const ctx = document.getElementById(`chart-${id}`).getContext('2d');
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: data.labels,
+            datasets: [{
+                label: data.indicator,
+                data: data.values,
+                backgroundColor: config.color || '#3b82f6'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: { color: 'white' }
+                }
+            },
+            scales: {
+                x: { ticks: { color: 'white' }, grid: { color: 'rgba(255,255,255,0.1)' } },
+                y: { ticks: { color: 'white' }, grid: { color: 'rgba(255,255,255,0.1)' } }
+            }
+        }
+    });
+}
+
+function renderPieChart($body, data, config, id) {
+    $body.html(`<canvas id="chart-${id}" class="widget-chart"></canvas>`);
+    
+    const ctx = document.getElementById(`chart-${id}`).getContext('2d');
+    new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: data.labels,
+            datasets: [{
+                data: data.values,
+                backgroundColor: data.colors || ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6']
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: { color: 'white' }
+                }
+            }
+        }
+    });
+}
+
+function renderTable($body, data) {
+    let html = '<table style="width: 100%; color: white; font-size: 0.9rem;">';
+    html += '<thead><tr><th>Indicateur</th><th>Date</th><th>Valeur</th></tr></thead><tbody>';
+    
+    data.rows.forEach(row => {
+        html += `<tr>
+            <td>${row.indicator}</td>
+            <td>${row.date}</td>
+            <td>${formatNumber(row.value)}</td>
+        </tr>`;
+    });
+    
+    html += '</tbody></table>';
+    $body.html(html);
+}
+
+function renderStockTicker($body, data) {
+    let html = '<div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem;">';
+    
+    data.stocks.forEach(stock => {
+        const variationClass = stock.variation >= 0 ? 'positive' : 'negative';
+        html += `
+            <div style="background: rgba(255,255,255,0.05); padding: 0.75rem; border-radius: 8px;">
+                <div style="font-weight: 600;">${stock.symbol}</div>
+                <div style="font-size: 1.2rem; color: #60a5fa; margin: 0.25rem 0;">${stock.price}</div>
+                <div class="kpi-variation ${variationClass}">
+                    ${stock.variation >= 0 ? '↑' : '↓'} ${Math.abs(stock.variation).toFixed(2)}%
+                </div>
+            </div>
+        `;
+    });
+    
+    html += '</div>';
+    $body.html(html);
+}
+
+function formatNumber(value) {
+    if (value === null || value === undefined) return 'N/A';
+    return new Intl.NumberFormat('fr-FR', {
+        maximumFractionDigits: 2
+    }).format(value);
+}
+
+function fetchAvailableWidgets() {
+    fetch('/api/widgets/')
+        .then(res => res.json())
+        .then(data => {
+            availableWidgets = data.widgets;
+            displayWidgetsList();
+        });
+}
+
+function displayWidgetsList() {
+    const html = availableWidgets.map(widget => `
+        <div class="widget-card" onclick="selectWidget('${widget.type}')">
+            <div class="widget-icon">${widget.icon}</div>
+            <div class="widget-name">${widget.name}</div>
+            <div class="widget-description">${widget.description}</div>
+        </div>
+    `).join('');
+    
+    $('#widgetsList').html(html);
+}
+
+function selectWidget(type) {
+    // Ouvrir modal config pour ce type
+    openConfigModal(type);
+}
+
+function openConfigModal(type) {
+    // TODO: Générer formulaire selon widget.config_schema
+    closeModal('addWidgetModal');
+    alert(`Configuration widget ${type} - À implémenter`);
+}
+
+function openAddWidgetModal() {
+    $('#addWidgetModal').addClass('active');
+}
+
+function openLayoutsModal() {
+    $('#layoutsModal').addClass('active');
+    fetchPredefinedLayouts();
+}
+
+function fetchPredefinedLayouts() {
+    fetch('/api/layouts/')
+        .then(res => res.json())
+        .then(data => {
+            displayLayoutsList(data.layouts);
+        });
+}
+
+function displayLayoutsList(layouts) {
+    const html = layouts.map(layout => `
+        <div class="layout-card" onclick="applyLayout('${layout.id}')">
+            <div class="layout-name">${layout.name}</div>
+            <div class="layout-description">${layout.description}</div>
+        </div>
+    `).join('');
+    
+    $('#layoutsList').html(html);
+}
+
+function applyLayout(layoutId) {
+    if (!confirm('Remplacer votre layout actuel ?')) return;
+    
+    fetch(`/api/dashboard/reset/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({ layout_id: layoutId })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        }
+    });
+}
+
+function saveLayout() {
+    const widgets = [];
+    
+    $('.gridster li').each(function() {
+        const $widget = $(this);
+        const id = $widget.data('widget-id');
+        const type = $widget.data('widget-type');
+        const position = $widget.data('coords');
+        const sizex = $widget.data('sizex');
+        const sizey = $widget.data('sizey');
+        
+        widgets.push({
+            type: type,
+            position: {
+                x: position.col - 1,
+                y: position.row - 1,
+                w: sizex,
+                h: sizey
+            },
+            config: currentLayout[id]?.config || {}
+        });
+    });
+    
+    fetch('/api/dashboard/save/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({ layout: widgets })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            alert('✅ Layout sauvegardé !');
+        } else {
+            alert('❌ Erreur: ' + data.error);
+        }
+    });
+}
+
+function resetLayout() {
+    if (!confirm('Supprimer tous les widgets ?')) return;
+    
+    fetch('/api/dashboard/reset/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({})
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        }
+    });
+}
+
+function refreshWidget(id) {
+    const $widget = $(`.gridster li[data-widget-id="${id}"]`);
+    const type = $widget.data('widget-type');
+    const config = currentLayout[id]?.config || {};
+    
+    loadWidgetData(id, type, config);
+}
+
+function configureWidget(id) {
+    alert('Configuration widget - À implémenter');
+}
+
+function removeWidget(id) {
+    if (!confirm('Supprimer ce widget ?')) return;
+    
+    const $widget = $(`.gridster li[data-widget-id="${id}"]`);
+    gridster.remove_widget($widget);
+}
+
+function closeModal(modalId) {
+    $(`#${modalId}`).removeClass('active');
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
+{% endblock %}

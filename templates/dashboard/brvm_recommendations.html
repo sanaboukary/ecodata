@@ -1,0 +1,948 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Recommandations d'Investissement BRVM - AI Predictions{% endblock %}
+
+{% block head_extra %}
+<style>
+  body {
+    background: #f8fafc;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+
+  .recommendations-header {
+    background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+    color: white;
+    padding: 3rem 2rem;
+    margin-bottom: 2rem;
+  }
+
+  .header-content {
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  .header-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin-bottom: 1rem;
+  }
+
+  .header-subtitle {
+    font-size: 1.1rem;
+    opacity: 0.9;
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    max-width: 1400px;
+    margin: -2rem auto 2rem;
+    padding: 0 2rem;
+  }
+
+  .stat-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    text-align: center;
+  }
+
+  .stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1e3a8a;
+    margin-bottom: 0.5rem;
+  }
+
+  .stat-label {
+    color: #64748b;
+    font-size: 0.9rem;
+  }
+
+  .content-wrapper {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 2rem 3rem;
+  }
+
+  .section-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #1e3a8a;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .recommendations-grid {
+    display: grid;
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+  }
+
+  .rec-card {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s;
+    border-left: 4px solid #e2e8f0;
+  }
+
+  .rec-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+  }
+
+  .rec-card.strong-buy {
+    border-left-color: #10b981;
+  }
+
+  .rec-card.buy {
+    border-left-color: #3b82f6;
+  }
+
+  .rec-card.strong-sell {
+    border-left-color: #ef4444;
+  }
+
+  .rec-card.sell {
+    border-left-color: #f59e0b;
+  }
+
+  .rec-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1.5rem;
+  }
+
+  .rec-symbol {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1e3a8a;
+  }
+
+  .rec-company {
+    color: #64748b;
+    font-size: 0.9rem;
+  }
+
+  .rec-action {
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+  }
+
+  .action-strong-buy {
+    background: #10b981;
+    color: white;
+  }
+
+  .action-buy {
+    background: #3b82f6;
+    color: white;
+  }
+
+  .action-strong-sell {
+    background: #ef4444;
+    color: white;
+  }
+
+  .action-sell {
+    background: #f59e0b;
+    color: white;
+  }
+
+  .rec-metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .metric {
+    text-align: center;
+    padding: 1rem;
+    background: #f8fafc;
+    border-radius: 8px;
+  }
+
+  .metric-value {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #1e3a8a;
+  }
+
+  .metric-label {
+    color: #64748b;
+    font-size: 0.8rem;
+    margin-top: 0.3rem;
+  }
+
+  .rec-details {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e2e8f0;
+  }
+
+  .detail-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem;
+  }
+
+  .detail-label {
+    color: #64748b;
+    font-size: 0.9rem;
+  }
+
+  .detail-value {
+    font-weight: 600;
+    color: #1e3a8a;
+  }
+
+  .confidence-bar {
+    height: 8px;
+    background: #e2e8f0;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-top: 1rem;
+  }
+
+  .confidence-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #10b981 0%, #3b82f6 100%);
+    transition: width 0.5s;
+  }
+
+  .risk-badge {
+    display: inline-block;
+    padding: 0.3rem 0.8rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+
+  .risk-faible { background: #d1fae5; color: #065f46; }
+  .risk-modere { background: #dbeafe; color: #1e40af; }
+  .risk-eleve { background: #fed7aa; color: #c2410c; }
+  .risk-tres-eleve { background: #fee2e2; color: #991b1b; }
+
+  .empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: #64748b;
+  }
+
+  .empty-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+  }
+  
+  .data-info-banner {
+    background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+    border: 2px solid #0ea5e9;
+    border-radius: 12px;
+    padding: 1rem 1.5rem;
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  
+  .data-info-content {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  
+  .data-info-icon {
+    font-size: 1.8rem;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="recommendations-header">
+  <div class="header-content">
+    <h1 class="header-title">
+      <i class="fas fa-brain"></i>
+      Recommandations d'Investissement BRVM
+    </h1>
+    <p class="header-subtitle">
+      Analyse IA avancée · 15+ facteurs : Indicateurs Techniques (RSI, MACD, Bollinger, ATR) + NLP Publications + Fondamentaux (P/E, ROE, Dette, Dividendes) + Macro-économie (7 secteurs)
+      <br>
+      <strong>Objectif : 50-80% rendement hebdomadaire · Précision cible : 85-95%</strong>
+    </p>
+  </div>
+</div>
+
+<!-- Bannière d'information sur les données -->
+<div class="data-info-banner">
+  <div class="data-info-content">
+    <div class="data-info-icon">📊</div>
+    <div>
+      <div style="font-weight: 700; color: #0c4a6e; font-size: 1rem;">
+        {% if data_source == 'cache' %}
+          ✅ Données stables pour présentation investisseurs
+        {% else %}
+          🔄 Données fraîchement générées
+        {% endif %}
+      </div>
+      <div style="font-size: 0.85rem; color: #0369a1; margin-top: 0.2rem;">
+        {% if cache_time %}
+          Analyse du {{ cache_time|date:"d/m/Y à H:i" }} · Mise à jour automatique toutes les 6h (8h, 12h, 16h)
+        {% else %}
+          Générée le {{ timestamp|slice:":10" }} à {{ timestamp|slice:"11:16" }}
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  <div>
+    <a href="?refresh=true" style="background: #0ea5e9; color: white; padding: 0.5rem 1rem; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 0.9rem;">
+      🔄 Actualiser
+    </a>
+  </div>
+</div>
+
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-value">{{ recommendations.total_recommendations }}</div>
+    <div class="stat-label">Recommandations Actives</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value">{{ recommendations.average_confidence|floatformat:0 }}%</div>
+    <div class="stat-label">Confiance Moyenne</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value">{{ recommendations.average_weekly_potential|floatformat:1 }}%</div>
+    <div class="stat-label">Potentiel Hebdo Moyen</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value">{{ performance.backtest_7_days.win_rate|floatformat:0 }}%</div>
+    <div class="stat-label">Taux de Réussite (7j)</div>
+  </div>
+</div>
+
+<div class="content-wrapper">
+  <!-- Section Actions à Fort Potentiel -->
+  {% if recommendations.high_potential_stocks %}
+  <section style="margin-bottom: 3rem; background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); padding: 2rem; border-radius: 16px; border: 3px solid #f59e0b;">
+    <h2 class="section-title" style="color: #92400e;">
+      <i class="fas fa-rocket" style="color: #f59e0b;"></i>
+      🔥 Actions à Fort Potentiel (≥50% de gain hebdomadaire)
+    </h2>
+    <p style="color: #92400e; margin-bottom: 1.5rem; font-size: 1.05rem;">
+      <strong>{{ recommendations.statistics.total_high_potential }}</strong> actions identifiées avec un potentiel de gain exceptionnel
+    </p>
+    <div class="recommendations-grid">
+      {% for rec in recommendations.high_potential_stocks %}
+      <div class="rec-card strong-buy" style="background: white; border: 2px solid #f59e0b;">
+        <div style="position: absolute; top: -12px; right: 20px; background: #f59e0b; color: white; padding: 0.3rem 0.8rem; border-radius: 20px; font-weight: 700; font-size: 0.8rem;">
+          🚀 FORT POTENTIEL
+        </div>
+        <div class="rec-header">
+          <div>
+            <div class="rec-symbol">{{ rec.symbol }}</div>
+            <div class="rec-company">{{ rec.company_name }}</div>
+          </div>
+          <div class="rec-action action-strong-buy">{{ rec.action }}</div>
+        </div>
+        
+        <div class="rec-metrics">
+          <div class="metric">
+            <div class="metric-label">Prix Actuel</div>
+            <div class="metric-value">{{ rec.current_price|floatformat:0 }} FCFA</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Prix Cible</div>
+            <div class="metric-value" style="color: #10b981;">{{ rec.target_price|floatformat:0 }} FCFA</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Gain Attendu</div>
+            <div class="metric-value" style="color: #10b981; font-size: 1.3rem;">+{{ rec.expected_weekly_return|floatformat:1 }}%</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Confiance</div>
+            <div class="metric-value">{{ rec.confidence|floatformat:0 }}%</div>
+          </div>
+        </div>
+        
+        <!-- Nouveau: Stratégie de Trading Hebdomadaire -->
+        <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); padding: 1.2rem; border-radius: 8px; margin: 1rem 0; border: 2px solid #f59e0b;">
+          <div style="font-weight: 700; color: #92400e; margin-bottom: 0.8rem; font-size: 1.1rem;">
+            📊 Stratégie de Trading Hebdomadaire
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;">
+            <div style="text-align: center;">
+              <div style="font-size: 0.75rem; color: #92400e; font-weight: 600; margin-bottom: 0.3rem;">💰 PRIX D'ACHAT</div>
+              <div style="font-size: 1.3rem; font-weight: 700; color: #059669;">{{ rec.buy_price|floatformat:0 }} FCFA</div>
+              <div style="font-size: 0.7rem; color: #78716c; margin-top: 0.2rem;">Entrée optimale</div>
+            </div>
+            <div style="text-align: center;">
+              <div style="font-size: 0.75rem; color: #92400e; font-weight: 600; margin-bottom: 0.3rem;">🎯 PRIX DE VENTE (7j)</div>
+              <div style="font-size: 1.3rem; font-weight: 700; color: #dc2626;">{{ rec.sell_price_week|floatformat:0 }} FCFA</div>
+              <div style="font-size: 0.7rem; color: #78716c; margin-top: 0.2rem;">Sortie semaine</div>
+            </div>
+            <div style="text-align: center;">
+              <div style="font-size: 0.75rem; color: #92400e; font-weight: 600; margin-bottom: 0.3rem;">📈 PROFIT</div>
+              <div style="font-size: 1.3rem; font-weight: 700; color: #7c3aed;">+{{ rec.weekly_profit_potential|floatformat:1 }}%</div>
+              <div style="font-size: 0.7rem; color: #78716c; margin-top: 0.2rem;">Gain 7 jours</div>
+            </div>
+          </div>
+          <div style="margin-top: 0.8rem; padding-top: 0.8rem; border-top: 1px solid #fbbf24; font-size: 0.85rem; color: #78350f;">
+            <strong>⚡ Plan d'action:</strong> Achetez à <strong>{{ rec.buy_price|floatformat:0 }} FCFA</strong>, 
+            vendez à <strong>{{ rec.sell_price_week|floatformat:0 }} FCFA</strong> avant 7 jours pour un profit de 
+            <strong style="color: #059669;">+{{ rec.weekly_profit_potential|floatformat:1 }}%</strong>
+          </div>
+        </div>
+        
+        <!-- Indicateurs Techniques Complets -->
+        <div style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); padding: 1.2rem; border-radius: 8px; margin: 1rem 0; border: 2px solid #0ea5e9;">
+          <div style="font-weight: 700; color: #0c4a6e; margin-bottom: 0.8rem; font-size: 1.1rem;">
+            📊 Analyse Technique Complète
+          </div>
+          
+          <!-- Ligne 1: Indicateurs principaux -->
+          <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.8rem; margin-bottom: 0.8rem;">
+            {% if rec.rsi %}
+            <div style="background: white; padding: 0.6rem; border-radius: 6px; text-align: center;">
+              <div style="font-size: 0.7rem; color: #64748b; font-weight: 600;">RSI (14)</div>
+              <div style="font-size: 1.1rem; font-weight: 700; color: {% if rec.rsi < 30 %}#22c55e{% elif rec.rsi > 70 %}#ef4444{% else %}#3b82f6{% endif %};">
+                {{ rec.rsi|floatformat:1 }}
+              </div>
+            </div>
+            {% endif %}
+            
+            <div style="background: white; padding: 0.6rem; border-radius: 6px; text-align: center;">
+              <div style="font-size: 0.7rem; color: #64748b; font-weight: 600;">Volatilité</div>
+              <div style="font-size: 1.1rem; font-weight: 700; color: {% if rec.volatility > 50 %}#ef4444{% elif rec.volatility > 30 %}#f59e0b{% else %}#22c55e{% endif %};">
+                {{ rec.volatility|floatformat:1 }}%
+              </div>
+            </div>
+            
+            <div style="background: white; padding: 0.6rem; border-radius: 6px; text-align: center;">
+              <div style="font-size: 0.7rem; color: #64748b; font-weight: 600;">Volume</div>
+              <div style="font-size: 1.1rem; font-weight: 700; color: {% if rec.volume_ratio > 1.5 %}#22c55e{% elif rec.volume_ratio > 1 %}#3b82f6{% else %}#94a3b8{% endif %};">
+                {{ rec.volume_ratio|floatformat:2 }}x
+              </div>
+            </div>
+            
+            <div style="background: white; padding: 0.6rem; border-radius: 6px; text-align: center;">
+              <div style="font-size: 0.7rem; color: #64748b; font-weight: 600;">Tendance</div>
+              <div style="font-size: 1.1rem; font-weight: 700; color: {% if rec.trend == 'UP' %}#22c55e{% elif rec.trend == 'DOWN' %}#ef4444{% else %}#94a3b8{% endif %};">
+                {{ rec.trend }}
+              </div>
+            </div>
+          </div>
+          
+          <!-- Ligne 2: MACD -->
+          {% if rec.macd %}
+          <div style="background: white; padding: 0.8rem; border-radius: 6px; margin-bottom: 0.8rem;">
+            <div style="font-size: 0.75rem; color: #64748b; font-weight: 600; margin-bottom: 0.4rem;">📈 MACD</div>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; font-size: 0.8rem;">
+              <div>
+                <span style="color: #64748b;">Ligne:</span> 
+                <strong style="color: {% if rec.macd.macd > 0 %}#22c55e{% else %}#ef4444{% endif %};">{{ rec.macd.macd|floatformat:2 }}</strong>
+              </div>
+              <div>
+                <span style="color: #64748b;">Signal:</span> 
+                <strong style="color: {% if rec.macd.signal > 0 %}#22c55e{% else %}#ef4444{% endif %};">{{ rec.macd.signal|floatformat:2 }}</strong>
+              </div>
+              <div>
+                <span style="color: #64748b;">Histogramme:</span> 
+                <strong style="color: {% if rec.macd.histogram > 0 %}#22c55e{% else %}#ef4444{% endif %};">{{ rec.macd.histogram|floatformat:2 }}</strong>
+              </div>
+            </div>
+            <div style="margin-top: 0.4rem; font-size: 0.75rem;">
+              <span style="padding: 0.2rem 0.5rem; border-radius: 4px; background: {% if rec.macd.trend == 'BULLISH' %}#dcfce7{% else %}#fee2e2{% endif %}; color: {% if rec.macd.trend == 'BULLISH' %}#166534{% else %}#991b1b{% endif %}; font-weight: 600;">
+                {{ rec.macd.trend }} (Force: {{ rec.macd.strength|floatformat:0 }}%)
+              </span>
+            </div>
+          </div>
+          {% endif %}
+          
+          <!-- Ligne 3: Bollinger Bands -->
+          {% if rec.bollinger %}
+          <div style="background: white; padding: 0.8rem; border-radius: 6px; margin-bottom: 0.8rem;">
+            <div style="font-size: 0.75rem; color: #64748b; font-weight: 600; margin-bottom: 0.4rem;">📊 Bandes de Bollinger</div>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; font-size: 0.8rem;">
+              <div>
+                <span style="color: #64748b;">Supérieure:</span> 
+                <strong style="color: #3b82f6;">{{ rec.bollinger.upper|floatformat:0 }}</strong>
+              </div>
+              <div>
+                <span style="color: #64748b;">Moyenne:</span> 
+                <strong style="color: #64748b;">{{ rec.bollinger.middle|floatformat:0 }}</strong>
+              </div>
+              <div>
+                <span style="color: #64748b;">Inférieure:</span> 
+                <strong style="color: #3b82f6;">{{ rec.bollinger.lower|floatformat:0 }}</strong>
+              </div>
+            </div>
+            <div style="margin-top: 0.4rem; font-size: 0.75rem;">
+              <span style="padding: 0.2rem 0.5rem; border-radius: 4px; background: #f1f5f9; color: #475569; font-weight: 600;">
+                Position: {{ rec.bollinger.percent_b|floatformat:2 }} | {{ rec.bollinger.signal }}
+              </span>
+            </div>
+          </div>
+          {% endif %}
+          
+          <!-- Ligne 4: Sentiment & Macro -->
+          <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.8rem;">
+            {% if rec.publication_sentiment and rec.publication_sentiment.sentiment_score %}
+            <div style="background: white; padding: 0.8rem; border-radius: 6px;">
+              <div style="font-size: 0.75rem; color: #64748b; font-weight: 600; margin-bottom: 0.4rem;">📰 Sentiment Publications</div>
+              <div style="font-size: 1.1rem; font-weight: 700; color: {% if rec.publication_sentiment.sentiment_score > 20 %}#22c55e{% elif rec.publication_sentiment.sentiment_score < -20 %}#ef4444{% else %}#94a3b8{% endif %};">
+                {{ rec.publication_sentiment.sentiment_score }}/100
+              </div>
+              <div style="font-size: 0.7rem; color: #64748b; margin-top: 0.2rem;">{{ rec.publication_sentiment.sentiment_label }}</div>
+            </div>
+            {% endif %}
+            
+            {% if rec.macro_context and rec.macro_context.sector %}
+            <div style="background: white; padding: 0.8rem; border-radius: 6px;">
+              <div style="font-size: 0.75rem; color: #64748b; font-weight: 600; margin-bottom: 0.4rem;">🌍 Contexte Macro</div>
+              <div style="font-size: 0.9rem; font-weight: 700; color: #3b82f6;">
+                {{ rec.macro_context.sector }}
+              </div>
+              <div style="font-size: 0.7rem; color: #64748b; margin-top: 0.2rem;">{{ rec.macro_context.macro_signal }}</div>
+            </div>
+            {% endif %}
+          </div>
+          
+          <!-- Ligne 5: Fundamentaux -->
+          {% if rec.fundamentals %}
+          <div style="background: white; padding: 0.8rem; border-radius: 6px; margin-top: 0.8rem;">
+            <div style="font-size: 0.75rem; color: #64748b; font-weight: 600; margin-bottom: 0.4rem;">💼 Analyse Fondamentale</div>
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; font-size: 0.75rem;">
+              {% if rec.fundamentals.pe_ratio %}
+              <div>
+                <span style="color: #64748b;">P/E:</span> 
+                <strong style="color: {% if rec.fundamentals.pe_ratio < 10 %}#22c55e{% elif rec.fundamentals.pe_ratio < 15 %}#3b82f6{% else %}#f59e0b{% endif %};">{{ rec.fundamentals.pe_ratio }}</strong>
+              </div>
+              {% endif %}
+              {% if rec.fundamentals.roe %}
+              <div>
+                <span style="color: #64748b;">ROE:</span> 
+                <strong style="color: {% if rec.fundamentals.roe > 15 %}#22c55e{% elif rec.fundamentals.roe > 10 %}#3b82f6{% else %}#f59e0b{% endif %};">{{ rec.fundamentals.roe }}%</strong>
+              </div>
+              {% endif %}
+              {% if rec.fundamentals.dividend_yield %}
+              <div>
+                <span style="color: #64748b;">Dividende:</span> 
+                <strong style="color: #22c55e;">{{ rec.fundamentals.dividend_yield }}%</strong>
+              </div>
+              {% endif %}
+              {% if rec.fundamentals.debt_ratio %}
+              <div>
+                <span style="color: #64748b;">Dette:</span> 
+                <strong style="color: {% if rec.fundamentals.debt_ratio < 30 %}#22c55e{% elif rec.fundamentals.debt_ratio < 50 %}#3b82f6{% else %}#ef4444{% endif %};">{{ rec.fundamentals.debt_ratio }}%</strong>
+              </div>
+              {% endif %}
+            </div>
+          </div>
+          {% endif %}
+        </div>
+        
+        <div class="rec-levels">
+          <div class="level">
+            <span class="level-label">Stop Loss:</span>
+            <span class="level-value stop-loss">{{ rec.stop_loss|floatformat:0 }} FCFA</span>
+          </div>
+          <div class="level">
+            <span class="level-label">Take Profit 1:</span>
+            <span class="level-value take-profit">{{ rec.take_profit_1|floatformat:0 }} FCFA</span>
+          </div>
+          <div class="level">
+            <span class="level-label">Take Profit 2:</span>
+            <span class="level-value take-profit">{{ rec.take_profit_2|floatformat:0 }} FCFA</span>
+          </div>
+        </div>
+        
+        {% if rec.reasons %}
+        <div class="rec-reasons">
+          <strong style="color: #92400e;">Raisons de l'opportunité:</strong>
+          <ul>
+            {% for reason in rec.reasons %}
+            <li>{{ reason }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- Section Opportunités Premium -->
+  {% if recommendations.premium_opportunities %}
+  <section style="margin-bottom: 3rem; background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); padding: 2rem; border-radius: 16px; border: 3px solid #3b82f6;">
+    <h2 class="section-title" style="color: #1e3a8a;">
+      <i class="fas fa-gem" style="color: #3b82f6;"></i>
+      💎 Opportunités Premium (≥70% confiance + ≥40% gain)
+    </h2>
+    <p style="color: #1e3a8a; margin-bottom: 1.5rem; font-size: 1.05rem;">
+      <strong>{{ recommendations.statistics.total_premium }}</strong> opportunités de haute qualité validées par notre IA
+    </p>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem;">
+      {% for rec in recommendations.premium_opportunities %}
+      <div style="background: white; padding: 1.5rem; border-radius: 10px; border: 2px solid #3b82f6;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+          <div>
+            <div style="font-size: 1.1rem; font-weight: 700; color: #1e3a8a;">{{ rec.symbol }}</div>
+            <div style="font-size: 1.0rem; color: #475569; margin-top: 0.25rem; font-weight: 500;">{{ rec.company_name }}</div>
+          </div>
+          <div style="text-align: right;">
+            <div style="font-size: 1.5rem; font-weight: 700; color: #10b981;">+{{ rec.expected_weekly_return|floatformat:0 }}%</div>
+            <div style="font-size: 0.8rem; color: #64748b;">{{ rec.confidence|floatformat:0 }}% confiance</div>
+          </div>
+        </div>
+        <div style="display: flex; justify-content: space-between; padding-top: 1rem; border-top: 1px solid #e2e8f0;">
+          <div>
+            <div style="font-size: 0.75rem; color: #64748b;">Prix actuel</div>
+            <div style="font-weight: 600;">{{ rec.current_price|floatformat:0 }} FCFA</div>
+          </div>
+          <div>
+            <div style="font-size: 0.75rem; color: #64748b;">Cible</div>
+            <div style="font-weight: 600; color: #10b981;">{{ rec.target_price|floatformat:0 }} FCFA</div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  {% if recommendations.strong_buys %}
+  <section style="margin-bottom: 3rem;">
+    <h2 class="section-title">
+      <i class="fas fa-fire" style="color: #10b981;"></i>
+      Achats Recommandés - Forte Conviction
+    </h2>
+    <div class="recommendations-grid">
+      {% for rec in recommendations.strong_buys %}
+      <div class="rec-card strong-buy">
+        <div class="rec-header">
+          <div>
+            <div class="rec-symbol">{{ rec.symbol }}</div>
+            <div class="rec-company">{{ rec.company_name }}</div>
+          </div>
+          <div class="rec-action action-strong-buy">{{ rec.action }}</div>
+        </div>
+
+        <div class="rec-metrics">
+          <div class="metric">
+            <div class="metric-value">{{ rec.current_price|floatformat:0 }}</div>
+            <div class="metric-label">Prix Actuel (FCFA)</div>
+          </div>
+          <div class="metric">
+            <div class="metric-value" style="color: #10b981;">+{{ rec.expected_weekly_return|floatformat:1 }}%</div>
+            <div class="metric-label">Potentiel Hebdo</div>
+          </div>
+          <div class="metric">
+            <div class="metric-value">{{ rec.target_price|floatformat:0 }}</div>
+            <div class="metric-label">Prix Cible</div>
+          </div>
+          <div class="metric">
+            <div class="metric-value">{{ rec.confidence|floatformat:0 }}%</div>
+            <div class="metric-label">Confiance</div>
+          </div>
+        </div>
+
+        <!-- Stratégie de Trading Hebdomadaire -->
+        <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); padding: 1.2rem; border-radius: 8px; margin: 1rem 0; border: 2px solid #f59e0b;">
+          <div style="font-weight: 700; color: #92400e; margin-bottom: 0.8rem; font-size: 1.1rem;">
+            📊 Stratégie de Trading Hebdomadaire
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;">
+            <div style="text-align: center;">
+              <div style="font-size: 0.75rem; color: #92400e; font-weight: 600; margin-bottom: 0.3rem;">💰 PRIX D'ACHAT</div>
+              <div style="font-size: 1.3rem; font-weight: 700; color: #059669;">{{ rec.buy_price|floatformat:0 }} FCFA</div>
+              <div style="font-size: 0.7rem; color: #78716c; margin-top: 0.2rem;">Entrée optimale</div>
+            </div>
+            <div style="text-align: center;">
+              <div style="font-size: 0.75rem; color: #92400e; font-weight: 600; margin-bottom: 0.3rem;">🎯 PRIX DE VENTE (7j)</div>
+              <div style="font-size: 1.3rem; font-weight: 700; color: #dc2626;">{{ rec.sell_price_week|floatformat:0 }} FCFA</div>
+              <div style="font-size: 0.7rem; color: #78716c; margin-top: 0.2rem;">Sortie semaine</div>
+            </div>
+            <div style="text-align: center;">
+              <div style="font-size: 0.75rem; color: #92400e; font-weight: 600; margin-bottom: 0.3rem;">📈 PROFIT</div>
+              <div style="font-size: 1.3rem; font-weight: 700; color: #7c3aed;">+{{ rec.weekly_profit_potential|floatformat:1 }}%</div>
+              <div style="font-size: 0.7rem; color: #78716c; margin-top: 0.2rem;">Gain 7 jours</div>
+            </div>
+          </div>
+          <div style="margin-top: 0.8rem; padding-top: 0.8rem; border-top: 1px solid #fbbf24; font-size: 0.85rem; color: #78350f;">
+            <strong>⚡ Plan d'action:</strong> Achetez à <strong>{{ rec.buy_price|floatformat:0 }} FCFA</strong>, 
+            vendez à <strong>{{ rec.sell_price_week|floatformat:0 }} FCFA</strong> avant 7 jours pour un profit de 
+            <strong style="color: #059669;">+{{ rec.weekly_profit_potential|floatformat:1 }}%</strong>
+          </div>
+        </div>
+        
+        <!-- Indicateurs Techniques Complets -->
+        <div style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); padding: 1.2rem; border-radius: 8px; margin: 1rem 0; border: 2px solid #0ea5e9;">
+          <div style="font-weight: 700; color: #0c4a6e; margin-bottom: 0.8rem; font-size: 1.1rem;">
+            📊 Analyse Technique Complète
+          </div>
+          
+          <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.8rem; margin-bottom: 0.8rem;">
+            {% if rec.rsi %}
+            <div style="background: white; padding: 0.6rem; border-radius: 6px; text-align: center;">
+              <div style="font-size: 0.7rem; color: #64748b; font-weight: 600;">RSI (14)</div>
+              <div style="font-size: 1.1rem; font-weight: 700; color: {% if rec.rsi < 30 %}#22c55e{% elif rec.rsi > 70 %}#ef4444{% else %}#3b82f6{% endif %};">
+                {{ rec.rsi|floatformat:1 }}
+              </div>
+            </div>
+            {% endif %}
+            
+            <div style="background: white; padding: 0.6rem; border-radius: 6px; text-align: center;">
+              <div style="font-size: 0.7rem; color: #64748b; font-weight: 600;">Volatilité</div>
+              <div style="font-size: 1.1rem; font-weight: 700; color: {% if rec.volatility > 50 %}#ef4444{% elif rec.volatility > 30 %}#f59e0b{% else %}#22c55e{% endif %};">
+                {{ rec.volatility|floatformat:1 }}%
+              </div>
+            </div>
+            
+            <div style="background: white; padding: 0.6rem; border-radius: 6px; text-align: center;">
+              <div style="font-size: 0.7rem; color: #64748b; font-weight: 600;">Volume</div>
+              <div style="font-size: 1.1rem; font-weight: 700; color: {% if rec.volume_ratio > 1.5 %}#22c55e{% elif rec.volume_ratio > 1 %}#3b82f6{% else %}#94a3b8{% endif %};">
+                {{ rec.volume_ratio|floatformat:2 }}x
+              </div>
+            </div>
+            
+            <div style="background: white; padding: 0.6rem; border-radius: 6px; text-align: center;">
+              <div style="font-size: 0.7rem; color: #64748b; font-weight: 600;">Tendance</div>
+              <div style="font-size: 1.1rem; font-weight: 700; color: {% if rec.trend == 'UP' %}#22c55e{% elif rec.trend == 'DOWN' %}#ef4444{% else %}#94a3b8{% endif %};">
+                {{ rec.trend }}
+              </div>
+            </div>
+          </div>
+          
+          {% if rec.macd %}
+          <div style="background: white; padding: 0.8rem; border-radius: 6px; margin-bottom: 0.8rem;">
+            <div style="font-size: 0.75rem; color: #64748b; font-weight: 600; margin-bottom: 0.4rem;">📈 MACD</div>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; font-size: 0.8rem;">
+              <div>
+                <span style="color: #64748b;">Ligne:</span> 
+                <strong style="color: {% if rec.macd.macd > 0 %}#22c55e{% else %}#ef4444{% endif %};">{{ rec.macd.macd|floatformat:2 }}</strong>
+              </div>
+              <div>
+                <span style="color: #64748b;">Signal:</span> 
+                <strong style="color: {% if rec.macd.signal > 0 %}#22c55e{% else %}#ef4444{% endif %};">{{ rec.macd.signal|floatformat:2 }}</strong>
+              </div>
+              <div>
+                <span style="color: #64748b;">Histogramme:</span> 
+                <strong style="color: {% if rec.macd.histogram > 0 %}#22c55e{% else %}#ef4444{% endif %};">{{ rec.macd.histogram|floatformat:2 }}</strong>
+              </div>
+            </div>
+            <div style="margin-top: 0.4rem; font-size: 0.75rem;">
+              <span style="padding: 0.2rem 0.5rem; border-radius: 4px; background: {% if rec.macd.trend == 'BULLISH' %}#dcfce7{% else %}#fee2e2{% endif %}; color: {% if rec.macd.trend == 'BULLISH' %}#166534{% else %}#991b1b{% endif %}; font-weight: 600;">
+                {{ rec.macd.trend }} (Force: {{ rec.macd.strength|floatformat:0 }}%)
+              </span>
+            </div>
+          </div>
+          {% endif %}
+          
+          {% if rec.bollinger %}
+          <div style="background: white; padding: 0.8rem; border-radius: 6px; margin-bottom: 0.8rem;">
+            <div style="font-size: 0.75rem; color: #64748b; font-weight: 600; margin-bottom: 0.4rem;">📊 Bandes de Bollinger</div>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; font-size: 0.8rem;">
+              <div>
+                <span style="color: #64748b;">Supérieure:</span> 
+                <strong style="color: #3b82f6;">{{ rec.bollinger.upper|floatformat:0 }}</strong>
+              </div>
+              <div>
+                <span style="color: #64748b;">Moyenne:</span> 
+                <strong style="color: #64748b;">{{ rec.bollinger.middle|floatformat:0 }}</strong>
+              </div>
+              <div>
+                <span style="color: #64748b;">Inférieure:</span> 
+                <strong style="color: #3b82f6;">{{ rec.bollinger.lower|floatformat:0 }}</strong>
+              </div>
+            </div>
+            <div style="margin-top: 0.4rem; font-size: 0.75rem;">
+              <span style="padding: 0.2rem 0.5rem; border-radius: 4px; background: #f1f5f9; color: #475569; font-weight: 600;">
+                Position: {{ rec.bollinger.percent_b|floatformat:2 }} | {{ rec.bollinger.signal }}
+              </span>
+            </div>
+          </div>
+          {% endif %}
+          
+          <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.8rem;">
+            {% if rec.publication_sentiment and rec.publication_sentiment.sentiment_score %}
+            <div style="background: white; padding: 0.8rem; border-radius: 6px;">
+              <div style="font-size: 0.75rem; color: #64748b; font-weight: 600; margin-bottom: 0.4rem;">📰 Sentiment Publications</div>
+              <div style="font-size: 1.1rem; font-weight: 700; color: {% if rec.publication_sentiment.sentiment_score > 20 %}#22c55e{% elif rec.publication_sentiment.sentiment_score < -20 %}#ef4444{% else %}#94a3b8{% endif %};">
+                {{ rec.publication_sentiment.sentiment_score }}/100
+              </div>
+              <div style="font-size: 0.7rem; color: #64748b; margin-top: 0.2rem;">{{ rec.publication_sentiment.sentiment_label }}</div>
+            </div>
+            {% endif %}
+            
+            {% if rec.macro_context and rec.macro_context.sector %}
+            <div style="background: white; padding: 0.8rem; border-radius: 6px;">
+              <div style="font-size: 0.75rem; color: #64748b; font-weight: 600; margin-bottom: 0.4rem;">🌍 Contexte Macro</div>
+              <div style="font-size: 0.9rem; font-weight: 700; color: #3b82f6;">
+                {{ rec.macro_context.sector }}
+              </div>
+              <div style="font-size: 0.7rem; color: #64748b; margin-top: 0.2rem;">{{ rec.macro_context.macro_signal }}</div>
+            </div>
+            {% endif %}
+          </div>
+          
+          {% if rec.fundamentals %}
+          <div style="background: white; padding: 0.8rem; border-radius: 6px; margin-top: 0.8rem;">
+            <div style="font-size: 0.75rem; color: #64748b; font-weight: 600; margin-bottom: 0.4rem;">💼 Analyse Fondamentale</div>
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; font-size: 0.75rem;">
+              {% if rec.fundamentals.pe_ratio %}
+              <div>
+                <span style="color: #64748b;">P/E:</span> 
+                <strong style="color: {% if rec.fundamentals.pe_ratio < 10 %}#22c55e{% elif rec.fundamentals.pe_ratio < 15 %}#3b82f6{% else %}#f59e0b{% endif %};">{{ rec.fundamentals.pe_ratio }}</strong>
+              </div>
+              {% endif %}
+              {% if rec.fundamentals.roe %}
+              <div>
+                <span style="color: #64748b;">ROE:</span> 
+                <strong style="color: {% if rec.fundamentals.roe > 15 %}#22c55e{% elif rec.fundamentals.roe > 10 %}#3b82f6{% else %}#f59e0b{% endif %};">{{ rec.fundamentals.roe }}%</strong>
+              </div>
+              {% endif %}
+              {% if rec.fundamentals.dividend_yield %}
+              <div>
+                <span style="color: #64748b;">Dividende:</span> 
+                <strong style="color: #22c55e;">{{ rec.fundamentals.dividend_yield }}%</strong>
+              </div>
+              {% endif %}
+              {% if rec.fundamentals.debt_ratio %}
+              <div>
+                <span style="color: #64748b;">Dette:</span> 
+                <strong style="color: {% if rec.fundamentals.debt_ratio < 30 %}#22c55e{% elif rec.fundamentals.debt_ratio < 50 %}#3b82f6{% else %}#ef4444{% endif %};">{{ rec.fundamentals.debt_ratio }}%</strong>
+              </div>
+              {% endif %}
+            </div>
+          </div>
+          {% endif %}
+        </div>
+
+        <div class="rec-details">
+          <div class="detail-item">
+            <span class="detail-label">Stop Loss:</span>
+            <span class="detail-value">{{ rec.stop_loss|floatformat:0 }} FCFA</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Take Profit 1:</span>
+            <span class="detail-value" style="color: #10b981;">{{ rec.take_profit_1|floatformat:0 }} FCFA</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Take Profit 2:</span>
+            <span class="detail-value" style="color: #059669;">{{ rec.take_profit_2|floatformat:0 }} FCFA</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Risque:</span>
+            <span class="risk-badge risk-{{ rec.risk_level|lower }}">{{ rec.risk_level }}</span>
+          </div>
+        </div>
+
+        <div class="confidence-bar">
+          <div class="confidence-fill" style="width: {{ rec.confidence }}%;"></div>
+        </div>
+
+        {% if rec.reasons %}
+        <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #e2e8f0;">
+          <strong style="color: #92400e; font-size: 1rem;">Raisons de l'opportunité:</strong>
+          <ul style="margin-top: 0.5rem; padding-left: 1.2rem; font-size: 0.9rem; color: #64748b;">
+            {% for reason in rec.reasons %}
+            <li style="margin-top: 0.3rem;">{{ reason }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  {% if recommendations.buys %}
+  <section style="margin-bottom: 3rem;">
+    <h2 class="section-title">
+      <i class="fas fa-chart-line" style="color: #3b82f6;"></i>
+      Opportunités d'Achat
+    </h2>
+    <div class="recommendations-grid">
+      {% for rec in recommendations.buys %}
+      <div class="rec-card buy">
+        <div class="rec-header">
+          <div>
+            <div class="rec-symbol">{{ rec.symbol }}</div>
+            <div class="rec-company">{{ rec.company_name }}</div>
+          </div>
+          <div class="rec-action action-buy">{{ rec.action }}</div>
+        </div>
+
+        <div class="rec-metrics">
+          <div class="metric">
+            <div class="metric-value">{{ rec.current_price|floatformat:0 }}</div>
+            <div class="metric-label">Prix Actuel (FCFA)</div>
+          </div>
+          <div class="metric">
+            <div class="metric-value" style="color: #3b82f6;">+{{ rec.expected_weekly_return|floatformat:1 }}%</div>
+            <div class="metric-label">Potentiel Hebdo</div>
+          </div>
+          <div class="metric">
+            <div class="metric-value">{{ rec.target_price|floatformat:0 }}</div>
+            <div class="metric-label">Prix Cible</div>
+          </div>
+          <div class="metric">
+            <div class="metric-value">{{ rec.confidence|floatformat:0 }}%</div>
+            <div class="metric-label">Confiance</div>
+          </div>
+        </div>
+
+        <div class="confidence-bar">
+          <div class="confidence-fill" style="width: {{ rec.confidence }}%;"></div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  {% if not recommendations.strong_buys and not recommendations.buys and not recommendations.strong_sells and not recommendations.sells %}
+  <div class="empty-state">
+    <div class="empty-icon">🔍</div>
+    <h3>Aucune recommandation disponible pour le moment</h3>
+    <p>Le système analyse les publications et les données de marché en continu.</p>
+    <p style="margin-top: 1rem;">
+      <a href="{% url 'dashboard:brvm_publications_page' %}" style="color: #3b82f6; text-decoration: none; font-weight: 600;">
+        Voir les publications récentes →
+      </a>
+    </p>
+  </div>
+  {% endif %}
+</div>
+
+<script>
+// Animation des barres de confiance
+document.addEventListener('DOMContentLoaded', () => {
+  const bars = document.querySelectorAll('.confidence-fill');
+  bars.forEach(bar => {
+    const width = bar.style.width;
+    bar.style.width = '0%';
+    setTimeout(() => {
+      bar.style.width = width;
+    }, 100);
+  });
+});
+</script>
+{% endblock %}

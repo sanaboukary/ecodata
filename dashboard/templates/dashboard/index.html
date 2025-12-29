@@ -1,0 +1,722 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Plateforme professionnelle de centralisation des données économiques BRVM - Analyse intelligente et décision d'investissement">
+    <title>Plateforme BRVM - Centralisation des Données Économiques | Expert Dashboard</title>
+    
+    <!-- Preconnect pour performance -->
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    
+    <!-- Bootstrap 5.3 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    
+    <!-- CSS Expert Responsive -->
+    <link rel="stylesheet" href="{% static 'css/expert-responsive.css' %}">
+    
+    <style>
+        :root {
+            --brvm-primary: #1e3a8a;
+            --brvm-secondary: #3b82f6;
+            --brvm-success: #10b981;
+            --brvm-danger: #ef4444;
+            --brvm-warning: #f59e0b;
+        }
+        
+        body {
+            font-family: 'Segoe UI', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .hero-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 60px 40px;
+            margin: 40px auto;
+            max-width: 1200px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        .hero-title {
+            color: var(--brvm-primary);
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+        
+        .hero-subtitle {
+            color: #64748b;
+            font-size: 1.3rem;
+            margin-bottom: 40px;
+        }
+        
+        .feature-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border: 2px solid transparent;
+            height: 100%;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 35px rgba(59, 130, 246, 0.3);
+            border-color: var(--brvm-secondary);
+        }
+        
+        .feature-icon {
+            width: 70px;
+            height: 70px;
+            margin: 0 auto 20px;
+            background: linear-gradient(135deg, var(--brvm-primary) 0%, var(--brvm-secondary) 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2rem;
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+        }
+        
+        .stats-card {
+            background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(255,255,255,0.95));
+            border-radius: 20px;
+            padding: 30px 20px;
+            text-align: center;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+            border: 2px solid transparent;
+        }
+        
+        .stats-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 15px 45px rgba(59, 130, 246, 0.35);
+            border-color: var(--brvm-secondary);
+        }
+        
+        .stats-icon {
+            width: 65px;
+            height: 65px;
+            margin: 0 auto 15px;
+            background: linear-gradient(135deg, var(--brvm-secondary) 0%, var(--brvm-primary) 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2rem;
+            box-shadow: 0 8px 20px rgba(30, 58, 138, 0.4);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        .stats-number {
+            font-size: 2.8rem;
+            font-weight: 800;
+            color: var(--brvm-primary);
+            margin-bottom: 8px;
+            line-height: 1;
+        }
+        
+        .stats-label {
+            font-size: 1rem;
+            font-weight: 500;
+            opacity: 0.85;
+            color: #64748b;
+        }
+        
+        .btn-primary-custom {
+            background: linear-gradient(135deg, var(--brvm-primary) 0%, var(--brvm-secondary) 100%);
+            border: none;
+            padding: 16px 42px;
+            font-size: 1.125rem;
+            font-weight: 600;
+            border-radius: 50px;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.35);
+        }
+        
+        .btn-primary-custom:hover {
+            transform: scale(1.05) translateY(-3px);
+            box-shadow: 0 15px 40px rgba(59, 130, 246, 0.5);
+        }
+        
+        .btn-primary-custom:active {
+            transform: scale(0.98);
+        }
+        
+        .quick-links {
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 20px;
+            padding: 35px;
+            margin: 35px auto;
+            max-width: 1200px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+        }
+        
+        .list-group-item {
+            border: 1px solid rgba(226, 232, 240, 0.6);
+            transition: all 0.25s ease;
+            margin-bottom: 8px;
+            border-radius: 10px !important;
+        }
+        
+        .list-group-item:hover {
+            background: rgba(59, 130, 246, 0.08);
+            border-color: var(--brvm-secondary);
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+        }
+        
+        .section-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--brvm-primary);
+            margin-bottom: 25px;
+            position: relative;
+            padding-bottom: 15px;
+        }
+        
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--brvm-primary), var(--brvm-secondary));
+            border-radius: 2px;
+        }
+        
+        footer {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border-top: 2px solid rgba(255, 255, 255, 0.2);
+            padding: 25px 0;
+            margin-top: 50px;
+        }
+        
+        /* Responsive optimizations */
+        @media (max-width: 768px) {
+            .hero-pro-title {
+                font-size: 1.75rem !important;
+            }
+            
+            .stats-number {
+                font-size: 2rem;
+            }
+            
+            .stats-icon {
+                width: 55px;
+                height: 55px;
+                font-size: 1.5rem;
+            }
+            
+            .btn-primary-custom {
+                padding: 12px 30px;
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+            margin-bottom: 30px;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            height: 100%;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+            border-color: var(--brvm-secondary);
+        }
+        
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            display: block;
+        }
+        
+        .feature-card.brvm {
+            border-left: 5px solid var(--brvm-primary);
+        }
+        
+        .feature-card.recommendations {
+            border-left: 5px solid var(--brvm-success);
+        }
+        
+        .feature-card.publications {
+            border-left: 5px solid var(--brvm-warning);
+        }
+        
+        .feature-card.macro {
+            border-left: 5px solid var(--brvm-secondary);
+        }
+        
+        .stats-card {
+            background: linear-gradient(135deg, var(--brvm-primary) 0%, var(--brvm-secondary) 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .stats-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin: 10px 0;
+        }
+        
+        .stats-label {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+        
+        .btn-primary-custom {
+            background: linear-gradient(135deg, var(--brvm-primary) 0%, var(--brvm-secondary) 100%);
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.1rem;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary-custom:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.4);
+        }
+        
+        .quick-links {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            margin: 30px auto;
+            max-width: 1200px;
+        }
+        
+        .navbar-custom {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar Professional Responsive -->
+    <nav class="navbar navbar-expand-lg navbar-light navbar-professional sticky-top">
+        <div class="container-fluid">
+            <a class="navbar-brand-pro" href="{% url 'dashboard:index' %}">
+                <i class="bi bi-graph-up-arrow"></i> 
+                <span class="hide-mobile">Plateforme BRVM</span>
+                <span class="hide-desktop">BRVM</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" 
+                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link-pro active" href="{% url 'dashboard:index' %}">
+                            <i class="bi bi-house-fill"></i> Accueil
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link-pro" href="{% url 'dashboard:dashboard_brvm' %}">
+                            <i class="bi bi-graph-up"></i> BRVM
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link-pro" href="{% url 'dashboard:brvm_recommendations_page' %}">
+                            <i class="bi bi-lightbulb"></i> Recommandations
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link-pro" href="{% url 'dashboard:brvm_publications_page' %}">
+                            <i class="bi bi-file-earmark-pdf"></i> Publications
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link-pro" href="{% url 'dashboard:explorer' %}">
+                            <i class="bi bi-search"></i> Explorer
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link-pro" href="{% url 'dashboard:administration' %}">
+                            <i class="bi bi-gear"></i> Admin
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section Professional -->
+    <div class="container-responsive">
+        <div class="hero-pro animate-fade-in-up mt-responsive">
+            <div class="text-center">
+                <h1 class="hero-pro-title">
+                    <i class="bi bi-building"></i> 
+                    Plateforme de Centralisation des Données Économiques
+                </h1>
+                <p class="hero-pro-subtitle">
+                    Analyse intelligente du marché BRVM avec données macroéconomiques en temps réel
+                    <br>
+                    <strong>5 sources de données</strong> • <strong>47 actions suivies</strong> • <strong>Recommandations IA</strong>
+                </p>
+                <a href="{% url 'dashboard:dashboard_brvm' %}" class="btn-pro btn-pro-primary">
+                    <i class="bi bi-chart-line"></i> Accéder au Dashboard BRVM
+                </a>
+                <a href="{% url 'dashboard:brvm_recommendations_page' %}" class="btn-pro btn-pro-secondary ms-2">
+                    <i class="bi bi-lightbulb-fill"></i> Voir les Recommandations
+                </a>
+            </div>
+
+            <!-- Stats Grid Responsive -->
+            <div class="stats-grid mt-5 animate-fade-in-up animate-delay-200">
+                <div class="stats-card-pro">
+                    <div class="stats-icon-pro">
+                        <i class="bi bi-building"></i>
+                    </div>
+                    <div class="stats-number-pro" id="brvm-count">47</div>
+                    <div class="stats-label-pro">Actions BRVM</div>
+                </div>
+                <div class="stats-card-pro">
+                    <div class="stats-icon-pro" style="background: linear-gradient(135deg, #10b981, #059669);">
+                        <i class="bi bi-graph-up"></i>
+                    </div>
+                    <div class="stats-number-pro" id="recommendations-count" style="color: #059669;">-</div>
+                    <div class="stats-label-pro">Recommandations Actives</div>
+                </div>
+                <div class="stats-card-pro">
+                    <div class="stats-icon-pro" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+                        <i class="bi bi-file-earmark-pdf"></i>
+                    </div>
+                    <div class="stats-number-pro" id="publications-count" style="color: #d97706;">-</div>
+                    <div class="stats-label-pro">Publications</div>
+                </div>
+                <div class="stats-card-pro">
+                    <div class="stats-icon-pro" style="background: linear-gradient(135deg, #06b6d4, #0891b2);">
+                        <i class="bi bi-database-fill"></i>
+                    </div>
+                    <div class="stats-number-pro" id="total-obs" style="color: #0891b2;">-</div>
+                    <div class="stats-label-pro">Observations</div>
+                </div>
+            </div>
+        </div>
+    </div>
+                        <div class="stats-label">Publications Récentes</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stats-card">
+                        <i class="bi bi-database stats-icon"></i>
+                        <div class="stats-number" id="total-obs">-</div>
+                        <div class="stats-label">Observations Totales</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Features Grid -->
+            <div class="row mt-5">
+                <div class="col-md-6 col-lg-3">
+                    <div class="feature-card brvm">
+                        <i class="bi bi-graph-up-arrow feature-icon text-primary"></i>
+                        <h4>Trading BRVM</h4>
+                        <p>47 actions cotées avec 70+ indicateurs techniques et fondamentaux en temps réel.</p>
+                        <a href="{% url 'dashboard:dashboard_brvm' %}" class="btn btn-sm btn-outline-primary">
+                            Explorer <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <div class="feature-card recommendations">
+                        <i class="bi bi-lightbulb feature-icon text-success"></i>
+                        <h4>Recommandations IA</h4>
+                        <p>Signaux BUY/HOLD/SELL générés automatiquement par analyse technique et fondamentale.</p>
+                        <a href="{% url 'dashboard:brvm_recommendations_page' %}" class="btn btn-sm btn-outline-success">
+                            Voir les Opportunités <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <div class="feature-card publications">
+                        <i class="bi bi-file-earmark-text feature-icon text-warning"></i>
+                        <h4>Publications</h4>
+                        <p>Rapports annuels, communiqués et documents financiers des sociétés cotées.</p>
+                        <a href="{% url 'dashboard:brvm_publications_page' %}" class="btn btn-sm btn-outline-warning">
+                            Consulter <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <div class="feature-card macro">
+                        <i class="bi bi-globe feature-icon text-info"></i>
+                        <h4>Contexte Macro</h4>
+                        <p>Indicateurs World Bank, IMF, AfDB et UN SDG pour 15 pays ouest-africains.</p>
+                        <a href="{% url 'dashboard:explorer' %}" class="btn btn-sm btn-outline-info">
+                            Analyser <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Links Section -->
+        <div class="quick-links">
+            <h3 class="text-center mb-4"><i class="bi bi-link-45deg"></i> Accès Rapide</h3>
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <div class="list-group">
+                        <div class="list-group-item bg-primary text-white fw-bold">
+                            <i class="bi bi-building"></i> Marchés
+                        </div>
+                        <a href="{% url 'dashboard:dashboard_brvm' %}" class="list-group-item list-group-item-action">
+                            <i class="bi bi-graph-up"></i> Dashboard BRVM
+                        </a>
+                        <a href="{% url 'dashboard:dashboard_worldbank' %}" class="list-group-item list-group-item-action">
+                            <i class="bi bi-bank"></i> World Bank
+                        </a>
+                        <a href="{% url 'dashboard:dashboard_imf' %}" class="list-group-item list-group-item-action">
+                            <i class="bi bi-cash-coin"></i> IMF
+                        </a>
+                        <a href="{% url 'dashboard:dashboard_afdb' %}" class="list-group-item list-group-item-action">
+                            <i class="bi bi-globe-americas"></i> AfDB
+                        </a>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div class="list-group">
+                        <div class="list-group-item bg-success text-white fw-bold">
+                            <i class="bi bi-tools"></i> Outils d'Analyse
+                        </div>
+                        <a href="{% url 'dashboard:brvm_recommendations_page' %}" class="list-group-item list-group-item-action">
+                            <i class="bi bi-lightbulb"></i> Recommandations IA
+                        </a>
+                        <a href="{% url 'dashboard:comparateur' %}" class="list-group-item list-group-item-action">
+                            <i class="bi bi-bar-chart"></i> Comparateur
+                        </a>
+                        <a href="{% url 'dashboard:explorer' %}" class="list-group-item list-group-item-action">
+                            <i class="bi bi-compass"></i> Explorer les Données
+                        </a>
+                        <a href="{% url 'dashboard:global_search' %}" class="list-group-item list-group-item-action">
+                            <i class="bi bi-search"></i> Recherche Globale
+                        </a>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div class="list-group">
+                        <div class="list-group-item bg-warning text-dark fw-bold">
+                            <i class="bi bi-gear"></i> Administration
+                        </div>
+                        <a href="{% url 'dashboard:administration' %}" class="list-group-item list-group-item-action">
+                            <i class="bi bi-sliders"></i> Tableau de Bord Admin
+                        </a>
+                        <a href="#" class="list-group-item list-group-item-action" id="trigger-ingestion">
+                            <i class="bi bi-download"></i> Lancer Ingestion
+                        </a>
+                        <a href="#" class="list-group-item list-group-item-action" id="check-automation">
+                            <i class="bi bi-robot"></i> État Automatisation
+                        </a>
+                        <a href="http://localhost:8080" target="_blank" class="list-group-item list-group-item-action">
+                            <i class="bi bi-calendar-check"></i> Airflow (Planification)
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section Prix en Temps Réel BRVM -->
+    <div class="container-responsive mt-5">
+        <div class="card-pro">
+            <h3 class="text-center mb-4">
+                <i class="bi bi-graph-up-arrow"></i> Prix des Actions BRVM en Temps Réel
+            </h3>
+            <div id="stock-prices-loading" class="text-center py-4">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Chargement...</span>
+                </div>
+                <p class="mt-2">Chargement des cours BRVM...</p>
+            </div>
+            <div id="stock-prices-container" style="display: none;">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-primary">
+                            <tr>
+                                <th>#</th>
+                                <th>Symbole</th>
+                                <th class="text-end">Prix (FCFA)</th>
+                                <th class="text-end">Variation</th>
+                                <th class="text-center">Tendance</th>
+                            </tr>
+                        </thead>
+                        <tbody id="stock-prices-tbody">
+                            <!-- Rempli dynamiquement -->
+                        </tbody>
+                    </table>
+                </div>
+                <div class="text-center mt-3">
+                    <a href="{% url 'dashboard:dashboard_brvm' %}" class="btn btn-primary">
+                        <i class="bi bi-bar-chart-line"></i> Voir Tous les Cours
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="text-center text-white mt-5 pb-4">
+        <p class="mb-0">&copy; 2025 Plateforme BRVM - Centralisation des Données Économiques</p>
+        <p class="small">Développé pour l'investissement intelligent en Afrique de l'Ouest</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Charger les statistiques au démarrage
+        async function loadStats() {
+            try {
+                // Compter les recommandations
+                const recResponse = await fetch('/api/brvm/recommendations/');
+                if (recResponse.ok) {
+                    const recData = await recResponse.json();
+                    document.getElementById('recommendations-count').textContent = recData.length || 0;
+                }
+
+                // Compter les publications
+                const pubResponse = await fetch('/api/brvm/publications/');
+                if (pubResponse.ok) {
+                    const pubData = await pubResponse.json();
+                    document.getElementById('publications-count').textContent = pubData.publications?.length || 0;
+                }
+
+                // Obtenir statistiques BRVM
+                const summaryResponse = await fetch('/api/brvm/summary/');
+                if (summaryResponse.ok) {
+                    const summaryData = await summaryResponse.json();
+                    document.getElementById('total-obs').textContent = 
+                        (summaryData.total_observations || 0).toLocaleString();
+                }
+            } catch (error) {
+                console.error('Erreur lors du chargement des statistiques:', error);
+            }
+        }
+
+        // Lancer ingestion
+        document.getElementById('trigger-ingestion')?.addEventListener('click', async (e) => {
+            e.preventDefault();
+            if (confirm('Voulez-vous lancer une ingestion manuelle des données BRVM ?')) {
+                const btn = e.target.closest('a');
+                btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Ingestion en cours...';
+                try {
+                    const response = await fetch('/api/ingestion/start/', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({source: 'brvm'})
+                    });
+                    if (response.ok) {
+                        alert('Ingestion lancée avec succès !');
+                        setTimeout(() => loadStats(), 2000);
+                    } else {
+                        alert('Erreur lors du lancement de l\'ingestion');
+                    }
+                } catch (error) {
+                    alert('Erreur: ' + error.message);
+                } finally {
+                    btn.innerHTML = '<i class="bi bi-download"></i> Lancer Ingestion';
+                }
+            }
+        });
+
+        // Vérifier automatisation
+        document.getElementById('check-automation')?.addEventListener('click', async (e) => {
+            e.preventDefault();
+            try {
+                const response = await fetch('/api/automation/status/');
+                if (response.ok) {
+                    const data = await response.json();
+                    alert(`État Airflow: ${data.airflow_running ? 'Actif ✓' : 'Inactif ✗'}\n` +
+                          `Dernière collecte: ${data.last_collection || 'N/A'}`);
+                } else {
+                    alert('Impossible de vérifier l\'état de l\'automatisation');
+                }
+            } catch (error) {
+                alert('Vérifiez manuellement sur http://localhost:8080');
+            }
+        });
+
+        // Charger les stats au démarrage
+        loadStats();
+        loadStockPrices();
+
+        // Fonction pour charger les prix des actions
+        async function loadStockPrices() {
+            try {
+                const response = await fetch('/api/brvm/stocks/');
+                if (!response.ok) throw new Error('Erreur API');
+                
+                const data = await response.json();
+                const stocks = data.items || [];
+                
+                // Trier par variation décroissante
+                stocks.sort((a, b) => (b.change_pct || 0) - (a.change_pct || 0));
+                
+                // Afficher top 15
+                const tbody = document.getElementById('stock-prices-tbody');
+                tbody.innerHTML = '';
+                
+                stocks.slice(0, 15).forEach((stock, index) => {
+                    const price = stock.latest || 0;
+                    const change = stock.change_pct || 0;
+                    const isPositive = change >= 0;
+                    const arrow = isPositive ? '▲' : '▼';
+                    const badgeClass = isPositive ? 'bg-success' : 'bg-danger';
+                    
+                    const row = `
+                        <tr>
+                            <td><strong>${index + 1}</strong></td>
+                            <td><strong>${stock.symbol}</strong></td>
+                            <td class="text-end">${price.toLocaleString('fr-FR')} FCFA</td>
+                            <td class="text-end">
+                                <span class="badge ${badgeClass}">
+                                    ${arrow} ${change >= 0 ? '+' : ''}${change.toFixed(2)}%
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                ${isPositive ? 
+                                    '<i class="bi bi-graph-up text-success fs-4"></i>' : 
+                                    '<i class="bi bi-graph-down text-danger fs-4"></i>'}
+                            </td>
+                        </tr>
+                    `;
+                    tbody.innerHTML += row;
+                });
+                
+                // Cacher loading, montrer tableau
+                document.getElementById('stock-prices-loading').style.display = 'none';
+                document.getElementById('stock-prices-container').style.display = 'block';
+                
+            } catch (error) {
+                console.error('Erreur chargement prix:', error);
+                document.getElementById('stock-prices-loading').innerHTML = 
+                    '<p class="text-danger">Erreur de chargement des cours</p>';
+            }
+        }
+    </script>
+</body>
+</html>

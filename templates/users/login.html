@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connexion - Plateforme de Centralisation des Données</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 420px;
+            padding: 40px;
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo h1 {
+            color: #667eea;
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+
+        .logo p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .alert {
+            padding: 12px 16px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .alert-error {
+            background: #fee;
+            border-left: 4px solid #dc3545;
+            color: #721c24;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            color: #155724;
+        }
+
+        .alert-info {
+            background: #d1ecf1;
+            border-left: 4px solid #17a2b8;
+            color: #0c5460;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            color: #333;
+            font-weight: 500;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 15px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus,
+        input[type="password"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .help-text {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+            text-align: center;
+            font-size: 13px;
+            color: #666;
+        }
+
+        .demo-credentials {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 20px;
+            font-size: 12px;
+        }
+
+        .demo-credentials h4 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 13px;
+        }
+
+        .demo-credentials ul {
+            list-style: none;
+        }
+
+        .demo-credentials li {
+            padding: 4px 0;
+            color: #555;
+        }
+
+        .demo-credentials code {
+            background: white;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            color: #667eea;
+        }
+
+        .mfa-notice {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            color: #856404;
+        }
+
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 12px;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="logo">
+            <h1>📊 Centralisation</h1>
+            <p>Données Économiques UEMOA</p>
+        </div>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        {% if error %}
+            <div class="alert alert-error">
+                {{ error }}
+            </div>
+        {% endif %}
+
+        {% if mfa_required %}
+            <div class="mfa-notice">
+                🔐 <strong>Authentification à deux facteurs requise</strong><br>
+                Veuillez entrer votre code MFA pour continuer.
+            </div>
+        {% endif %}
+
+        <form method="post" action="{% url 'users:login' %}">
+            {% csrf_token %}
+
+            {% if not mfa_required %}
+                <div class="form-group">
+                    <label for="username">Nom d'utilisateur</label>
+                    <input 
+                        type="text" 
+                        id="username" 
+                        name="username" 
+                        required 
+                        autofocus
+                        placeholder="admin"
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Mot de passe</label>
+                    <input 
+                        type="password" 
+                        id="password" 
+                        name="password" 
+                        required
+                        placeholder="••••••••"
+                    >
+                </div>
+            {% else %}
+                <div class="form-group">
+                    <label for="mfa_token">Code MFA (6 chiffres)</label>
+                    <input 
+                        type="text" 
+                        id="mfa_token" 
+                        name="mfa_token" 
+                        required 
+                        autofocus
+                        maxlength="6"
+                        pattern="[0-9]{6}"
+                        placeholder="123456"
+                    >
+                </div>
+            {% endif %}
+
+            <button type="submit" class="btn">
+                {% if mfa_required %}
+                    ✓ Vérifier le code MFA
+                {% else %}
+                    🔓 Se connecter
+                {% endif %}
+            </button>
+        </form>
+
+        {% if not mfa_required %}
+            <div class="demo-credentials">
+                <h4>🧪 Comptes de démonstration :</h4>
+                <ul>
+                    <li><strong>Admin :</strong> <code>admin</code> / <code>admin123</code></li>
+                    <li><strong>Ingénieur :</strong> <code>engineer</code> / <code>engineer123</code></li>
+                    <li><strong>Analyste :</strong> <code>analyst</code> / <code>analyst123</code></li>
+                    <li><strong>Lecteur :</strong> <code>reader</code> / <code>reader123</code></li>
+                    <li><strong>API Client :</strong> <code>api_client</code> / <code>api123</code></li>
+                </ul>
+            </div>
+
+            <div class="help-text">
+                Première connexion ? Tous les comptes ci-dessus sont préinitialisés.<br>
+                Contactez l'administrateur pour obtenir vos accès.
+            </div>
+        {% endif %}
+
+        <div class="footer">
+            Plateforme de Centralisation des Données Économiques UEMOA<br>
+            © 2025 - Tous droits réservés
+        </div>
+    </div>
+</body>
+</html>

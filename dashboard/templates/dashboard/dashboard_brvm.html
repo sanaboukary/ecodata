@@ -1,0 +1,223 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard BRVM - Plateforme de Trading</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        body { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; }
+        .dashboard-header { background: white; padding: 30px; border-radius: 15px; margin-bottom: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .metric-card { background: white; border-radius: 15px; padding: 25px; margin-bottom: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .metric-value { font-size: 2.5rem; font-weight: 700; color: #1e3a8a; }
+        .metric-label { color: #64748b; font-size: 0.9rem; text-transform: uppercase; }
+        .stock-card { background: white; border-radius: 10px; padding: 20px; margin-bottom: 15px; transition: all 0.3s ease; }
+        .stock-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.15); }
+        .gain { color: #10b981; }
+        .loss { color: #ef4444; }
+        .chart-container { background: white; border-radius: 15px; padding: 25px; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{% url 'dashboard:index' %}">
+                <i class="bi bi-graph-up-arrow"></i> Plateforme BRVM
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link active" href="{% url 'dashboard:dashboard_brvm' %}">BRVM</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'dashboard:brvm_recommendations_page' %}">Recommandations</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'dashboard:brvm_publications_page' %}">Publications</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'dashboard:explorer' %}">Explorer</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid py-4">
+        <div class="dashboard-header">
+            <h1><i class="bi bi-building"></i> Dashboard BRVM - Bourse Régionale des Valeurs Mobilières</h1>
+            <p class="text-muted mb-0">Suivi en temps réel du marché ouest-africain</p>
+        </div>
+
+        <!-- Market Overview -->
+        <div class="row">
+            <div class="col-md-3">
+                <div class="metric-card">
+                    <div class="metric-label">Total Actions</div>
+                    <div class="metric-value">{{ market_overview.total_stocks }}</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="metric-card">
+                    <div class="metric-label">Capitalisation</div>
+                    <div class="metric-value">{{ market_overview.market_cap|floatformat:0 }} <small>FCFA</small></div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="metric-card">
+                    <div class="metric-label">Volume Total</div>
+                    <div class="metric-value">{{ market_overview.total_volume|floatformat:0 }}</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="metric-card">
+                    <div class="metric-label">P/E Moyen</div>
+                    <div class="metric-value">{{ market_overview.avg_pe|floatformat:2 }}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Gainers & Losers -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="chart-container">
+                    <h4><i class="bi bi-arrow-up-circle text-success"></i> Top Gainers</h4>
+                    {% for stock in top_gainers %}
+                    <div class="stock-card">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="mb-1">{{ stock.symbol }}</h5>
+                                <small class="text-muted">{{ stock.name }}</small>
+                            </div>
+                            <div class="text-end">
+                                <div class="h5 mb-0">{{ stock.price|floatformat:0 }} FCFA</div>
+                                <span class="gain">+{{ stock.change_pct|floatformat:2 }}%</span>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p class="text-muted">Aucune donnée disponible</p>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="chart-container">
+                    <h4><i class="bi bi-arrow-down-circle text-danger"></i> Top Losers</h4>
+                    {% for stock in top_losers %}
+                    <div class="stock-card">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="mb-1">{{ stock.symbol }}</h5>
+                                <small class="text-muted">{{ stock.name }}</small>
+                            </div>
+                            <div class="text-end">
+                                <div class="h5 mb-0">{{ stock.price|floatformat:0 }} FCFA</div>
+                                <span class="loss">{{ stock.change_pct|floatformat:2 }}%</span>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p class="text-muted">Aucune donnée disponible</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Investment Opportunities -->
+        {% if investment_opportunities %}
+        <div class="chart-container">
+            <h4><i class="bi bi-lightbulb text-warning"></i> Opportunités d'Investissement</h4>
+            <div class="row">
+                {% for opp in investment_opportunities %}
+                <div class="col-md-4">
+                    <div class="stock-card">
+                        <h5>{{ opp.symbol }}</h5>
+                        <p class="text-muted small mb-2">{{ opp.name }}</p>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Prix:</span>
+                            <strong>{{ opp.price|floatformat:0 }} FCFA</strong>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Recommandation:</span>
+                            <span class="badge bg-success">{{ opp.recommendation }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span>Score:</span>
+                            <strong>{{ opp.score }}/5</strong>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Sector Analysis -->
+        {% if sector_stats %}
+        <div class="chart-container">
+            <h4><i class="bi bi-pie-chart"></i> Analyse Sectorielle</h4>
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Secteur</th>
+                            <th>Actions</th>
+                            <th>Capitalisation</th>
+                            <th>Performance</th>
+                            <th>Volume</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for sector in sector_stats %}
+                        <tr>
+                            <td><strong>{{ sector.name }}</strong></td>
+                            <td>{{ sector.stocks_count }}</td>
+                            <td>{{ sector.market_cap|floatformat:0 }} FCFA</td>
+                            <td class="{% if sector.avg_performance > 0 %}gain{% else %}loss{% endif %}">
+                                {{ sector.avg_performance|floatformat:2 }}%
+                            </td>
+                            <td>{{ sector.total_volume|floatformat:0 }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Price Chart -->
+        <div class="chart-container">
+            <h4><i class="bi bi-graph-up"></i> Évolution des Prix</h4>
+            <canvas id="priceChart" height="80"></canvas>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Chart.js - Price Evolution
+        const chartData = {{ chart_data|safe }};
+        const ctx = document.getElementById('priceChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: chartData.labels,
+                datasets: [{
+                    label: 'Prix Moyen (FCFA)',
+                    data: chartData.prices,
+                    borderColor: '#3b82f6',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: true },
+                    title: { display: false }
+                },
+                scales: {
+                    y: { beginAtZero: false }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,403 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Recherche: {{ query }}{% endblock %}
+
+{% block head_extra %}
+<link rel="stylesheet" href="{% static 'css/finance.css' %}">
+<style>
+  .search-page {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    min-height: 100vh;
+    padding: 2rem;
+    color: #ffffff;
+  }
+  
+  .search-header {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+  
+  .search-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #60a5fa;
+    margin-bottom: 1rem;
+  }
+  
+  .search-query {
+    font-size: 1.5rem;
+    color: #ffffff;
+    margin-bottom: 0.5rem;
+  }
+  
+  .search-stats {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.95rem;
+  }
+  
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background: rgba(255, 255, 255, 0.1);
+    color: #60a5fa;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: all 0.3s;
+    margin-bottom: 2rem;
+  }
+  
+  .back-link:hover {
+    background: rgba(255, 255, 255, 0.15);
+  }
+  
+  /* Nouvelle recherche */
+  .search-again {
+    max-width: 600px;
+    margin: 0 auto 3rem;
+  }
+  
+  .search-input-wrapper {
+    position: relative;
+  }
+  
+  .search-input {
+    width: 100%;
+    padding: 1rem 1rem 1rem 3rem;
+    background: rgba(30, 41, 59, 0.8);
+    border: 2px solid rgba(59, 130, 246, 0.3);
+    border-radius: 12px;
+    color: #ffffff;
+    font-size: 1.1rem;
+  }
+  
+  .search-input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+  }
+  
+  .search-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1.3rem;
+  }
+  
+  /* Catégories résultats */
+  .results-section {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  
+  .category-section {
+    background: rgba(30, 41, 59, 0.6);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+  }
+  
+  .category-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #60a5fa;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .category-count {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.6);
+    font-weight: 400;
+  }
+  
+  .results-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1rem;
+  }
+  
+  .result-card {
+    background: rgba(15, 23, 42, 0.6);
+    border-radius: 12px;
+    padding: 1.5rem;
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    transition: all 0.3s;
+    text-decoration: none;
+    color: inherit;
+    display: block;
+  }
+  
+  .result-card:hover {
+    border-color: rgba(59, 130, 246, 0.5);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+  }
+  
+  .result-main {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #ffffff;
+    margin-bottom: 0.5rem;
+  }
+  
+  .result-subtitle {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.7);
+    margin-bottom: 0.75rem;
+  }
+  
+  .result-score {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    background: rgba(59, 130, 246, 0.2);
+    border-radius: 12px;
+    font-size: 0.85rem;
+    color: #60a5fa;
+  }
+  
+  /* Observations table */
+  .observations-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .observations-table th {
+    background: rgba(59, 130, 246, 0.2);
+    padding: 0.75rem;
+    text-align: left;
+    font-weight: 600;
+    color: #60a5fa;
+    border-bottom: 2px solid rgba(59, 130, 246, 0.3);
+  }
+  
+  .observations-table td {
+    padding: 0.75rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .observations-table tr:hover {
+    background: rgba(59, 130, 246, 0.1);
+  }
+  
+  /* Empty state */
+  .empty-state {
+    text-align: center;
+    padding: 3rem;
+    color: rgba(255, 255, 255, 0.5);
+  }
+  
+  .empty-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+  }
+  
+  /* Highlight */
+  mark {
+    background: rgba(251, 191, 36, 0.3);
+    color: #fbbf24;
+    padding: 0.1rem 0.2rem;
+    border-radius: 3px;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="search-page">
+  <a href="{% url 'dashboard:index' %}" class="back-link">
+    ← Retour à l'accueil
+  </a>
+  
+  <div class="search-header">
+    <h1 class="search-title">🔍 Résultats de recherche</h1>
+    {% if query %}
+    <div class="search-query">"{{ query }}"</div>
+    <div class="search-stats">{{ total }} résultat(s) trouvé(s)</div>
+    {% endif %}
+  </div>
+  
+  <!-- Nouvelle recherche -->
+  <div class="search-again">
+    <form method="GET" action="{% url 'dashboard:global_search' %}">
+      <div class="search-input-wrapper">
+        <span class="search-icon">🔍</span>
+        <input type="text" name="q" class="search-input" placeholder="Rechercher pays, indicateurs, actions BRVM..." value="{{ query }}" autofocus>
+      </div>
+    </form>
+  </div>
+  
+  {% if query %}
+  <div class="results-section">
+    <!-- Indicateurs -->
+    {% if results.indicators %}
+    <div class="category-section">
+      <h2 class="category-title">
+        📊 Indicateurs
+        <span class="category-count">({{ results.indicators|length }})</span>
+      </h2>
+      <div class="results-grid">
+        {% for item in results.indicators %}
+        <a href="{{ item.url }}" class="result-card">
+          <div class="result-main">{{ item.name }}</div>
+          <div class="result-subtitle">{{ item.code }}</div>
+          <span class="result-score">Score: {{ item.score }}%</span>
+        </a>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+    
+    <!-- Pays -->
+    {% if results.countries %}
+    <div class="category-section">
+      <h2 class="category-title">
+        🌍 Pays CEDEAO
+        <span class="category-count">({{ results.countries|length }})</span>
+      </h2>
+      <div class="results-grid">
+        {% for item in results.countries %}
+        <a href="{{ item.url }}" class="result-card">
+          <div class="result-main">{{ item.name }}</div>
+          <div class="result-subtitle">Code: {{ item.code }}</div>
+          <span class="result-score">Score: {{ item.score }}%</span>
+        </a>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+    
+    <!-- Actions BRVM -->
+    {% if results.stocks %}
+    <div class="category-section">
+      <h2 class="category-title">
+        📈 Actions BRVM
+        <span class="category-count">({{ results.stocks|length }})</span>
+      </h2>
+      <div class="results-grid">
+        {% for item in results.stocks %}
+        <a href="{{ item.url }}" class="result-card">
+          <div class="result-main">{{ item.name }}</div>
+          <div class="result-subtitle">{{ item.symbol }} - {{ item.sector }}</div>
+          <span class="result-score">Score: {{ item.score }}%</span>
+        </a>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+    
+    <!-- Sources -->
+    {% if results.sources %}
+    <div class="category-section">
+      <h2 class="category-title">
+        🗂 Sources de données
+        <span class="category-count">({{ results.sources|length }})</span>
+      </h2>
+      <div class="results-grid">
+        {% for item in results.sources %}
+        <a href="{{ item.url }}" class="result-card">
+          <div class="result-main">{{ item.name }}</div>
+          <div class="result-subtitle">{{ item.id }}</div>
+          <span class="result-score">Score: {{ item.score }}%</span>
+        </a>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+    
+    <!-- Observations MongoDB -->
+    {% if results.observations %}
+    <div class="category-section">
+      <h2 class="category-title">
+        💾 Observations directes
+        <span class="category-count">({{ results.observations|length }})</span>
+      </h2>
+      <table class="observations-table">
+        <thead>
+          <tr>
+            <th>Source</th>
+            <th>Dataset</th>
+            <th>Clé</th>
+            <th>Date</th>
+            <th>Valeur</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for obs in results.observations %}
+          <tr>
+            <td>{{ obs.source }}</td>
+            <td>{{ obs.dataset }}</td>
+            <td>{{ obs.key|truncatechars:40 }}</td>
+            <td>{{ obs.date }}</td>
+            <td>{{ obs.value|floatformat:2 }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% endif %}
+    
+    <!-- Aucun résultat -->
+    {% if total == 0 %}
+    <div class="category-section">
+      <div class="empty-state">
+        <div class="empty-icon">🔍</div>
+        <div style="font-size: 1.2rem; margin-bottom: 0.5rem;">Aucun résultat trouvé</div>
+        <div>Essayez avec d'autres termes de recherche</div>
+        
+        {% if recent_searches %}
+        <div style="margin-top: 2rem;">
+          <div style="color: rgba(255, 255, 255, 0.7); margin-bottom: 1rem;">Recherches populaires:</div>
+          <div style="display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap;">
+            {% for term in recent_searches %}
+            <a href="{% url 'dashboard:global_search' %}?q={{ term }}" style="
+              padding: 0.5rem 1rem;
+              background: rgba(59, 130, 246, 0.2);
+              border-radius: 20px;
+              text-decoration: none;
+              color: #60a5fa;
+              font-size: 0.9rem;
+            ">{{ term }}</a>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+  {% else %}
+  <div class="category-section" style="max-width: 800px; margin: 0 auto;">
+    <div class="empty-state">
+      <div class="empty-icon">💡</div>
+      <div style="font-size: 1.2rem; margin-bottom: 0.5rem;">Entrez un terme de recherche</div>
+      <div style="margin-bottom: 2rem;">Recherchez parmi les indicateurs, pays, actions BRVM et sources de données</div>
+      
+      {% if recent_searches %}
+      <div style="margin-top: 2rem;">
+        <div style="color: rgba(255, 255, 255, 0.7); margin-bottom: 1rem;">Recherches populaires:</div>
+        <div style="display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap;">
+          {% for term in recent_searches %}
+          <a href="{% url 'dashboard:global_search' %}?q={{ term }}" style="
+            padding: 0.5rem 1rem;
+            background: rgba(59, 130, 246, 0.2);
+            border-radius: 20px;
+            text-decoration: none;
+            color: #60a5fa;
+            font-size: 0.9rem;
+          ">{{ term }}</a>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
