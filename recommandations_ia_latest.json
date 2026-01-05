@@ -1,1731 +1,1995 @@
 {
+  "generated_at": "2026-01-05T12:03:59.783717",
+  "analysis_period_days": 60,
+  "total_actions_analyzed": 123,
   "buy_signals": [
     {
-      "symbol": "ORGT",
-      "signal": "ACHAT",
-      "current_price": 7201.32,
-      "variation_daily": 45.92576981997681,
-      "rsi": 46.04229619279849,
-      "signal_score": 45,
-      "confidence": 77.5,
+      "symbol": "STAC",
+      "signal": "BUY",
+      "confidence": 95,
+      "signal_score": 37,
+      "current_price": 1875.72,
+      "target_price": 2581.19,
+      "stop_loss": -285.36,
+      "potential_gain": 37.61,
+      "volatility": 73.91,
+      "volume_ratio": 1.24,
+      "trend": "UP",
+      "sma_5": 3367.87,
+      "sma_10": 3188.1,
+      "sma_20": 3177.12,
+      "rsi": 44.49,
+      "macd": {
+        "macd": 47.9645,
+        "signal": 35.6056,
+        "histogram": 12.3589,
+        "trend": "BULLISH",
+        "strength": 100,
+        "crossover": null
+      },
+      "bollinger": {
+        "upper": 5165.74,
+        "middle": 3177.12,
+        "lower": 1188.5,
+        "current_price": 1875.72,
+        "percent_b": 0.173,
+        "bandwidth": 125.18,
+        "signal": "NEAR_OVERSOLD",
+        "squeeze": "False",
+        "std_dev": 994.31
+      },
+      "atr": {
+        "atr": 1080.54,
+        "atr_percent": 57.61,
+        "volatility": "HIGH",
+        "stop_loss_distance": 2161.08,
+        "risk_level": "HIGH"
+      },
+      "recent_high": 5026.64,
+      "recent_low": 1176.44,
+      "publication_sentiment": null,
+      "fundamentals": null,
+      "macro_context": {
+        "sector": "INDUSTRIE",
+        "indicators": {},
+        "macro_score": 0,
+        "macro_signal": "NEUTRAL",
+        "indicators_count": 0
+      },
       "reasons": [
-        "Tendance haussière (prix > SMA5 > SMA10)",
-        "Momentum positif (+45.9%)",
-        "Volume élevé"
+        "✓ MACD haussier (histogram: +12.3589)",
+        "📊 Prix proche bande inférieure Bollinger",
+        "⚠️ Volatilité élevée: 57.6%"
       ],
-      "sma5": 6531.661999999999,
-      "sma10": 6163.778,
-      "sma20": 6153.339,
-      "data_points": 60,
-      "target_price": 7921.452,
-      "stop_loss": 6841.253999999999,
-      "potential_gain": 10.0
-    },
-    {
-      "symbol": "PRSC",
-      "signal": "ACHAT",
-      "current_price": 3486.06,
-      "variation_daily": 65.23020921216026,
-      "rsi": 53.832318883610455,
-      "signal_score": 45,
-      "confidence": 77.5,
-      "reasons": [
-        "Tendance haussière (prix > SMA5 > SMA10)",
-        "Momentum positif (+65.2%)",
-        "Volume élevé"
-      ],
-      "sma5": 3179.752,
-      "sma10": 2934.712,
-      "sma20": 2684.811,
-      "data_points": 60,
-      "target_price": 3834.666,
-      "stop_loss": 3311.7569999999996,
-      "potential_gain": 10.0
-    },
-    {
-      "symbol": "ECOC",
-      "signal": "ACHAT",
-      "current_price": 7862.08,
-      "variation_daily": 75.11916535250668,
-      "rsi": 53.03617905654758,
-      "signal_score": 35,
-      "confidence": 72.5,
-      "reasons": [
-        "Tendance haussière (prix > SMA5 > SMA10)",
-        "Momentum positif (+75.1%)"
-      ],
-      "sma5": 6098.26,
-      "sma10": 5874.687,
-      "sma20": 5740.771,
-      "data_points": 60,
-      "target_price": 8648.288,
-      "stop_loss": 7468.976,
-      "potential_gain": 10.0
-    },
-    {
-      "symbol": "ETIT",
-      "signal": "ACHAT",
-      "current_price": 7286.53,
-      "variation_daily": 57.70651752804463,
-      "rsi": 60.17521016121583,
-      "signal_score": 35,
-      "confidence": 72.5,
-      "reasons": [
-        "Tendance haussière (prix > SMA5 > SMA10)",
-        "Momentum positif (+57.7%)"
-      ],
-      "sma5": 6521.656,
-      "sma10": 6197.987,
-      "sma20": 6135.5985,
-      "data_points": 60,
-      "target_price": 8015.183,
-      "stop_loss": 6922.2035,
-      "potential_gain": 10.0
+      "data_points": 102,
+      "last_update": "2026-01-05"
     },
     {
       "symbol": "FTSC",
-      "signal": "ACHAT",
-      "current_price": 3681.38,
-      "variation_daily": 4.361112843511346,
-      "rsi": 65.81968560314813,
-      "signal_score": 35,
-      "confidence": 72.5,
+      "signal": "BUY",
+      "confidence": 95,
+      "signal_score": 25,
+      "current_price": 1843.97,
+      "target_price": 2430.29,
+      "stop_loss": 158.53,
+      "potential_gain": 31.8,
+      "volatility": 71.64,
+      "volume_ratio": 2.33,
+      "trend": "UP",
+      "sma_5": 3332.9,
+      "sma_10": 2798.61,
+      "sma_20": 2605.84,
+      "rsi": 52.26,
+      "macd": {
+        "macd": 195.5264,
+        "signal": 154.2308,
+        "histogram": 41.2956,
+        "trend": "BULLISH",
+        "strength": 100,
+        "crossover": null
+      },
+      "bollinger": {
+        "upper": 4340.17,
+        "middle": 2605.84,
+        "lower": 871.5,
+        "current_price": 1843.97,
+        "percent_b": 0.28,
+        "bandwidth": 133.11,
+        "signal": "NEUTRAL",
+        "squeeze": "False",
+        "std_dev": 867.17
+      },
+      "atr": {
+        "atr": 842.72,
+        "atr_percent": 45.7,
+        "volatility": "HIGH",
+        "stop_loss_distance": 1685.43,
+        "risk_level": "HIGH"
+      },
+      "recent_high": 3922.89,
+      "recent_low": 1327.28,
+      "publication_sentiment": null,
+      "fundamentals": null,
+      "macro_context": {
+        "sector": "INDUSTRIE",
+        "indicators": {},
+        "macro_score": 0,
+        "macro_signal": "NEUTRAL",
+        "indicators_count": 0
+      },
       "reasons": [
-        "Tendance haussière (prix > SMA5 > SMA10)",
-        "Momentum positif (+4.4%)"
+        "✓ MACD haussier (histogram: +41.2956)",
+        "📈 Volume exceptionnel: 2.3x la moyenne",
+        "📉 Momentum négatif 5j: -53.0%",
+        "⚠️ Volatilité élevée: 45.7%"
       ],
-      "sma5": 3656.3120000000004,
-      "sma10": 2891.214,
-      "sma20": 2674.8275000000003,
-      "data_points": 60,
-      "target_price": 4049.5180000000005,
-      "stop_loss": 3497.311,
-      "potential_gain": 10.0
+      "data_points": 102,
+      "last_update": "2026-01-05"
+    },
+    {
+      "symbol": "SCRC",
+      "signal": "BUY",
+      "confidence": 95,
+      "signal_score": 38,
+      "current_price": 2223.48,
+      "target_price": 2896.2,
+      "stop_loss": 577.3,
+      "potential_gain": 30.26,
+      "volatility": 53.65,
+      "volume_ratio": 0.03,
+      "trend": "UP",
+      "sma_5": 3406.38,
+      "sma_10": 3058.48,
+      "sma_20": 3004.86,
+      "rsi": 47.92,
+      "macd": {
+        "macd": 44.7309,
+        "signal": 42.2569,
+        "histogram": 2.474,
+        "trend": "BULLISH",
+        "strength": 24.7,
+        "crossover": null
+      },
+      "bollinger": {
+        "upper": 4733.68,
+        "middle": 3004.86,
+        "lower": 1276.04,
+        "current_price": 2223.48,
+        "percent_b": 0.274,
+        "bandwidth": 115.07,
+        "signal": "NEUTRAL",
+        "squeeze": "False",
+        "std_dev": 864.41
+      },
+      "atr": {
+        "atr": 823.09,
+        "atr_percent": 37.02,
+        "volatility": "HIGH",
+        "stop_loss_distance": 1646.18,
+        "risk_level": "HIGH"
+      },
+      "recent_high": 4485.14,
+      "recent_low": 1585.81,
+      "publication_sentiment": null,
+      "fundamentals": {
+        "pe_ratio": 7.8,
+        "roe": 13.5,
+        "debt_ratio": 31.5
+      },
+      "macro_context": {
+        "sector": "AGRICULTURE",
+        "indicators": {},
+        "macro_score": 0,
+        "macro_signal": "NEUTRAL",
+        "indicators_count": 0
+      },
+      "reasons": [
+        "✓ MACD haussier (histogram: +2.4740)",
+        "📉 Momentum négatif 5j: -44.7%",
+        "⚠️ Volatilité élevée: 37.0%",
+        "💎 P/E très bas: 7.8 (sous-évalué)",
+        "✓ ROE bon: 13.5%"
+      ],
+      "data_points": 103,
+      "last_update": "2026-01-05"
+    },
+    {
+      "symbol": "ECOC",
+      "signal": "BUY",
+      "confidence": 95,
+      "signal_score": 25,
+      "current_price": 5110.74,
+      "target_price": 6183.84,
+      "stop_loss": 1596.9,
+      "potential_gain": 21.0,
+      "volatility": 30.19,
+      "volume_ratio": 0.36,
+      "trend": "UP",
+      "sma_5": 5974.01,
+      "sma_10": 5930.43,
+      "sma_20": 5679.24,
+      "rsi": 50.3,
+      "macd": {
+        "macd": 51.8978,
+        "signal": -16.8112,
+        "histogram": 68.709,
+        "trend": "BULLISH",
+        "strength": 100,
+        "crossover": null
+      },
+      "bollinger": {
+        "upper": 8026.83,
+        "middle": 5679.24,
+        "lower": 3331.65,
+        "current_price": 5110.74,
+        "percent_b": 0.379,
+        "bandwidth": 82.67,
+        "signal": "NEUTRAL",
+        "squeeze": "False",
+        "std_dev": 1173.8
+      },
+      "atr": {
+        "atr": 1756.92,
+        "atr_percent": 34.38,
+        "volatility": "HIGH",
+        "stop_loss_distance": 3513.85,
+        "risk_level": "HIGH"
+      },
+      "recent_high": 7862.08,
+      "recent_low": 4004.32,
+      "publication_sentiment": null,
+      "fundamentals": null,
+      "macro_context": {
+        "sector": "UNKNOWN",
+        "indicators": {},
+        "macro_score": 0,
+        "macro_signal": "NEUTRAL",
+        "indicators_count": 0
+      },
+      "reasons": [
+        "✓ MACD haussier (histogram: +68.7090)",
+        "⚠️ Volatilité élevée: 34.4%"
+      ],
+      "data_points": 103,
+      "last_update": "2026-01-05"
+    },
+    {
+      "symbol": "BOAC",
+      "signal": "BUY",
+      "confidence": 95,
+      "signal_score": 25,
+      "current_price": 5702.63,
+      "target_price": 6568.51,
+      "stop_loss": 2904.11,
+      "potential_gain": 15.18,
+      "volatility": 48.44,
+      "volume_ratio": 0.36,
+      "trend": "UP",
+      "sma_5": 5732.96,
+      "sma_10": 5523.2,
+      "sma_20": 5637.89,
+      "rsi": 53.31,
+      "macd": {
+        "macd": -36.8008,
+        "signal": -147.9154,
+        "histogram": 111.1146,
+        "trend": "BULLISH",
+        "strength": 100,
+        "crossover": null
+      },
+      "bollinger": {
+        "upper": 7956.12,
+        "middle": 5637.89,
+        "lower": 3319.65,
+        "current_price": 5702.63,
+        "percent_b": 0.514,
+        "bandwidth": 82.24,
+        "signal": "NEUTRAL",
+        "squeeze": "False",
+        "std_dev": 1159.12
+      },
+      "atr": {
+        "atr": 1399.26,
+        "atr_percent": 24.54,
+        "volatility": "HIGH",
+        "stop_loss_distance": 2798.51,
+        "risk_level": "HIGH"
+      },
+      "recent_high": 7634.71,
+      "recent_low": 4053.65,
+      "publication_sentiment": null,
+      "fundamentals": null,
+      "macro_context": {
+        "sector": "BANQUE",
+        "indicators": {},
+        "macro_score": 0,
+        "macro_signal": "NEUTRAL",
+        "indicators_count": 0
+      },
+      "reasons": [
+        "✓ MACD haussier (histogram: +111.1146)",
+        "⚠️ Volatilité élevée: 24.5%"
+      ],
+      "data_points": 103,
+      "last_update": "2026-01-05"
     },
     {
       "symbol": "NTLC",
-      "signal": "ACHAT",
-      "current_price": 7503.88,
-      "variation_daily": 56.65654840689599,
-      "rsi": 61.623943419367826,
-      "signal_score": 35,
-      "confidence": 72.5,
+      "signal": "BUY",
+      "confidence": 95,
+      "signal_score": 30,
+      "current_price": 6285.53,
+      "target_price": 6989.14,
+      "stop_loss": 3468.43,
+      "potential_gain": 11.19,
+      "volatility": 116.3,
+      "volume_ratio": 1.39,
+      "trend": "UP",
+      "sma_5": 6152.13,
+      "sma_10": 5813.29,
+      "sma_20": 5846.23,
+      "rsi": 54.17,
+      "macd": {
+        "macd": 70.4833,
+        "signal": -50.1188,
+        "histogram": 120.6021,
+        "trend": "BULLISH",
+        "strength": 100,
+        "crossover": null
+      },
+      "bollinger": {
+        "upper": 8383.0,
+        "middle": 5846.23,
+        "lower": 3309.46,
+        "current_price": 6285.53,
+        "percent_b": 0.587,
+        "bandwidth": 86.78,
+        "signal": "NEUTRAL",
+        "squeeze": "False",
+        "std_dev": 1268.38
+      },
+      "atr": {
+        "atr": 1408.55,
+        "atr_percent": 22.41,
+        "volatility": "HIGH",
+        "stop_loss_distance": 2817.1,
+        "risk_level": "HIGH"
+      },
+      "recent_high": 7727.18,
+      "recent_low": 4070.33,
+      "publication_sentiment": null,
+      "fundamentals": null,
+      "macro_context": {
+        "sector": "INDUSTRIE",
+        "indicators": {},
+        "macro_score": 0,
+        "macro_signal": "NEUTRAL",
+        "indicators_count": 0
+      },
       "reasons": [
-        "Tendance haussière (prix > SMA5 > SMA10)",
-        "Momentum positif (+56.7%)"
+        "✓ Tendance haussière (prix > SMA5 > SMA10)",
+        "✓ MACD haussier (histogram: +120.6021)",
+        "📉 Momentum négatif 5j: -14.6%",
+        "⚠️ Volatilité élevée: 22.4%"
       ],
-      "sma5": 6435.954,
-      "sma10": 5615.798000000001,
-      "sma20": 5744.267,
-      "data_points": 60,
-      "target_price": 8254.268,
-      "stop_loss": 7128.686,
-      "potential_gain": 10.0
+      "data_points": 104,
+      "last_update": "2026-01-05"
     },
     {
-      "symbol": "SMBC",
-      "signal": "ACHAT",
-      "current_price": 3417.52,
-      "variation_daily": 33.26989970206991,
-      "rsi": 55.18544303489555,
-      "signal_score": 35,
-      "confidence": 72.5,
+      "symbol": "BOAG",
+      "signal": "BUY",
+      "confidence": 95,
+      "signal_score": 38,
+      "current_price": 7703.03,
+      "target_price": 7823.43,
+      "stop_loss": 5668.11,
+      "potential_gain": 1.56,
+      "volatility": 60.28,
+      "volume_ratio": 0.96,
+      "trend": "UP",
+      "sma_5": 6883.4,
+      "sma_10": 6086.72,
+      "sma_20": 6297.63,
+      "rsi": 52.1,
+      "macd": {
+        "macd": 124.6454,
+        "signal": 11.4014,
+        "histogram": 113.244,
+        "trend": "BULLISH",
+        "strength": 100,
+        "crossover": null
+      },
+      "bollinger": {
+        "upper": 8374.42,
+        "middle": 6297.63,
+        "lower": 4220.85,
+        "current_price": 7703.03,
+        "percent_b": 0.838,
+        "bandwidth": 65.95,
+        "signal": "NEAR_OVERBOUGHT",
+        "squeeze": "False",
+        "std_dev": 1038.39
+      },
+      "atr": {
+        "atr": 1017.46,
+        "atr_percent": 13.21,
+        "volatility": "HIGH",
+        "stop_loss_distance": 2034.92,
+        "risk_level": "HIGH"
+      },
+      "recent_high": 7909.07,
+      "recent_low": 4330.71,
+      "publication_sentiment": {
+        "sentiment_score": 1.0,
+        "sentiment_label": "NEUTRAL",
+        "confidence": 0.8,
+        "extracted_numbers": {
+          "percentages": [],
+          "amounts_fcfa": [],
+          "millions": [],
+          "milliards": []
+        },
+        "key_signals": [],
+        "trading_signal": "HOLD",
+        "impact_level": "LOW",
+        "detected_keywords": [],
+        "keyword_score": 0,
+        "category_boost": 5,
+        "numbers_boost": 0
+      },
+      "fundamentals": null,
+      "macro_context": {
+        "sector": "UNKNOWN",
+        "indicators": {},
+        "macro_score": 0,
+        "macro_signal": "NEUTRAL",
+        "indicators_count": 0
+      },
       "reasons": [
-        "Tendance haussière (prix > SMA5 > SMA10)",
-        "Momentum positif (+33.3%)"
+        "✓ Tendance haussière (prix > SMA5 > SMA10)",
+        "✓ MACD haussier (histogram: +113.2440)",
+        "⚠ Prix proche bande supérieure Bollinger",
+        "🚀 Momentum positif 5j: +5.7%",
+        "⚠ Proche de la résistance (2.6% du plus haut)",
+        "⚠️ Volatilité élevée: 13.2%"
       ],
-      "sma5": 3340.346,
-      "sma10": 3250.5,
-      "sma20": 2872.5834999999997,
-      "data_points": 60,
-      "target_price": 3759.2720000000004,
-      "stop_loss": 3246.644,
-      "potential_gain": 10.0
+      "data_points": 98,
+      "last_update": "2026-01-05"
+    },
+    {
+      "symbol": "SEMC",
+      "signal": "BUY",
+      "confidence": 95,
+      "signal_score": 38,
+      "current_price": 4887.49,
+      "target_price": 4887.49,
+      "stop_loss": 1711.09,
+      "potential_gain": 0.0,
+      "volatility": 97.59,
+      "volume_ratio": 0.27,
+      "trend": "DOWN",
+      "sma_5": 2634.51,
+      "sma_10": 3077.24,
+      "sma_20": 3155.66,
+      "rsi": 56.06,
+      "macd": {
+        "macd": 36.8967,
+        "signal": 0.8118,
+        "histogram": 36.0849,
+        "trend": "BULLISH",
+        "strength": 100,
+        "crossover": "BULLISH_CROSSOVER"
+      },
+      "bollinger": {
+        "upper": 5555.95,
+        "middle": 3155.66,
+        "lower": 755.38,
+        "current_price": 4887.49,
+        "percent_b": 0.861,
+        "bandwidth": 152.13,
+        "signal": "NEAR_OVERBOUGHT",
+        "squeeze": "False",
+        "std_dev": 1200.14
+      },
+      "atr": {
+        "atr": 1588.2,
+        "atr_percent": 32.5,
+        "volatility": "HIGH",
+        "stop_loss_distance": 3176.41,
+        "risk_level": "HIGH"
+      },
+      "recent_high": 4887.49,
+      "recent_low": 1023.61,
+      "publication_sentiment": null,
+      "fundamentals": null,
+      "macro_context": {
+        "sector": "INDUSTRIE",
+        "indicators": {},
+        "macro_score": 0,
+        "macro_signal": "NEUTRAL",
+        "indicators_count": 0
+      },
+      "reasons": [
+        "✓ MACD haussier (histogram: +36.0849)",
+        "🚀 Croisement MACD haussier détecté!",
+        "⚠ Prix proche bande supérieure Bollinger",
+        "🚀 Momentum positif 5j: +377.5%",
+        "⚠ Proche de la résistance (0.0% du plus haut)",
+        "⚠️ Volatilité élevée: 32.5%"
+      ],
+      "data_points": 102,
+      "last_update": "2026-01-05"
+    },
+    {
+      "symbol": "SICG",
+      "signal": "BUY",
+      "confidence": 80,
+      "signal_score": 35,
+      "current_price": 8100.0,
+      "target_price": 10615.53,
+      "stop_loss": 3931.86,
+      "potential_gain": 31.06,
+      "volatility": 77.11,
+      "volume_ratio": 0.91,
+      "trend": "UP",
+      "sma_5": 7024.6,
+      "sma_10": 6598.4,
+      "sma_20": 6499.1,
+      "rsi": 58.73,
+      "macd": null,
+      "bollinger": {
+        "upper": 12421.14,
+        "middle": 6499.1,
+        "lower": 577.06,
+        "current_price": 8100.0,
+        "percent_b": 0.635,
+        "bandwidth": 182.24,
+        "signal": "NEUTRAL",
+        "squeeze": "False",
+        "std_dev": 2961.02
+      },
+      "atr": {
+        "atr": 2084.07,
+        "atr_percent": 25.73,
+        "volatility": "HIGH",
+        "stop_loss_distance": 4168.14,
+        "risk_level": "HIGH"
+      },
+      "recent_high": 16791.0,
+      "recent_low": 2787.0,
+      "publication_sentiment": null,
+      "fundamentals": null,
+      "macro_context": {
+        "sector": "UNKNOWN",
+        "indicators": {},
+        "macro_score": 0,
+        "macro_signal": "NEUTRAL",
+        "indicators_count": 0
+      },
+      "reasons": [
+        "✓ Tendance haussière (prix > SMA5 > SMA10)",
+        "🚀 Momentum positif 5j: +74.0%",
+        "⚠️ Volatilité élevée: 25.7%"
+      ],
+      "data_points": 24,
+      "last_update": "2025-12-09"
+    },
+    {
+      "symbol": "SITC",
+      "signal": "BUY",
+      "confidence": 80,
+      "signal_score": 35,
+      "current_price": 7400.0,
+      "target_price": 7712.36,
+      "stop_loss": 4319.42,
+      "potential_gain": 4.22,
+      "volatility": 54.04,
+      "volume_ratio": 0.94,
+      "trend": "UP",
+      "sma_5": 6370.4,
+      "sma_10": 5929.4,
+      "sma_20": 5237.35,
+      "rsi": 59.75,
+      "macd": null,
+      "bollinger": {
+        "upper": 9150.33,
+        "middle": 5237.35,
+        "lower": 1324.37,
+        "current_price": 7400.0,
+        "percent_b": 0.776,
+        "bandwidth": 149.43,
+        "signal": "NEUTRAL",
+        "squeeze": "False",
+        "std_dev": 1956.49
+      },
+      "atr": {
+        "atr": 1540.29,
+        "atr_percent": 20.81,
+        "volatility": "HIGH",
+        "stop_loss_distance": 3080.57,
+        "risk_level": "HIGH"
+      },
+      "recent_high": 7960.0,
+      "recent_low": 2274.0,
+      "publication_sentiment": null,
+      "fundamentals": null,
+      "macro_context": {
+        "sector": "UNKNOWN",
+        "indicators": {},
+        "macro_score": 0,
+        "macro_signal": "NEUTRAL",
+        "indicators_count": 0
+      },
+      "reasons": [
+        "✓ Tendance haussière (prix > SMA5 > SMA10)",
+        "🚀 Momentum positif 5j: +47.3%",
+        "⚠️ Volatilité élevée: 20.8%"
+      ],
+      "data_points": 24,
+      "last_update": "2025-12-09"
     }
   ],
   "sell_signals": [
     {
-      "symbol": "NEIC",
-      "signal": "VENTE",
-      "current_price": 2062.17,
-      "variation_daily": -7.537204015657293,
-      "rsi": 72.50955654370308,
-      "signal_score": -35,
-      "confidence": 65,
+      "symbol": "BOAB",
+      "signal": "SELL",
+      "confidence": 95,
+      "signal_score": -40,
+      "current_price": 6338.08,
+      "target_price": 5395.75,
+      "stop_loss": 6781.75,
+      "potential_gain": -14.87,
+      "volatility": 54.77,
+      "volume_ratio": 0.7,
+      "trend": "DOWN",
+      "sma_5": 5924.39,
+      "sma_10": 6105.89,
+      "sma_20": 6322.95,
+      "rsi": 50.51,
+      "macd": {
+        "macd": -7.7554,
+        "signal": 65.4519,
+        "histogram": -73.2074,
+        "trend": "BEARISH",
+        "strength": 100,
+        "crossover": null
+      },
+      "bollinger": {
+        "upper": 8542.56,
+        "middle": 6322.95,
+        "lower": 4103.33,
+        "current_price": 6338.08,
+        "percent_b": 0.503,
+        "bandwidth": 70.21,
+        "signal": "NEUTRAL",
+        "squeeze": "False",
+        "std_dev": 1109.81
+      },
+      "atr": {
+        "atr": 1432.0,
+        "atr_percent": 22.59,
+        "volatility": "HIGH",
+        "stop_loss_distance": 2864.0,
+        "risk_level": "HIGH"
+      },
+      "recent_high": 7806.42,
+      "recent_low": 3982.25,
+      "publication_sentiment": null,
+      "fundamentals": null,
+      "macro_context": {
+        "sector": "BANQUE",
+        "indicators": {},
+        "macro_score": 0,
+        "macro_signal": "NEUTRAL",
+        "indicators_count": 0
+      },
       "reasons": [
-        "RSI suracheté (72.5)",
-        "Momentum négatif (-7.5%)"
+        "⚠ MACD baissier (histogram: -73.2074)",
+        "📉 Momentum négatif 5j: -15.3%",
+        "⚠️ Volatilité élevée: 22.6%"
       ],
-      "sma5": 2645.86,
-      "sma10": 3025.275,
-      "sma20": 3110.1150000000002,
-      "data_points": 60
+      "data_points": 104,
+      "last_update": "2026-01-05"
+    },
+    {
+      "symbol": "NSIAC",
+      "signal": "SELL",
+      "confidence": 95,
+      "signal_score": -30,
+      "current_price": 3936.99,
+      "target_price": 3670.94,
+      "stop_loss": 4212.58,
+      "potential_gain": -6.76,
+      "volatility": 47.03,
+      "volume_ratio": 0.51,
+      "trend": "DOWN",
+      "sma_5": 4014.0,
+      "sma_10": 4130.18,
+      "sma_20": 4329.77,
+      "rsi": 45.79,
+      "macd": {
+        "macd": -152.4672,
+        "signal": -103.7889,
+        "histogram": -48.6783,
+        "trend": "BEARISH",
+        "strength": 100,
+        "crossover": null
+      },
+      "bollinger": {
+        "upper": 5959.67,
+        "middle": 4329.77,
+        "lower": 2699.88,
+        "current_price": 3936.99,
+        "percent_b": 0.38,
+        "bandwidth": 75.29,
+        "signal": "NEUTRAL",
+        "squeeze": "False",
+        "std_dev": 814.95
+      },
+      "atr": {
+        "atr": 1042.82,
+        "atr_percent": 26.49,
+        "volatility": "HIGH",
+        "stop_loss_distance": 2085.64,
+        "risk_level": "HIGH"
+      },
+      "recent_high": 5764.82,
+      "recent_low": 3271.87,
+      "publication_sentiment": null,
+      "fundamentals": null,
+      "macro_context": {
+        "sector": "UNKNOWN",
+        "indicators": {},
+        "macro_score": 0,
+        "macro_signal": "NEUTRAL",
+        "indicators_count": 0
+      },
+      "reasons": [
+        "⚠ Tendance baissière (prix < SMA5 < SMA10)",
+        "⚠ MACD baissier (histogram: -48.6783)",
+        "🚀 Momentum positif 5j: +20.3%",
+        "⚠️ Volatilité élevée: 26.5%"
+      ],
+      "data_points": 97,
+      "last_update": "2026-01-05"
+    },
+    {
+      "symbol": "SOGC",
+      "signal": "SELL",
+      "confidence": 95,
+      "signal_score": -45,
+      "current_price": 1465.24,
+      "target_price": 1302.21,
+      "stop_loss": 1567.81,
+      "potential_gain": -11.13,
+      "volatility": 69.71,
+      "volume_ratio": 2.1,
+      "trend": "DOWN",
+      "sma_5": 1854.43,
+      "sma_10": 2305.43,
+      "sma_20": 2214.68,
+      "rsi": 51.86,
+      "macd": {
+        "macd": -168.7954,
+        "signal": -71.9615,
+        "histogram": -96.8339,
+        "trend": "BEARISH",
+        "strength": 100,
+        "crossover": null
+      },
+      "bollinger": {
+        "upper": 3670.07,
+        "middle": 2214.68,
+        "lower": 759.29,
+        "current_price": 1465.24,
+        "percent_b": 0.243,
+        "bandwidth": 131.43,
+        "signal": "NEUTRAL",
+        "squeeze": "False",
+        "std_dev": 727.7
+      },
+      "atr": {
+        "atr": 803.27,
+        "atr_percent": 54.82,
+        "volatility": "HIGH",
+        "stop_loss_distance": 1606.53,
+        "risk_level": "HIGH"
+      },
+      "recent_high": 3883.24,
+      "recent_low": 1057.67,
+      "publication_sentiment": null,
+      "fundamentals": null,
+      "macro_context": {
+        "sector": "AGRICULTURE",
+        "indicators": {},
+        "macro_score": 0,
+        "macro_signal": "NEUTRAL",
+        "indicators_count": 0
+      },
+      "reasons": [
+        "⚠ Tendance baissière (prix < SMA5 < SMA10)",
+        "⚠ MACD baissier (histogram: -96.8339)",
+        "📈 Volume exceptionnel: 2.1x la moyenne",
+        "📉 Momentum négatif 5j: -18.4%",
+        "⚠️ Volatilité élevée: 54.8%"
+      ],
+      "data_points": 102,
+      "last_update": "2026-01-05"
+    },
+    {
+      "symbol": "TTBC",
+      "signal": "SELL",
+      "confidence": 95,
+      "signal_score": -38,
+      "current_price": 1729.3,
+      "target_price": 1729.3,
+      "stop_loss": 1850.35,
+      "potential_gain": -0.0,
+      "volatility": 40.67,
+      "volume_ratio": 1.18,
+      "trend": "DOWN",
+      "sma_5": 2729.95,
+      "sma_10": 2626.02,
+      "sma_20": 2665.39,
+      "rsi": 49.44,
+      "macd": {
+        "macd": -69.5916,
+        "signal": -20.5893,
+        "histogram": -49.0023,
+        "trend": "BEARISH",
+        "strength": 100,
+        "crossover": "BEARISH_CROSSOVER"
+      },
+      "bollinger": {
+        "upper": 4123.13,
+        "middle": 2665.39,
+        "lower": 1207.64,
+        "current_price": 1729.3,
+        "percent_b": 0.179,
+        "bandwidth": 109.38,
+        "signal": "NEAR_OVERSOLD",
+        "squeeze": "False",
+        "std_dev": 728.87
+      },
+      "atr": {
+        "atr": 710.3,
+        "atr_percent": 41.07,
+        "volatility": "HIGH",
+        "stop_loss_distance": 1420.61,
+        "risk_level": "HIGH"
+      },
+      "recent_high": 3896.63,
+      "recent_low": 1729.3,
+      "publication_sentiment": null,
+      "fundamentals": null,
+      "macro_context": {
+        "sector": "UNKNOWN",
+        "indicators": {},
+        "macro_score": 0,
+        "macro_signal": "NEUTRAL",
+        "indicators_count": 0
+      },
+      "reasons": [
+        "⚠ MACD baissier (histogram: -49.0023)",
+        "📉 Croisement MACD baissier détecté!",
+        "📊 Prix proche bande inférieure Bollinger",
+        "📉 Momentum négatif 5j: -36.7%",
+        "✓ Proche du support (0.0% du plus bas)",
+        "⚠️ Volatilité élevée: 41.1%"
+      ],
+      "data_points": 74,
+      "last_update": "2026-01-05"
+    },
+    {
+      "symbol": "TTRC",
+      "signal": "SELL",
+      "confidence": 95,
+      "signal_score": -40,
+      "current_price": 5658.55,
+      "target_price": 4983.64,
+      "stop_loss": 6054.65,
+      "potential_gain": -11.93,
+      "volatility": 203.22,
+      "volume_ratio": 0.78,
+      "trend": "UP",
+      "sma_5": 6355.8,
+      "sma_10": 5784.81,
+      "sma_20": 6152.83,
+      "rsi": 50.54,
+      "macd": {
+        "macd": -34.0689,
+        "signal": -4.7884,
+        "histogram": -29.2805,
+        "trend": "BEARISH",
+        "strength": 100,
+        "crossover": null
+      },
+      "bollinger": {
+        "upper": 8502.53,
+        "middle": 6152.83,
+        "lower": 3803.12,
+        "current_price": 5658.55,
+        "percent_b": 0.395,
+        "bandwidth": 76.38,
+        "signal": "NEUTRAL",
+        "squeeze": "False",
+        "std_dev": 1174.85
+      },
+      "atr": {
+        "atr": 1396.3,
+        "atr_percent": 24.68,
+        "volatility": "HIGH",
+        "stop_loss_distance": 2792.59,
+        "risk_level": "HIGH"
+      },
+      "recent_high": 7838.47,
+      "recent_low": 3971.28,
+      "publication_sentiment": null,
+      "fundamentals": null,
+      "macro_context": {
+        "sector": "INDUSTRIE",
+        "indicators": {},
+        "macro_score": 0,
+        "macro_signal": "NEUTRAL",
+        "indicators_count": 0
+      },
+      "reasons": [
+        "⚠ MACD baissier (histogram: -29.2805)",
+        "📉 Momentum négatif 5j: -17.5%",
+        "⚠️ Volatilité élevée: 24.7%"
+      ],
+      "data_points": 75,
+      "last_update": "2026-01-05"
     },
     {
       "symbol": "NSBC",
-      "signal": "VENTE",
+      "signal": "SELL",
+      "confidence": 80,
+      "signal_score": -37,
       "current_price": 11500.0,
-      "variation_daily": -3.6850921273031827,
-      "rsi": 72.71655573838937,
-      "signal_score": -35,
-      "confidence": 65,
+      "target_price": 7838.4,
+      "stop_loss": 12305.0,
+      "potential_gain": -31.84,
+      "volatility": 59.59,
+      "volume_ratio": 0.0,
+      "trend": "UP",
+      "sma_5": 11870.0,
+      "sma_10": 8978.9,
+      "sma_20": 6556.95,
+      "rsi": 60.19,
+      "macd": null,
+      "bollinger": {
+        "upper": 14125.17,
+        "middle": 6556.95,
+        "lower": -1011.27,
+        "current_price": 11500.0,
+        "percent_b": 0.827,
+        "bandwidth": 230.85,
+        "signal": "NEAR_OVERBOUGHT",
+        "squeeze": "False",
+        "std_dev": 3784.11
+      },
+      "atr": {
+        "atr": 1993.43,
+        "atr_percent": 17.33,
+        "volatility": "HIGH",
+        "stop_loss_distance": 3986.86,
+        "risk_level": "HIGH"
+      },
+      "recent_high": 11990.0,
+      "recent_low": 2346.0,
+      "publication_sentiment": null,
+      "fundamentals": null,
+      "macro_context": {
+        "sector": "UNKNOWN",
+        "indicators": {},
+        "macro_score": 0,
+        "macro_signal": "NEUTRAL",
+        "indicators_count": 0
+      },
       "reasons": [
-        "RSI suracheté (72.7)",
-        "Momentum négatif (-3.7%)"
+        "📊 RSI élevé: 60.2",
+        "⚠ Prix proche bande supérieure Bollinger",
+        "⚠ Proche de la résistance (4.1% du plus haut)",
+        "⚠️ Volatilité élevée: 17.3%"
       ],
-      "sma5": 11870.0,
-      "sma10": 8978.9,
-      "sma20": 6556.95,
-      "data_points": 32
-    },
-    {
-      "symbol": "SIVC.BC",
-      "signal": "VENTE",
-      "current_price": 1595.0,
-      "variation_daily": -6.176470588235294,
-      "rsi": 73.65998026964814,
-      "signal_score": -35,
-      "confidence": 65,
-      "reasons": [
-        "RSI suracheté (73.7)",
-        "Momentum négatif (-6.2%)"
-      ],
-      "sma5": 1779.0,
-      "sma10": 889.5,
-      "sma20": 444.75,
-      "data_points": 39
+      "data_points": 28,
+      "last_update": "2025-12-18"
     }
   ],
   "hold_signals": [
     {
-      "symbol": "ORAC",
-      "signal": "CONSERVER",
-      "current_price": 14300.0,
-      "variation_daily": -5.266644584299437,
-      "rsi": 0.0,
-      "signal_score": 10,
-      "confidence": 60,
-      "reasons": [
-        "RSI survendu (0.0)",
-        "Momentum négatif (-5.3%)"
-      ],
-      "sma5": 14948.0,
-      "sma10": 14300.0,
-      "sma20": 14300.0,
-      "data_points": 6
-    },
-    {
-      "symbol": "STBC",
-      "signal": "CONSERVER",
-      "current_price": 5192.68,
-      "variation_daily": 13.728161336174713,
-      "rsi": 32.39315678158343,
-      "signal_score": 15,
-      "confidence": 60,
-      "reasons": [
-        "Momentum positif (+13.7%)"
-      ],
-      "sma5": 6447.714,
-      "sma10": 5991.530000000001,
-      "sma20": 5793.963,
-      "data_points": 60
-    },
-    {
-      "symbol": "TTLC",
-      "signal": "CONSERVER",
-      "current_price": 1076.08,
-      "variation_daily": 30.746145340996073,
-      "rsi": 32.975883345827256,
-      "signal_score": 15,
-      "confidence": 60,
-      "reasons": [
-        "Momentum positif (+30.7%)"
-      ],
-      "sma5": 1231.1219999999998,
-      "sma10": 1532.919,
-      "sma20": 1717.4779999999998,
-      "data_points": 60
-    },
-    {
-      "symbol": "SITC",
-      "signal": "CONSERVER",
-      "current_price": 7400.0,
-      "variation_daily": 0.0,
-      "rsi": 35.631325701012116,
-      "signal_score": 20,
-      "confidence": 60,
-      "reasons": [
-        "Tendance haussière (prix > SMA5 > SMA10)"
-      ],
-      "sma5": 6370.4,
-      "sma10": 5929.4,
-      "sma20": 5237.35,
-      "data_points": 28
-    },
-    {
-      "symbol": "SPHB",
-      "signal": "CONSERVER",
-      "current_price": 1030.83,
-      "variation_daily": -76.38824944167669,
-      "rsi": 35.8581268589669,
-      "signal_score": -15,
-      "confidence": 60,
-      "reasons": [
-        "Momentum négatif (-76.4%)"
-      ],
-      "sma5": 2719.644,
-      "sma10": 2846.725,
-      "sma20": 3036.7290000000003,
-      "data_points": 60
-    },
-    {
-      "symbol": "SEMC",
-      "signal": "CONSERVER",
-      "current_price": 1231.75,
-      "variation_daily": -73.86711531566318,
-      "rsi": 35.87750621880224,
-      "signal_score": -15,
-      "confidence": 60,
-      "reasons": [
-        "Momentum négatif (-73.9%)"
-      ],
-      "sma5": 2195.778,
-      "sma10": 2987.813,
-      "sma20": 2995.645,
-      "data_points": 60
-    },
-    {
-      "symbol": "UNLC",
-      "signal": "CONSERVER",
-      "current_price": 1832.69,
-      "variation_daily": -62.783184007668005,
-      "rsi": 37.52676589806311,
-      "signal_score": -15,
-      "confidence": 60,
-      "reasons": [
-        "Momentum négatif (-62.8%)"
-      ],
-      "sma5": 4111.034,
-      "sma10": 3682.583,
-      "sma20": 3248.6065,
-      "data_points": 60
-    },
-    {
-      "symbol": "TTRC",
-      "signal": "CONSERVER",
-      "current_price": 5612.53,
-      "variation_daily": -23.46703065938681,
-      "rsi": 38.85626483144311,
-      "signal_score": -15,
-      "confidence": 60,
-      "reasons": [
-        "Momentum négatif (-23.5%)"
-      ],
-      "sma5": 6129.7119999999995,
-      "sma10": 5915.157,
-      "sma20": 6185.011,
-      "data_points": 60
-    },
-    {
-      "symbol": "CABC",
-      "signal": "CONSERVER",
-      "current_price": 2345.0,
-      "variation_daily": -4.08997955010225,
-      "rsi": 39.01191357609208,
-      "signal_score": -15,
-      "confidence": 60,
-      "reasons": [
-        "Momentum négatif (-4.1%)"
-      ],
-      "sma5": 2347.0,
-      "sma10": 3963.3,
-      "sma20": 4835.4,
-      "data_points": 32
-    },
-    {
-      "symbol": "SHEC",
-      "signal": "CONSERVER",
-      "current_price": 2769.36,
-      "variation_daily": -30.272328082826405,
-      "rsi": 39.19512968512146,
-      "signal_score": -15,
-      "confidence": 60,
-      "reasons": [
-        "Momentum négatif (-30.3%)"
-      ],
-      "sma5": 3034.1259999999997,
-      "sma10": 2938.419,
-      "sma20": 2832.6315,
-      "data_points": 60
-    },
-    {
-      "symbol": "BICC",
-      "signal": "CONSERVER",
-      "current_price": 7423.83,
-      "variation_daily": 27.68929373682057,
-      "rsi": 40.14297085940955,
-      "signal_score": 15,
-      "confidence": 60,
-      "reasons": [
-        "Momentum positif (+27.7%)"
-      ],
-      "sma5": 6750.736,
-      "sma10": 6809.152,
-      "sma20": 6462.5205000000005,
-      "data_points": 60
-    },
-    {
-      "symbol": "LIBC",
-      "signal": "CONSERVER",
-      "current_price": 3148.0,
-      "variation_daily": -54.613610149942325,
-      "rsi": 40.183320461069904,
-      "signal_score": -15,
-      "confidence": 60,
-      "reasons": [
-        "Momentum négatif (-54.6%)"
-      ],
-      "sma5": 5161.8,
-      "sma10": 5155.5,
-      "sma20": 6612.5,
-      "data_points": 26
-    },
-    {
-      "symbol": "SCRC",
-      "signal": "CONSERVER",
-      "current_price": 3153.45,
-      "variation_daily": -12.282336578581369,
-      "rsi": 40.65872019117931,
-      "signal_score": -15,
-      "confidence": 60,
-      "reasons": [
-        "Momentum négatif (-12.3%)"
-      ],
-      "sma5": 3676.1159999999995,
-      "sma10": 3050.556,
-      "sma20": 3004.5045,
-      "data_points": 60
-    },
-    {
-      "symbol": "SIBC",
-      "signal": "CONSERVER",
-      "current_price": 5408.61,
-      "variation_daily": -16.650203034342475,
-      "rsi": 41.061191192381365,
-      "signal_score": -15,
-      "confidence": 60,
-      "reasons": [
-        "Momentum négatif (-16.7%)"
-      ],
-      "sma5": 5969.668,
-      "sma10": 5690.031,
-      "sma20": 5756.3565,
-      "data_points": 60
-    },
-    {
-      "symbol": "TTLS",
-      "signal": "CONSERVER",
-      "current_price": 2833.09,
-      "variation_daily": 165.78574578067978,
-      "rsi": 41.38610812198867,
-      "signal_score": 15,
-      "confidence": 60,
-      "reasons": [
-        "Momentum positif (+165.8%)"
-      ],
-      "sma5": 2924.4759999999997,
-      "sma10": 2934.076,
-      "sma20": 2972.187,
-      "data_points": 60
-    },
-    {
       "symbol": "ABJC",
-      "signal": "CONSERVER",
-      "current_price": 3484.89,
-      "variation_daily": -27.737607697172663,
-      "rsi": 41.572090500890724,
-      "signal_score": -15,
-      "confidence": 60,
+      "signal": "HOLD",
+      "confidence": 75,
+      "signal_score": 10,
+      "current_price": 3721.19,
+      "target_price": 3721.19,
+      "stop_loss": 3535.13,
+      "potential_gain": 0,
+      "volatility": 59.87,
+      "volume_ratio": 1.09,
+      "trend": "UP",
+      "sma_5": 4023.75,
+      "sma_10": 3541.92,
+      "sma_20": 3542.48,
+      "rsi": 46.33,
+      "macd": {
+        "macd": 98.5003,
+        "signal": 41.7717,
+        "histogram": 56.7286,
+        "trend": "BULLISH",
+        "strength": 100,
+        "crossover": null
+      },
+      "bollinger": {
+        "upper": 5144.47,
+        "middle": 3542.48,
+        "lower": 1940.49,
+        "current_price": 3721.19,
+        "percent_b": 0.556,
+        "bandwidth": 90.44,
+        "signal": "NEUTRAL",
+        "squeeze": "False",
+        "std_dev": 801.0
+      },
+      "atr": {
+        "atr": 970.3,
+        "atr_percent": 26.08,
+        "volatility": "HIGH",
+        "stop_loss_distance": 1940.6,
+        "risk_level": "HIGH"
+      },
+      "recent_high": 4961.19,
+      "recent_low": 2090.99,
+      "publication_sentiment": null,
+      "fundamentals": null,
+      "macro_context": {
+        "sector": "TELECOM",
+        "indicators": {},
+        "macro_score": 0,
+        "macro_signal": "NEUTRAL",
+        "indicators_count": 0
+      },
       "reasons": [
-        "Momentum négatif (-27.7%)"
+        "✓ MACD haussier (histogram: +56.7286)",
+        "📉 Momentum négatif 5j: -25.0%",
+        "⚠️ Volatilité élevée: 26.1%"
       ],
-      "sma5": 4012.858,
-      "sma10": 3502.7830000000004,
-      "sma20": 3593.19,
-      "data_points": 60
-    },
-    {
-      "symbol": "CFAC",
-      "signal": "CONSERVER",
-      "current_price": 1450.0,
-      "variation_daily": 2.112676056338028,
-      "rsi": 43.898686235057404,
-      "signal_score": 15,
-      "confidence": 60,
-      "reasons": [
-        "Momentum positif (+2.1%)"
-      ],
-      "sma5": 1446.0,
-      "sma10": 2520.9,
-      "sma20": 3491.7,
-      "data_points": 33
-    },
-    {
-      "symbol": "BOAN",
-      "signal": "CONSERVER",
-      "current_price": 6320.6,
-      "variation_daily": 23.715012722646318,
-      "rsi": 43.916530693394314,
-      "signal_score": 15,
-      "confidence": 60,
-      "reasons": [
-        "Momentum positif (+23.7%)"
-      ],
-      "sma5": 5649.894,
-      "sma10": 6106.226000000001,
-      "sma20": 5770.3745,
-      "data_points": 60
-    },
-    {
-      "symbol": "ONTBF",
-      "signal": "CONSERVER",
-      "current_price": 4045.93,
-      "variation_daily": -1.4389768574908688,
-      "rsi": 43.98431133775298,
-      "signal_score": 0,
-      "confidence": 60,
-      "reasons": [],
-      "sma5": 3660.4260000000004,
-      "sma10": 3795.6580000000004,
-      "sma20": 3412.1279999999997,
-      "data_points": 60
-    },
-    {
-      "symbol": "BOAB",
-      "signal": "CONSERVER",
-      "current_price": 5448.78,
-      "variation_daily": -14.458495231367014,
-      "rsi": 44.296765407137606,
-      "signal_score": -15,
-      "confidence": 60,
-      "reasons": [
-        "Momentum négatif (-14.5%)"
-      ],
-      "sma5": 6081.946,
-      "sma10": 6203.067,
-      "sma20": 6284.1449999999995,
-      "data_points": 60
-    },
-    {
-      "symbol": "SAFC",
-      "signal": "CONSERVER",
-      "current_price": 6818.09,
-      "variation_daily": -12.500304794709532,
-      "rsi": 44.4473806830018,
-      "signal_score": 5,
-      "confidence": 60,
-      "reasons": [
-        "Tendance haussière (prix > SMA5 > SMA10)",
-        "Momentum négatif (-12.5%)"
-      ],
-      "sma5": 6387.444,
-      "sma10": 5975.402,
-      "sma20": 5704.8965,
-      "data_points": 60
-    },
-    {
-      "symbol": "TTBC",
-      "signal": "CONSERVER",
-      "current_price": 1893.92,
-      "variation_daily": -44.35146443514644,
-      "rsi": 46.46954018652538,
-      "signal_score": -15,
-      "confidence": 60,
-      "reasons": [
-        "Momentum négatif (-44.4%)"
-      ],
-      "sma5": 2850.816,
-      "sma10": 2718.1400000000003,
-      "sma20": 2775.6510000000003,
-      "data_points": 60
-    },
-    {
-      "symbol": "SICC",
-      "signal": "CONSERVER",
-      "current_price": 1421.79,
-      "variation_daily": -63.77254358383742,
-      "rsi": 46.88477262508158,
-      "signal_score": -5,
-      "confidence": 60,
-      "reasons": [
-        "Momentum négatif (-63.8%)",
-        "Volume élevé"
-      ],
-      "sma5": 3429.442,
-      "sma10": 3323.0550000000003,
-      "sma20": 3254.2325,
-      "data_points": 60
-    },
-    {
-      "symbol": "CIAC",
-      "signal": "CONSERVER",
-      "current_price": 1775.01,
-      "variation_daily": -34.417016748506384,
-      "rsi": 47.72552919097924,
-      "signal_score": -15,
-      "confidence": 60,
-      "reasons": [
-        "Momentum négatif (-34.4%)"
-      ],
-      "sma5": 2343.376,
-      "sma10": 2507.418,
-      "sma20": 2601.772,
-      "data_points": 60
-    },
-    {
-      "symbol": "SDSC",
-      "signal": "CONSERVER",
-      "current_price": 3762.87,
-      "variation_daily": -23.32143956082024,
-      "rsi": 48.06164811625355,
-      "signal_score": -15,
-      "confidence": 60,
-      "reasons": [
-        "Momentum négatif (-23.3%)"
-      ],
-      "sma5": 3324.244,
-      "sma10": 3348.095,
-      "sma20": 3521.3835,
-      "data_points": 60
-    },
-    {
-      "symbol": "CIEC",
-      "signal": "CONSERVER",
-      "current_price": 2470.81,
-      "variation_daily": -5.405798599545954,
-      "rsi": 48.95556483927772,
-      "signal_score": -15,
-      "confidence": 60,
-      "reasons": [
-        "Momentum négatif (-5.4%)"
-      ],
-      "sma5": 2289.5080000000003,
-      "sma10": 2707.459,
-      "sma20": 2772.6985,
-      "data_points": 60
-    },
-    {
-      "symbol": "SIVC",
-      "signal": "CONSERVER",
-      "current_price": 1559.15,
-      "variation_daily": 27.17269842823469,
-      "rsi": 49.2346879148231,
-      "signal_score": 25,
-      "confidence": 60,
-      "reasons": [
-        "Momentum positif (+27.2%)",
-        "Volume élevé"
-      ],
-      "sma5": 1551.534,
-      "sma10": 1703.089,
-      "sma20": 1648.1105,
-      "data_points": 60
-    },
-    {
-      "symbol": "NSIAC",
-      "signal": "CONSERVER",
-      "current_price": 3863.84,
-      "variation_daily": -8.191579602669776,
-      "rsi": 49.343975450268985,
-      "signal_score": -15,
-      "confidence": 60,
-      "reasons": [
-        "Momentum négatif (-8.2%)"
-      ],
-      "sma5": 3892.656,
-      "sma10": 4301.387000000001,
-      "sma20": 4303.574500000001,
-      "data_points": 60
+      "data_points": 103,
+      "last_update": "2026-01-05"
     },
     {
       "symbol": "BICB",
-      "signal": "CONSERVER",
+      "signal": "HOLD",
+      "confidence": 50,
+      "signal_score": 0,
       "current_price": 4995.0,
-      "variation_daily": 2.9896907216494846,
-      "rsi": 49.350649350649356,
-      "signal_score": 15,
-      "confidence": 60,
+      "target_price": 4995.0,
+      "stop_loss": 4745.25,
+      "potential_gain": 0,
+      "volatility": 1.96,
+      "volume_ratio": 0.0,
+      "trend": "NEUTRAL",
+      "sma_5": 4928.0,
+      "sma_10": 4995.0,
+      "sma_20": 4995.0,
+      "rsi": null,
+      "macd": null,
+      "bollinger": null,
+      "atr": null,
+      "recent_high": 5000.0,
+      "recent_low": 4850.0,
+      "publication_sentiment": null,
+      "fundamentals": null,
+      "macro_context": {
+        "sector": "UNKNOWN",
+        "indicators": {},
+        "macro_score": 0,
+        "macro_signal": "NEUTRAL",
+        "indicators_count": 0
+      },
       "reasons": [
-        "Momentum positif (+3.0%)"
+        "✓ Proche du support (2.9% du plus bas)",
+        "⚠ Proche de la résistance (0.1% du plus haut)"
       ],
-      "sma5": 4928.0,
-      "sma10": 4995.0,
-      "sma20": 4995.0,
-      "data_points": 6
+      "data_points": 6,
+      "last_update": "2025-12-18"
     },
     {
-      "symbol": "SICG",
-      "signal": "CONSERVER",
-      "current_price": 8100.0,
-      "variation_daily": 0.0,
-      "rsi": 49.36465499113821,
-      "signal_score": 20,
-      "confidence": 60,
+      "symbol": "BICC",
+      "signal": "HOLD",
+      "confidence": 90,
+      "signal_score": -17,
+      "current_price": 4134.73,
+      "target_price": 4134.73,
+      "stop_loss": 3927.99,
+      "potential_gain": 0,
+      "volatility": 37.74,
+      "volume_ratio": 1.92,
+      "trend": "DOWN",
+      "sma_5": 6214.69,
+      "sma_10": 6469.85,
+      "sma_20": 6303.61,
+      "rsi": 49.74,
+      "macd": {
+        "macd": -23.9165,
+        "signal": 94.1117,
+        "histogram": -118.0282,
+        "trend": "BEARISH",
+        "strength": 100,
+        "crossover": "BEARISH_CROSSOVER"
+      },
+      "bollinger": {
+        "upper": 8714.47,
+        "middle": 6303.61,
+        "lower": 3892.74,
+        "current_price": 4134.73,
+        "percent_b": 0.05,
+        "bandwidth": 76.49,
+        "signal": "NEAR_OVERSOLD",
+        "squeeze": "False",
+        "std_dev": 1205.43
+      },
+      "atr": {
+        "atr": 1433.26,
+        "atr_percent": 34.66,
+        "volatility": "HIGH",
+        "stop_loss_distance": 2866.53,
+        "risk_level": "HIGH"
+      },
+      "recent_high": 7974.73,
+      "recent_low": 4134.73,
+      "publication_sentiment": {
+        "sentiment_score": 28.75,
+        "sentiment_label": "POSITIVE",
+        "confidence": 29.0,
+        "extracted_numbers": {
+          "percentages": [
+            15.0
+          ],
+          "amounts_fcfa": [],
+          "millions": [],
+          "milliards": []
+        },
+        "key_signals": [
+          "📈 Signal d'ACHAT détecté",
+          "✅ Mot-clé détecté: 'bénéfice' (impact: +25)",
+          "✅ Mot-clé détecté: 'hausse' (impact: +20)",
+          "📈 Variation: +15.0%"
+        ],
+        "trading_signal": "BUY",
+        "impact_level": "LOW",
+        "detected_keywords": [
+          "bénéfice",
+          "hausse"
+        ],
+        "keyword_score": 45,
+        "category_boost": 20,
+        "numbers_boost": 15
+      },
+      "fundamentals": {
+        "pe_ratio": 9.3,
+        "roe": 11.7,
+        "debt_ratio": 38.9,
+        "dividend_yield": 3.8,
+        "dividend_amount": 200,
+        "market_cap": 28000000000
+      },
+      "macro_context": {
+        "sector": "INDUSTRIE",
+        "indicators": {},
+        "macro_score": 0,
+        "macro_signal": "NEUTRAL",
+        "indicators_count": 0
+      },
       "reasons": [
-        "Tendance haussière (prix > SMA5 > SMA10)"
+        "⚠ Tendance baissière (prix < SMA5 < SMA10)",
+        "⚠ MACD baissier (histogram: -118.0282)",
+        "📉 Croisement MACD baissier détecté!",
+        "📊 Prix proche bande inférieure Bollinger",
+        "📈 Volume exceptionnel: 1.9x la moyenne",
+        "📉 Momentum négatif 5j: -31.6%",
+        "✓ Proche du support (0.0% du plus bas)",
+        "⚠️ Volatilité élevée: 34.7%",
+        "✓ P/E attractif: 9.3",
+        "✓ ROE bon: 11.7%"
       ],
-      "sma5": 7024.6,
-      "sma10": 6598.4,
-      "sma20": 6499.1,
-      "data_points": 28
-    },
-    {
-      "symbol": "SOGC",
-      "signal": "CONSERVER",
-      "current_price": 1847.36,
-      "variation_daily": 23.08020307274107,
-      "rsi": 49.889752018918905,
-      "signal_score": 15,
-      "confidence": 60,
-      "reasons": [
-        "Momentum positif (+23.1%)"
-      ],
-      "sma5": 1918.0739999999998,
-      "sma10": 2475.678,
-      "sma20": 2223.4875,
-      "data_points": 60
-    },
-    {
-      "symbol": "ETIT.BC",
-      "signal": "CONSERVER",
-      "current_price": 22,
-      "variation_daily": -99.73170731707317,
-      "rsi": 50.06716326779827,
-      "signal_score": -15,
-      "confidence": 60,
-      "reasons": [
-        "Momentum négatif (-99.7%)"
-      ],
-      "sma5": 1644.4,
-      "sma10": 822.2,
-      "sma20": 411.1,
-      "data_points": 38
-    },
-    {
-      "symbol": "BOABF",
-      "signal": "CONSERVER",
-      "current_price": 5966.78,
-      "variation_daily": -1.024788672585172,
-      "rsi": 50.15329503737016,
-      "signal_score": 20,
-      "confidence": 60,
-      "reasons": [
-        "Tendance haussière (prix > SMA5 > SMA10)"
-      ],
-      "sma5": 5563.17,
-      "sma10": 5459.424,
-      "sma20": 5663.6795,
-      "data_points": 60
-    },
-    {
-      "symbol": "SDCC",
-      "signal": "CONSERVER",
-      "current_price": 1990.25,
-      "variation_daily": 6.384400339959699,
-      "rsi": 50.322602536096056,
-      "signal_score": 15,
-      "confidence": 60,
-      "reasons": [
-        "Momentum positif (+6.4%)"
-      ],
-      "sma5": 2136.5739999999996,
-      "sma10": 1768.9560000000001,
-      "sma20": 1707.6645,
-      "data_points": 60
-    },
-    {
-      "symbol": "STAC",
-      "signal": "CONSERVER",
-      "current_price": 4622.92,
-      "variation_daily": -8.031607594735256,
-      "rsi": 50.96630832700169,
-      "signal_score": 5,
-      "confidence": 60,
-      "reasons": [
-        "Tendance haussière (prix > SMA5 > SMA10)",
-        "Momentum négatif (-8.0%)"
-      ],
-      "sma5": 3595.8480000000004,
-      "sma10": 3317.476,
-      "sma20": 3137.2515,
-      "data_points": 60
-    },
-    {
-      "symbol": "NEIC.BC",
-      "signal": "CONSERVER",
-      "current_price": 1110.0,
-      "variation_daily": -89.42857142857143,
-      "rsi": 52.79034690799397,
-      "signal_score": -15,
-      "confidence": 60,
-      "reasons": [
-        "Momentum négatif (-89.4%)"
-      ],
-      "sma5": 2322.0,
-      "sma10": 1161.0,
-      "sma20": 580.5,
-      "data_points": 38
-    },
-    {
-      "symbol": "SNTS",
-      "signal": "CONSERVER",
-      "current_price": 4319.07,
-      "variation_daily": 3.1190684815073766,
-      "rsi": 53.14536849829937,
-      "signal_score": 15,
-      "confidence": 60,
-      "reasons": [
-        "Momentum positif (+3.1%)"
-      ],
-      "sma5": 4417.344,
-      "sma10": 3888.9269999999997,
-      "sma20": 3011.7415,
-      "data_points": 60
-    },
-    {
-      "symbol": "SHEC.BC",
-      "signal": "CONSERVER",
-      "current_price": 1380.0,
-      "variation_daily": -85.91836734693878,
-      "rsi": 53.787047200878156,
-      "signal_score": -15,
-      "confidence": 60,
-      "reasons": [
-        "Momentum négatif (-85.9%)"
-      ],
-      "sma5": 2236.0,
-      "sma10": 1118.0,
-      "sma20": 559.0,
-      "data_points": 38
-    },
-    {
-      "symbol": "CBIBF",
-      "signal": "CONSERVER",
-      "current_price": 4865.02,
-      "variation_daily": -10.000702972091997,
-      "rsi": 54.20045287523328,
-      "signal_score": -15,
-      "confidence": 60,
-      "reasons": [
-        "Momentum négatif (-10.0%)"
-      ],
-      "sma5": 5917.096,
-      "sma10": 6234.989,
-      "sma20": 5989.7744999999995,
-      "data_points": 60
-    },
-    {
-      "symbol": "PVBC",
-      "signal": "CONSERVER",
-      "current_price": 2858.0,
-      "variation_daily": -60.27797081306463,
-      "rsi": 54.68423470824502,
-      "signal_score": -15,
-      "confidence": 60,
-      "reasons": [
-        "Momentum négatif (-60.3%)"
-      ],
-      "sma5": 4210.4,
-      "sma10": 4158.6,
-      "sma20": 4505.1,
-      "data_points": 26
-    },
-    {
-      "symbol": "CFAC.BC",
-      "signal": "CONSERVER",
-      "current_price": 1535,
-      "variation_daily": -82.75280898876404,
-      "rsi": 54.71872118044881,
-      "signal_score": -15,
-      "confidence": 60,
-      "reasons": [
-        "Momentum négatif (-82.8%)"
-      ],
-      "sma5": 2087.0,
-      "sma10": 1043.5,
-      "sma20": 521.75,
-      "data_points": 38
-    },
-    {
-      "symbol": "SGBC",
-      "signal": "CONSERVER",
-      "current_price": 7969.9,
-      "variation_daily": 24.227078101936055,
-      "rsi": 54.99484585250011,
-      "signal_score": 15,
-      "confidence": 60,
-      "reasons": [
-        "Momentum positif (+24.2%)"
-      ],
-      "sma5": 6368.466,
-      "sma10": 6685.122,
-      "sma20": 6382.3485,
-      "data_points": 60
-    },
-    {
-      "symbol": "SGBSL",
-      "signal": "CONSERVER",
-      "current_price": 7487.14,
-      "variation_daily": 69.38924182367741,
-      "rsi": 55.49394959645975,
-      "signal_score": 15,
-      "confidence": 60,
-      "reasons": [
-        "Momentum positif (+69.4%)"
-      ],
-      "sma5": 6150.87,
-      "sma10": 6174.339,
-      "sma20": 6359.55,
-      "data_points": 60
-    },
-    {
-      "symbol": "UNXC.BC",
-      "signal": "CONSERVER",
-      "current_price": 1375.0,
-      "variation_daily": -79.77941176470588,
-      "rsi": 55.623721881390594,
-      "signal_score": -15,
-      "confidence": 60,
-      "reasons": [
-        "Momentum négatif (-79.8%)"
-      ],
-      "sma5": 1635.0,
-      "sma10": 817.5,
-      "sma20": 408.75,
-      "data_points": 38
-    },
-    {
-      "symbol": "FTSC.BC",
-      "signal": "CONSERVER",
-      "current_price": 2135.0,
-      "variation_daily": -71.90789473684211,
-      "rsi": 58.17068503635668,
-      "signal_score": 5,
-      "confidence": 60,
-      "reasons": [
-        "Tendance haussière (prix > SMA5 > SMA10)",
-        "Momentum négatif (-71.9%)"
-      ],
-      "sma5": 1947.0,
-      "sma10": 973.5,
-      "sma20": 486.75,
-      "data_points": 38
-    },
-    {
-      "symbol": "SNDC",
-      "signal": "CONSERVER",
-      "current_price": 2687.52,
-      "variation_daily": -12.450361760557188,
-      "rsi": 58.79971069958953,
-      "signal_score": -5,
-      "confidence": 60,
-      "reasons": [
-        "Momentum négatif (-12.5%)",
-        "Volume élevé"
-      ],
-      "sma5": 3350.5620000000004,
-      "sma10": 3351.9019999999996,
-      "sma20": 2925.9425,
-      "data_points": 60
-    },
-    {
-      "symbol": "NSIAS",
-      "signal": "CONSERVER",
-      "current_price": 4732.51,
-      "variation_daily": 9.508790766340097,
-      "rsi": 58.847713533249525,
-      "signal_score": 15,
-      "confidence": 60,
-      "reasons": [
-        "Momentum positif (+9.5%)"
-      ],
-      "sma5": 4584.258,
-      "sma10": 4596.387000000001,
-      "sma20": 4576.9755,
-      "data_points": 60
+      "data_points": 104,
+      "last_update": "2026-01-05"
     },
     {
       "symbol": "BNBC",
-      "signal": "CONSERVER",
+      "signal": "HOLD",
+      "confidence": 60,
+      "signal_score": 15,
       "current_price": 1445.0,
-      "variation_daily": -1.0273972602739725,
-      "rsi": 59.134667979433324,
-      "signal_score": 0,
-      "confidence": 60,
-      "reasons": [],
-      "sma5": 1418.0,
-      "sma10": 3116.7,
-      "sma20": 3746.2,
-      "data_points": 32
-    },
-    {
-      "symbol": "ONTBF.BC",
-      "signal": "CONSERVER",
-      "current_price": 2490.0,
-      "variation_daily": -67.66233766233766,
-      "rsi": 59.64368706429124,
-      "signal_score": 5,
-      "confidence": 60,
+      "target_price": 1445.0,
+      "stop_loss": 1372.75,
+      "potential_gain": 0,
+      "volatility": 102.37,
+      "volume_ratio": 0.0,
+      "trend": "DOWN",
+      "sma_5": 1418.0,
+      "sma_10": 3116.7,
+      "sma_20": 3746.2,
+      "rsi": 42.24,
+      "macd": null,
+      "bollinger": {
+        "upper": 7992.71,
+        "middle": 3746.2,
+        "lower": -500.31,
+        "current_price": 1445.0,
+        "percent_b": 0.229,
+        "bandwidth": 226.71,
+        "signal": "NEUTRAL",
+        "squeeze": "False",
+        "std_dev": 2123.25
+      },
+      "atr": {
+        "atr": 1847.79,
+        "atr_percent": 127.87,
+        "volatility": "HIGH",
+        "stop_loss_distance": 3695.57,
+        "risk_level": "HIGH"
+      },
+      "recent_high": 7776.0,
+      "recent_low": 1360.0,
+      "publication_sentiment": null,
+      "fundamentals": null,
+      "macro_context": {
+        "sector": "BANQUE",
+        "indicators": {},
+        "macro_score": 0,
+        "macro_signal": "NEUTRAL",
+        "indicators_count": 0
+      },
       "reasons": [
-        "Tendance haussière (prix > SMA5 > SMA10)",
-        "Momentum négatif (-67.7%)"
+        "🚀 Momentum positif 5j: +5.9%",
+        "⚠️ Volatilité élevée: 127.9%"
       ],
-      "sma5": 2038.0,
-      "sma10": 1019.0,
-      "sma20": 509.5,
-      "data_points": 38
-    },
-    {
-      "symbol": "PALC",
-      "signal": "CONSERVER",
-      "current_price": 1290.4,
-      "variation_daily": -48.910426960597995,
-      "rsi": 60.77815016481286,
-      "signal_score": -5,
-      "confidence": 60,
-      "reasons": [
-        "Momentum négatif (-48.9%)",
-        "Volume élevé"
-      ],
-      "sma5": 1919.416,
-      "sma10": 1990.7990000000002,
-      "sma20": 1706.941,
-      "data_points": 60
+      "data_points": 28,
+      "last_update": "2025-12-18"
     },
     {
       "symbol": "BOAM",
-      "signal": "CONSERVER",
-      "current_price": 5697.38,
-      "variation_daily": -10.575327845051515,
-      "rsi": 61.93399871109403,
+      "signal": "HOLD",
+      "confidence": 75,
+      "signal_score": -14,
+      "current_price": 5849.01,
+      "target_price": 5849.01,
+      "stop_loss": 5556.56,
+      "potential_gain": 0,
+      "volatility": 30.9,
+      "volume_ratio": 0.64,
+      "trend": "DOWN",
+      "sma_5": 5779.81,
+      "sma_10": 6062.58,
+      "sma_20": 5935.72,
+      "rsi": 50.75,
+      "macd": {
+        "macd": -2.4252,
+        "signal": 46.8708,
+        "histogram": -49.296,
+        "trend": "BEARISH",
+        "strength": 100,
+        "crossover": null
+      },
+      "bollinger": {
+        "upper": 8145.68,
+        "middle": 5935.72,
+        "lower": 3725.76,
+        "current_price": 5849.01,
+        "percent_b": 0.48,
+        "bandwidth": 74.46,
+        "signal": "NEUTRAL",
+        "squeeze": "False",
+        "std_dev": 1104.98
+      },
+      "atr": {
+        "atr": 1691.68,
+        "atr_percent": 28.92,
+        "volatility": "HIGH",
+        "stop_loss_distance": 3383.36,
+        "risk_level": "HIGH"
+      },
+      "recent_high": 7831.05,
+      "recent_low": 4179.52,
+      "publication_sentiment": null,
+      "fundamentals": {
+        "pe_ratio": 8.5,
+        "roe": 12.3,
+        "debt_ratio": 35.2,
+        "dividend_yield": 4.5,
+        "dividend_amount": 250,
+        "market_cap": 25000000000
+      },
+      "macro_context": {
+        "sector": "BANQUE",
+        "indicators": {},
+        "macro_score": 0,
+        "macro_signal": "NEUTRAL",
+        "indicators_count": 0
+      },
+      "reasons": [
+        "⚠ MACD baissier (histogram: -49.2960)",
+        "📉 Momentum négatif 5j: -14.0%",
+        "⚠️ Volatilité élevée: 28.9%",
+        "✓ P/E attractif: 8.5",
+        "✓ ROE bon: 12.3%",
+        "✓ Bon dividende: 4.5%"
+      ],
+      "data_points": 104,
+      "last_update": "2026-01-05"
+    },
+    {
+      "symbol": "CABC",
+      "signal": "HOLD",
+      "confidence": 60,
+      "signal_score": 10,
+      "current_price": 2345.0,
+      "target_price": 2345.0,
+      "stop_loss": 2227.75,
+      "potential_gain": 0,
+      "volatility": 69.47,
+      "volume_ratio": 0.0,
+      "trend": "DOWN",
+      "sma_5": 2347.0,
+      "sma_10": 3963.3,
+      "sma_20": 4835.4,
+      "rsi": 35.46,
+      "macd": null,
+      "bollinger": {
+        "upper": 9428.32,
+        "middle": 4835.4,
+        "lower": 242.48,
+        "current_price": 2345.0,
+        "percent_b": 0.229,
+        "bandwidth": 189.97,
+        "signal": "NEUTRAL",
+        "squeeze": "False",
+        "std_dev": 2296.46
+      },
+      "atr": {
+        "atr": 1167.5,
+        "atr_percent": 49.79,
+        "volatility": "HIGH",
+        "stop_loss_distance": 2335.0,
+        "risk_level": "HIGH"
+      },
+      "recent_high": 8192.0,
+      "recent_low": 2190.0,
+      "publication_sentiment": null,
+      "fundamentals": null,
+      "macro_context": {
+        "sector": "BANQUE",
+        "indicators": {},
+        "macro_score": 0,
+        "macro_signal": "NEUTRAL",
+        "indicators_count": 0
+      },
+      "reasons": [
+        "⚠ Tendance baissière (prix < SMA5 < SMA10)",
+        "📊 RSI bas: 35.5",
+        "🚀 Momentum positif 5j: +6.6%",
+        "⚠️ Volatilité élevée: 49.8%"
+      ],
+      "data_points": 28,
+      "last_update": "2025-12-18"
+    },
+    {
+      "symbol": "CBIBF",
+      "signal": "HOLD",
+      "confidence": 80,
+      "signal_score": -23,
+      "current_price": 4366.68,
+      "target_price": 4366.68,
+      "stop_loss": 4148.35,
+      "potential_gain": 0,
+      "volatility": 47.99,
+      "volume_ratio": 1.82,
+      "trend": "DOWN",
+      "sma_5": 5632.64,
+      "sma_10": 6055.97,
+      "sma_20": 5942.87,
+      "rsi": 48.89,
+      "macd": {
+        "macd": -124.434,
+        "signal": 32.7389,
+        "histogram": -157.1729,
+        "trend": "BEARISH",
+        "strength": 100,
+        "crossover": null
+      },
+      "bollinger": {
+        "upper": 7925.76,
+        "middle": 5942.87,
+        "lower": 3959.98,
+        "current_price": 4366.68,
+        "percent_b": 0.103,
+        "bandwidth": 66.73,
+        "signal": "NEAR_OVERSOLD",
+        "squeeze": "False",
+        "std_dev": 991.45
+      },
+      "atr": {
+        "atr": 1304.89,
+        "atr_percent": 29.88,
+        "volatility": "HIGH",
+        "stop_loss_distance": 2609.79,
+        "risk_level": "HIGH"
+      },
+      "recent_high": 8068.71,
+      "recent_low": 4366.68,
+      "publication_sentiment": null,
+      "fundamentals": null,
+      "macro_context": {
+        "sector": "BANQUE",
+        "indicators": {},
+        "macro_score": 0,
+        "macro_signal": "NEUTRAL",
+        "indicators_count": 0
+      },
+      "reasons": [
+        "⚠ Tendance baissière (prix < SMA5 < SMA10)",
+        "⚠ MACD baissier (histogram: -157.1729)",
+        "📊 Prix proche bande inférieure Bollinger",
+        "📈 Volume exceptionnel: 1.8x la moyenne",
+        "📉 Momentum négatif 5j: -20.0%",
+        "✓ Proche du support (0.0% du plus bas)",
+        "⚠️ Volatilité élevée: 29.9%"
+      ],
+      "data_points": 102,
+      "last_update": "2026-01-05"
+    },
+    {
+      "symbol": "CFAC",
+      "signal": "HOLD",
+      "confidence": 60,
+      "signal_score": 10,
+      "current_price": 1450.0,
+      "target_price": 1450.0,
+      "stop_loss": 1377.5,
+      "potential_gain": 0,
+      "volatility": 56.35,
+      "volume_ratio": 0.0,
+      "trend": "DOWN",
+      "sma_5": 1446.0,
+      "sma_10": 2520.9,
+      "sma_20": 3491.7,
+      "rsi": 47.33,
+      "macd": null,
+      "bollinger": {
+        "upper": 7213.82,
+        "middle": 3491.7,
+        "lower": -230.42,
+        "current_price": 1450.0,
+        "percent_b": 0.226,
+        "bandwidth": 213.2,
+        "signal": "NEUTRAL",
+        "squeeze": "False",
+        "std_dev": 1861.06
+      },
+      "atr": {
+        "atr": 1285.71,
+        "atr_percent": 88.67,
+        "volatility": "HIGH",
+        "stop_loss_distance": 2571.43,
+        "risk_level": "HIGH"
+      },
+      "recent_high": 7235.0,
+      "recent_low": 1420.0,
+      "publication_sentiment": null,
+      "fundamentals": null,
+      "macro_context": {
+        "sector": "DISTRIBUTION",
+        "indicators": {},
+        "macro_score": 0,
+        "macro_signal": "NEUTRAL",
+        "indicators_count": 0
+      },
+      "reasons": [
+        "✓ Proche du support (2.1% du plus bas)",
+        "⚠️ Volatilité élevée: 88.7%"
+      ],
+      "data_points": 29,
+      "last_update": "2025-12-18"
+    },
+    {
+      "symbol": "CIEC",
+      "signal": "HOLD",
+      "confidence": 80,
+      "signal_score": -23,
+      "current_price": 1582.27,
+      "target_price": 1582.27,
+      "stop_loss": 1503.16,
+      "potential_gain": 0,
+      "volatility": 52.25,
+      "volume_ratio": 1.88,
+      "trend": "DOWN",
+      "sma_5": 2291.21,
+      "sma_10": 2642.96,
+      "sma_20": 2687.09,
+      "rsi": 49.68,
+      "macd": {
+        "macd": -226.3567,
+        "signal": -118.4864,
+        "histogram": -107.8703,
+        "trend": "BEARISH",
+        "strength": 100,
+        "crossover": null
+      },
+      "bollinger": {
+        "upper": 4373.76,
+        "middle": 2687.09,
+        "lower": 1000.43,
+        "current_price": 1582.27,
+        "percent_b": 0.172,
+        "bandwidth": 125.54,
+        "signal": "NEAR_OVERSOLD",
+        "squeeze": "False",
+        "std_dev": 843.33
+      },
+      "atr": {
+        "atr": 1101.78,
+        "atr_percent": 69.63,
+        "volatility": "HIGH",
+        "stop_loss_distance": 2203.57,
+        "risk_level": "HIGH"
+      },
+      "recent_high": 4396.98,
+      "recent_low": 1547.48,
+      "publication_sentiment": null,
+      "fundamentals": null,
+      "macro_context": {
+        "sector": "BANQUE",
+        "indicators": {},
+        "macro_score": 0,
+        "macro_signal": "NEUTRAL",
+        "indicators_count": 0
+      },
+      "reasons": [
+        "⚠ Tendance baissière (prix < SMA5 < SMA10)",
+        "⚠ MACD baissier (histogram: -107.8703)",
+        "📊 Prix proche bande inférieure Bollinger",
+        "📈 Volume exceptionnel: 1.9x la moyenne",
+        "📉 Momentum négatif 5j: -51.2%",
+        "✓ Proche du support (2.2% du plus bas)",
+        "⚠️ Volatilité élevée: 69.6%"
+      ],
+      "data_points": 102,
+      "last_update": "2026-01-05"
+    },
+    {
+      "symbol": "LIBC",
+      "signal": "HOLD",
+      "confidence": 60,
       "signal_score": -15,
-      "confidence": 60,
+      "current_price": 3148.0,
+      "target_price": 3148.0,
+      "stop_loss": 2990.6,
+      "potential_gain": 0,
+      "volatility": 83.84,
+      "volume_ratio": 0.82,
+      "trend": "DOWN",
+      "sma_5": 5161.8,
+      "sma_10": 5155.5,
+      "sma_20": 6612.5,
+      "rsi": 50.79,
+      "macd": null,
+      "bollinger": {
+        "upper": 15853.77,
+        "middle": 6612.5,
+        "lower": -2628.77,
+        "current_price": 3148.0,
+        "percent_b": 0.313,
+        "bandwidth": 279.51,
+        "signal": "NEUTRAL",
+        "squeeze": "False",
+        "std_dev": 4620.64
+      },
+      "atr": {
+        "atr": 2326.93,
+        "atr_percent": 73.92,
+        "volatility": "HIGH",
+        "stop_loss_distance": 4653.86,
+        "risk_level": "HIGH"
+      },
+      "recent_high": 19295.0,
+      "recent_low": 1996.0,
+      "publication_sentiment": null,
+      "fundamentals": null,
+      "macro_context": {
+        "sector": "UNKNOWN",
+        "indicators": {},
+        "macro_score": 0,
+        "macro_signal": "NEUTRAL",
+        "indicators_count": 0
+      },
       "reasons": [
-        "Momentum négatif (-10.6%)"
+        "📉 Momentum négatif 5j: -40.4%",
+        "⚠️ Volatilité élevée: 73.9%"
       ],
-      "sma5": 6124.116,
-      "sma10": 6260.788,
-      "sma20": 5987.9895,
-      "data_points": 60
-    },
+      "data_points": 22,
+      "last_update": "2025-12-05"
+    }
+  ],
+  "premium_opportunities": [
     {
-      "symbol": "BOAS",
-      "signal": "CONSERVER",
-      "current_price": 5078.36,
-      "variation_daily": -33.51565701328677,
-      "rsi": 63.30178084205634,
-      "signal_score": -5,
-      "confidence": 60,
+      "symbol": "STAC",
+      "signal": "BUY",
+      "confidence": 95,
+      "signal_score": 37,
+      "current_price": 1875.72,
+      "target_price": 2581.19,
+      "stop_loss": -285.36,
+      "potential_gain": 37.61,
+      "volatility": 73.91,
+      "volume_ratio": 1.24,
+      "trend": "UP",
+      "sma_5": 3367.87,
+      "sma_10": 3188.1,
+      "sma_20": 3177.12,
+      "rsi": 44.49,
+      "macd": {
+        "macd": 47.9645,
+        "signal": 35.6056,
+        "histogram": 12.3589,
+        "trend": "BULLISH",
+        "strength": 100,
+        "crossover": null
+      },
+      "bollinger": {
+        "upper": 5165.74,
+        "middle": 3177.12,
+        "lower": 1188.5,
+        "current_price": 1875.72,
+        "percent_b": 0.173,
+        "bandwidth": 125.18,
+        "signal": "NEAR_OVERSOLD",
+        "squeeze": "False",
+        "std_dev": 994.31
+      },
+      "atr": {
+        "atr": 1080.54,
+        "atr_percent": 57.61,
+        "volatility": "HIGH",
+        "stop_loss_distance": 2161.08,
+        "risk_level": "HIGH"
+      },
+      "recent_high": 5026.64,
+      "recent_low": 1176.44,
+      "publication_sentiment": null,
+      "fundamentals": null,
+      "macro_context": {
+        "sector": "INDUSTRIE",
+        "indicators": {},
+        "macro_score": 0,
+        "macro_signal": "NEUTRAL",
+        "indicators_count": 0
+      },
       "reasons": [
-        "Momentum négatif (-33.5%)",
-        "Volume élevé"
+        "✓ MACD haussier (histogram: +12.3589)",
+        "📊 Prix proche bande inférieure Bollinger",
+        "⚠️ Volatilité élevée: 57.6%"
       ],
-      "sma5": 5703.096,
-      "sma10": 6094.965,
-      "sma20": 5992.548000000001,
-      "data_points": 60
+      "data_points": 102,
+      "last_update": "2026-01-05"
     },
     {
-      "symbol": "BOAG",
-      "signal": "CONSERVER",
-      "current_price": 5975.28,
-      "variation_daily": -0.4659142964227752,
-      "rsi": 64.81829476679903,
-      "signal_score": 0,
-      "confidence": 60,
-      "reasons": [],
-      "sma5": 6330.014,
-      "sma10": 5850.136,
-      "sma20": 6294.9345,
-      "data_points": 60
-    },
-    {
-      "symbol": "SLBC",
-      "signal": "CONSERVER",
-      "current_price": 28800.0,
-      "variation_daily": 0.34843205574912894,
-      "rsi": 65.9181067894761,
-      "signal_score": 20,
-      "confidence": 60,
+      "symbol": "FTSC",
+      "signal": "BUY",
+      "confidence": 95,
+      "signal_score": 25,
+      "current_price": 1843.97,
+      "target_price": 2430.29,
+      "stop_loss": 158.53,
+      "potential_gain": 31.8,
+      "volatility": 71.64,
+      "volume_ratio": 2.33,
+      "trend": "UP",
+      "sma_5": 3332.9,
+      "sma_10": 2798.61,
+      "sma_20": 2605.84,
+      "rsi": 52.26,
+      "macd": {
+        "macd": 195.5264,
+        "signal": 154.2308,
+        "histogram": 41.2956,
+        "trend": "BULLISH",
+        "strength": 100,
+        "crossover": null
+      },
+      "bollinger": {
+        "upper": 4340.17,
+        "middle": 2605.84,
+        "lower": 871.5,
+        "current_price": 1843.97,
+        "percent_b": 0.28,
+        "bandwidth": 133.11,
+        "signal": "NEUTRAL",
+        "squeeze": "False",
+        "std_dev": 867.17
+      },
+      "atr": {
+        "atr": 842.72,
+        "atr_percent": 45.7,
+        "volatility": "HIGH",
+        "stop_loss_distance": 1685.43,
+        "risk_level": "HIGH"
+      },
+      "recent_high": 3922.89,
+      "recent_low": 1327.28,
+      "publication_sentiment": null,
+      "fundamentals": null,
+      "macro_context": {
+        "sector": "INDUSTRIE",
+        "indicators": {},
+        "macro_score": 0,
+        "macro_signal": "NEUTRAL",
+        "indicators_count": 0
+      },
       "reasons": [
-        "Tendance haussière (prix > SMA5 > SMA10)"
+        "✓ MACD haussier (histogram: +41.2956)",
+        "📈 Volume exceptionnel: 2.3x la moyenne",
+        "📉 Momentum négatif 5j: -53.0%",
+        "⚠️ Volatilité élevée: 45.7%"
       ],
-      "sma5": 27805.0,
-      "sma10": 21824.3,
-      "sma20": 13493.55,
-      "data_points": 33
+      "data_points": 102,
+      "last_update": "2026-01-05"
     },
     {
-      "symbol": "SPHC",
-      "signal": "CONSERVER",
-      "current_price": 3727.0,
-      "variation_daily": -13.008162341193804,
-      "rsi": 67.17729525084289,
-      "signal_score": 5,
-      "confidence": 60,
+      "symbol": "SCRC",
+      "signal": "BUY",
+      "confidence": 95,
+      "signal_score": 38,
+      "current_price": 2223.48,
+      "target_price": 2896.2,
+      "stop_loss": 577.3,
+      "potential_gain": 30.26,
+      "volatility": 53.65,
+      "volume_ratio": 0.03,
+      "trend": "UP",
+      "sma_5": 3406.38,
+      "sma_10": 3058.48,
+      "sma_20": 3004.86,
+      "rsi": 47.92,
+      "macd": {
+        "macd": 44.7309,
+        "signal": 42.2569,
+        "histogram": 2.474,
+        "trend": "BULLISH",
+        "strength": 24.7,
+        "crossover": null
+      },
+      "bollinger": {
+        "upper": 4733.68,
+        "middle": 3004.86,
+        "lower": 1276.04,
+        "current_price": 2223.48,
+        "percent_b": 0.274,
+        "bandwidth": 115.07,
+        "signal": "NEUTRAL",
+        "squeeze": "False",
+        "std_dev": 864.41
+      },
+      "atr": {
+        "atr": 823.09,
+        "atr_percent": 37.02,
+        "volatility": "HIGH",
+        "stop_loss_distance": 1646.18,
+        "risk_level": "HIGH"
+      },
+      "recent_high": 4485.14,
+      "recent_low": 1585.81,
+      "publication_sentiment": null,
+      "fundamentals": {
+        "pe_ratio": 7.8,
+        "roe": 13.5,
+        "debt_ratio": 31.5
+      },
+      "macro_context": {
+        "sector": "AGRICULTURE",
+        "indicators": {},
+        "macro_score": 0,
+        "macro_signal": "NEUTRAL",
+        "indicators_count": 0
+      },
       "reasons": [
-        "Tendance haussière (prix > SMA5 > SMA10)",
-        "Momentum négatif (-13.0%)"
+        "✓ MACD haussier (histogram: +2.4740)",
+        "📉 Momentum négatif 5j: -44.7%",
+        "⚠️ Volatilité élevée: 37.0%",
+        "💎 P/E très bas: 7.8 (sous-évalué)",
+        "✓ ROE bon: 13.5%"
       ],
-      "sma5": 3708.374,
-      "sma10": 3305.007,
-      "sma20": 3170.0885,
-      "data_points": 60
+      "data_points": 103,
+      "last_update": "2026-01-05"
     },
     {
-      "symbol": "UNXC",
-      "signal": "CONSERVER",
-      "current_price": 1435.0,
-      "variation_daily": 0.34965034965034963,
-      "rsi": 69.23076923076923,
-      "signal_score": 0,
-      "confidence": 60,
-      "reasons": [],
-      "sma5": 1433.0,
-      "sma10": 1435.0,
-      "sma20": 1435.0,
-      "data_points": 6
-    },
-    {
-      "symbol": "BOABF.BC",
-      "signal": "CONSERVER",
-      "current_price": 3705.0,
-      "variation_daily": -40.24193548387097,
-      "rsi": 71.30534790109257,
-      "signal_score": -15,
-      "confidence": 60,
+      "symbol": "ECOC",
+      "signal": "BUY",
+      "confidence": 95,
+      "signal_score": 25,
+      "current_price": 5110.74,
+      "target_price": 6183.84,
+      "stop_loss": 1596.9,
+      "potential_gain": 21.0,
+      "volatility": 30.19,
+      "volume_ratio": 0.36,
+      "trend": "UP",
+      "sma_5": 5974.01,
+      "sma_10": 5930.43,
+      "sma_20": 5679.24,
+      "rsi": 50.3,
+      "macd": {
+        "macd": 51.8978,
+        "signal": -16.8112,
+        "histogram": 68.709,
+        "trend": "BULLISH",
+        "strength": 100,
+        "crossover": null
+      },
+      "bollinger": {
+        "upper": 8026.83,
+        "middle": 5679.24,
+        "lower": 3331.65,
+        "current_price": 5110.74,
+        "percent_b": 0.379,
+        "bandwidth": 82.67,
+        "signal": "NEUTRAL",
+        "squeeze": "False",
+        "std_dev": 1173.8
+      },
+      "atr": {
+        "atr": 1756.92,
+        "atr_percent": 34.38,
+        "volatility": "HIGH",
+        "stop_loss_distance": 3513.85,
+        "risk_level": "HIGH"
+      },
+      "recent_high": 7862.08,
+      "recent_low": 4004.32,
+      "publication_sentiment": null,
+      "fundamentals": null,
+      "macro_context": {
+        "sector": "UNKNOWN",
+        "indicators": {},
+        "macro_score": 0,
+        "macro_signal": "NEUTRAL",
+        "indicators_count": 0
+      },
       "reasons": [
-        "Tendance haussière (prix > SMA5 > SMA10)",
-        "RSI suracheté (71.3)",
-        "Momentum négatif (-40.2%)"
+        "✓ MACD haussier (histogram: +68.7090)",
+        "⚠️ Volatilité élevée: 34.4%"
       ],
-      "sma5": 1981.0,
-      "sma10": 990.5,
-      "sma20": 495.25,
-      "data_points": 38
-    },
-    {
-      "symbol": "SIBC.BC",
-      "signal": "CONSERVER",
-      "current_price": 5650.0,
-      "variation_daily": -39.8936170212766,
-      "rsi": 71.48288973384031,
-      "signal_score": -15,
-      "confidence": 60,
-      "reasons": [
-        "Tendance haussière (prix > SMA5 > SMA10)",
-        "RSI suracheté (71.5)",
-        "Momentum négatif (-39.9%)"
-      ],
-      "sma5": 3010.0,
-      "sma10": 1505.0,
-      "sma20": 752.5,
-      "data_points": 38
-    },
-    {
-      "symbol": "ORGT.BC",
-      "signal": "CONSERVER",
-      "current_price": 2325.0,
-      "variation_daily": -7.000000000000001,
-      "rsi": 75.69141193595343,
-      "signal_score": -15,
-      "confidence": 60,
-      "reasons": [
-        "Tendance haussière (prix > SMA5 > SMA10)",
-        "RSI suracheté (75.7)",
-        "Momentum négatif (-7.0%)"
-      ],
-      "sma5": 2265.0,
-      "sma10": 1132.5,
-      "sma20": 566.25,
-      "data_points": 39
+      "data_points": 103,
+      "last_update": "2026-01-05"
     },
     {
       "symbol": "BOAC",
-      "signal": "CONSERVER",
-      "current_price": 7634.71,
-      "variation_daily": 59.386853999436326,
-      "rsi": 76.66225088620799,
-      "signal_score": 15,
-      "confidence": 60,
+      "signal": "BUY",
+      "confidence": 95,
+      "signal_score": 25,
+      "current_price": 5702.63,
+      "target_price": 6568.51,
+      "stop_loss": 2904.11,
+      "potential_gain": 15.18,
+      "volatility": 48.44,
+      "volume_ratio": 0.36,
+      "trend": "UP",
+      "sma_5": 5732.96,
+      "sma_10": 5523.2,
+      "sma_20": 5637.89,
+      "rsi": 53.31,
+      "macd": {
+        "macd": -36.8008,
+        "signal": -147.9154,
+        "histogram": 111.1146,
+        "trend": "BULLISH",
+        "strength": 100,
+        "crossover": null
+      },
+      "bollinger": {
+        "upper": 7956.12,
+        "middle": 5637.89,
+        "lower": 3319.65,
+        "current_price": 5702.63,
+        "percent_b": 0.514,
+        "bandwidth": 82.24,
+        "signal": "NEUTRAL",
+        "squeeze": "False",
+        "std_dev": 1159.12
+      },
+      "atr": {
+        "atr": 1399.26,
+        "atr_percent": 24.54,
+        "volatility": "HIGH",
+        "stop_loss_distance": 2798.51,
+        "risk_level": "HIGH"
+      },
+      "recent_high": 7634.71,
+      "recent_low": 4053.65,
+      "publication_sentiment": null,
+      "fundamentals": null,
+      "macro_context": {
+        "sector": "BANQUE",
+        "indicators": {},
+        "macro_score": 0,
+        "macro_signal": "NEUTRAL",
+        "indicators_count": 0
+      },
       "reasons": [
-        "Tendance haussière (prix > SMA5 > SMA10)",
-        "RSI suracheté (76.7)",
-        "Momentum positif (+59.4%)"
+        "✓ MACD haussier (histogram: +111.1146)",
+        "⚠️ Volatilité élevée: 24.5%"
       ],
-      "sma5": 5991.906,
-      "sma10": 5410.994000000001,
-      "sma20": 5606.0195,
-      "data_points": 60
+      "data_points": 103,
+      "last_update": "2026-01-05"
     },
     {
-      "symbol": "LNBB",
-      "signal": "CONSERVER",
-      "current_price": 3900.0,
-      "variation_daily": 2.631578947368421,
-      "rsi": 78.94736842105263,
-      "signal_score": -5,
-      "confidence": 60,
+      "symbol": "SICG",
+      "signal": "BUY",
+      "confidence": 80,
+      "signal_score": 35,
+      "current_price": 8100.0,
+      "target_price": 10615.53,
+      "stop_loss": 3931.86,
+      "potential_gain": 31.06,
+      "volatility": 77.11,
+      "volume_ratio": 0.91,
+      "trend": "UP",
+      "sma_5": 7024.6,
+      "sma_10": 6598.4,
+      "sma_20": 6499.1,
+      "rsi": 58.73,
+      "macd": null,
+      "bollinger": {
+        "upper": 12421.14,
+        "middle": 6499.1,
+        "lower": 577.06,
+        "current_price": 8100.0,
+        "percent_b": 0.635,
+        "bandwidth": 182.24,
+        "signal": "NEUTRAL",
+        "squeeze": "False",
+        "std_dev": 2961.02
+      },
+      "atr": {
+        "atr": 2084.07,
+        "atr_percent": 25.73,
+        "volatility": "HIGH",
+        "stop_loss_distance": 4168.14,
+        "risk_level": "HIGH"
+      },
+      "recent_high": 16791.0,
+      "recent_low": 2787.0,
+      "publication_sentiment": null,
+      "fundamentals": null,
+      "macro_context": {
+        "sector": "UNKNOWN",
+        "indicators": {},
+        "macro_score": 0,
+        "macro_signal": "NEUTRAL",
+        "indicators_count": 0
+      },
       "reasons": [
-        "RSI suracheté (78.9)",
-        "Momentum positif (+2.6%)"
+        "✓ Tendance haussière (prix > SMA5 > SMA10)",
+        "🚀 Momentum positif 5j: +74.0%",
+        "⚠️ Volatilité élevée: 25.7%"
       ],
-      "sma5": 3845.0,
-      "sma10": 3900.0,
-      "sma20": 3900.0,
-      "data_points": 6
-    },
-    {
-      "symbol": "BOAM.BC",
-      "signal": "CONSERVER",
-      "current_price": 4300.0,
-      "variation_daily": -4.444444444444445,
-      "rsi": 95.74468085106383,
-      "signal_score": -15,
-      "confidence": 60,
-      "reasons": [
-        "Tendance haussière (prix > SMA5 > SMA10)",
-        "RSI suracheté (95.7)",
-        "Momentum négatif (-4.4%)"
-      ],
-      "sma5": 1760.0,
-      "sma10": 880.0,
-      "sma20": 440.0,
-      "data_points": 38
-    },
-    {
-      "symbol": "ABJC.BC",
-      "signal": "CONSERVER",
-      "current_price": 4200.0,
-      "variation_daily": 0,
-      "rsi": 100,
-      "signal_score": 0,
-      "confidence": 60,
-      "reasons": [
-        "Tendance haussière (prix > SMA5 > SMA10)",
-        "RSI suracheté (100.0)"
-      ],
-      "sma5": 840.0,
-      "sma10": 420.0,
-      "sma20": 210.0,
-      "data_points": 37
-    },
-    {
-      "symbol": "BICC.BC",
-      "signal": "CONSERVER",
-      "current_price": 7990.0,
-      "variation_daily": 0,
-      "rsi": 100,
-      "signal_score": 0,
-      "confidence": 60,
-      "reasons": [
-        "Tendance haussière (prix > SMA5 > SMA10)",
-        "RSI suracheté (100.0)"
-      ],
-      "sma5": 1598.0,
-      "sma10": 799.0,
-      "sma20": 399.5,
-      "data_points": 37
-    },
-    {
-      "symbol": "BNBC.BC",
-      "signal": "CONSERVER",
-      "current_price": 0.0,
-      "variation_daily": 0,
-      "rsi": 100,
-      "signal_score": -20,
-      "confidence": 60,
-      "reasons": [
-        "RSI suracheté (100.0)"
-      ],
-      "sma5": 0.0,
-      "sma10": 0.0,
-      "sma20": 0.0,
-      "data_points": 37
-    },
-    {
-      "symbol": "BOAB.BC",
-      "signal": "CONSERVER",
-      "current_price": 5500.0,
-      "variation_daily": 0,
-      "rsi": 100,
-      "signal_score": 0,
-      "confidence": 60,
-      "reasons": [
-        "Tendance haussière (prix > SMA5 > SMA10)",
-        "RSI suracheté (100.0)"
-      ],
-      "sma5": 1100.0,
-      "sma10": 550.0,
-      "sma20": 275.0,
-      "data_points": 37
-    },
-    {
-      "symbol": "BOAC.BC",
-      "signal": "CONSERVER",
-      "current_price": 5800.0,
-      "variation_daily": 0,
-      "rsi": 100,
-      "signal_score": 0,
-      "confidence": 60,
-      "reasons": [
-        "Tendance haussière (prix > SMA5 > SMA10)",
-        "RSI suracheté (100.0)"
-      ],
-      "sma5": 1160.0,
-      "sma10": 580.0,
-      "sma20": 290.0,
-      "data_points": 37
-    },
-    {
-      "symbol": "CABC.BC",
-      "signal": "CONSERVER",
-      "current_price": 5900.0,
-      "variation_daily": 0,
-      "rsi": 100,
-      "signal_score": 0,
-      "confidence": 60,
-      "reasons": [
-        "Tendance haussière (prix > SMA5 > SMA10)",
-        "RSI suracheté (100.0)"
-      ],
-      "sma5": 1180.0,
-      "sma10": 590.0,
-      "sma20": 295.0,
-      "data_points": 37
-    },
-    {
-      "symbol": "CIAC.BC",
-      "signal": "CONSERVER",
-      "current_price": 6400.0,
-      "variation_daily": 0,
-      "rsi": 100,
-      "signal_score": 0,
-      "confidence": 60,
-      "reasons": [
-        "Tendance haussière (prix > SMA5 > SMA10)",
-        "RSI suracheté (100.0)"
-      ],
-      "sma5": 1280.0,
-      "sma10": 640.0,
-      "sma20": 320.0,
-      "data_points": 37
-    },
-    {
-      "symbol": "CIE.BC",
-      "signal": "CONSERVER",
-      "current_price": 11500.0,
-      "variation_daily": 0,
-      "rsi": 100,
-      "signal_score": 0,
-      "confidence": 60,
-      "reasons": [
-        "Tendance haussière (prix > SMA5 > SMA10)",
-        "RSI suracheté (100.0)"
-      ],
-      "sma5": 2300.0,
-      "sma10": 1150.0,
-      "sma20": 575.0,
-      "data_points": 37
-    },
-    {
-      "symbol": "ECOC.BC",
-      "signal": "CONSERVER",
-      "current_price": 15000.0,
-      "variation_daily": 0,
-      "rsi": 100,
-      "signal_score": 0,
-      "confidence": 60,
-      "reasons": [
-        "Tendance haussière (prix > SMA5 > SMA10)",
-        "RSI suracheté (100.0)"
-      ],
-      "sma5": 3000.0,
-      "sma10": 1500.0,
-      "sma20": 750.0,
-      "data_points": 37
-    },
-    {
-      "symbol": "NSBC.BC",
-      "signal": "CONSERVER",
-      "current_price": 0.0,
-      "variation_daily": 0,
-      "rsi": 100,
-      "signal_score": -20,
-      "confidence": 60,
-      "reasons": [
-        "RSI suracheté (100.0)"
-      ],
-      "sma5": 0.0,
-      "sma10": 0.0,
-      "sma20": 0.0,
-      "data_points": 37
-    },
-    {
-      "symbol": "NTLC.BC",
-      "signal": "CONSERVER",
-      "current_price": 12000.0,
-      "variation_daily": 0,
-      "rsi": 100,
-      "signal_score": 0,
-      "confidence": 60,
-      "reasons": [
-        "Tendance haussière (prix > SMA5 > SMA10)",
-        "RSI suracheté (100.0)"
-      ],
-      "sma5": 2400.0,
-      "sma10": 1200.0,
-      "sma20": 600.0,
-      "data_points": 37
-    },
-    {
-      "symbol": "PALC.BC",
-      "signal": "CONSERVER",
-      "current_price": 6100.0,
-      "variation_daily": 0,
-      "rsi": 100,
-      "signal_score": 0,
-      "confidence": 60,
-      "reasons": [
-        "Tendance haussière (prix > SMA5 > SMA10)",
-        "RSI suracheté (100.0)"
-      ],
-      "sma5": 1220.0,
-      "sma10": 610.0,
-      "sma20": 305.0,
-      "data_points": 37
-    },
-    {
-      "symbol": "PRSC.BC",
-      "signal": "CONSERVER",
-      "current_price": 11000.0,
-      "variation_daily": 0,
-      "rsi": 100,
-      "signal_score": 0,
-      "confidence": 60,
-      "reasons": [
-        "Tendance haussière (prix > SMA5 > SMA10)",
-        "RSI suracheté (100.0)"
-      ],
-      "sma5": 2200.0,
-      "sma10": 1100.0,
-      "sma20": 550.0,
-      "data_points": 37
-    },
-    {
-      "symbol": "SABC.BC",
-      "signal": "CONSERVER",
-      "current_price": 8300.0,
-      "variation_daily": 0,
-      "rsi": 100,
-      "signal_score": 0,
-      "confidence": 60,
-      "reasons": [
-        "Tendance haussière (prix > SMA5 > SMA10)",
-        "RSI suracheté (100.0)"
-      ],
-      "sma5": 1660.0,
-      "sma10": 830.0,
-      "sma20": 415.0,
-      "data_points": 37
-    },
-    {
-      "symbol": "SCRC.BC",
-      "signal": "CONSERVER",
-      "current_price": 6700.0,
-      "variation_daily": 0,
-      "rsi": 100,
-      "signal_score": 0,
-      "confidence": 60,
-      "reasons": [
-        "Tendance haussière (prix > SMA5 > SMA10)",
-        "RSI suracheté (100.0)"
-      ],
-      "sma5": 1340.0,
-      "sma10": 670.0,
-      "sma20": 335.0,
-      "data_points": 37
-    },
-    {
-      "symbol": "SDCC.BC",
-      "signal": "CONSERVER",
-      "current_price": 7200.0,
-      "variation_daily": 0,
-      "rsi": 100,
-      "signal_score": 0,
-      "confidence": 60,
-      "reasons": [
-        "Tendance haussière (prix > SMA5 > SMA10)",
-        "RSI suracheté (100.0)"
-      ],
-      "sma5": 1440.0,
-      "sma10": 720.0,
-      "sma20": 360.0,
-      "data_points": 37
-    },
-    {
-      "symbol": "SDSC.BC",
-      "signal": "CONSERVER",
-      "current_price": 1480.0,
-      "variation_daily": 0,
-      "rsi": 100,
-      "signal_score": 0,
-      "confidence": 60,
-      "reasons": [
-        "Tendance haussière (prix > SMA5 > SMA10)",
-        "RSI suracheté (100.0)"
-      ],
-      "sma5": 296.0,
-      "sma10": 148.0,
-      "sma20": 74.0,
-      "data_points": 38
-    },
-    {
-      "symbol": "SEMC.BC",
-      "signal": "CONSERVER",
-      "current_price": 9100.0,
-      "variation_daily": 0,
-      "rsi": 100,
-      "signal_score": 0,
-      "confidence": 60,
-      "reasons": [
-        "Tendance haussière (prix > SMA5 > SMA10)",
-        "RSI suracheté (100.0)"
-      ],
-      "sma5": 1820.0,
-      "sma10": 910.0,
-      "sma20": 455.0,
-      "data_points": 37
-    },
-    {
-      "symbol": "SGBC.BC",
-      "signal": "CONSERVER",
-      "current_price": 14500.0,
-      "variation_daily": 0,
-      "rsi": 100,
-      "signal_score": 0,
-      "confidence": 60,
-      "reasons": [
-        "Tendance haussière (prix > SMA5 > SMA10)",
-        "RSI suracheté (100.0)"
-      ],
-      "sma5": 2900.0,
-      "sma10": 1450.0,
-      "sma20": 725.0,
-      "data_points": 37
-    },
-    {
-      "symbol": "SICB.BC",
-      "signal": "CONSERVER",
-      "current_price": 0.0,
-      "variation_daily": 0,
-      "rsi": 100,
-      "signal_score": -20,
-      "confidence": 60,
-      "reasons": [
-        "RSI suracheté (100.0)"
-      ],
-      "sma5": 0.0,
-      "sma10": 0.0,
-      "sma20": 0.0,
-      "data_points": 37
-    },
-    {
-      "symbol": "SICC.BC",
-      "signal": "CONSERVER",
-      "current_price": 7400.0,
-      "variation_daily": 0,
-      "rsi": 100,
-      "signal_score": 0,
-      "confidence": 60,
-      "reasons": [
-        "Tendance haussière (prix > SMA5 > SMA10)",
-        "RSI suracheté (100.0)"
-      ],
-      "sma5": 1480.0,
-      "sma10": 740.0,
-      "sma20": 370.0,
-      "data_points": 37
-    },
-    {
-      "symbol": "SLBC.BC",
-      "signal": "CONSERVER",
-      "current_price": 0.0,
-      "variation_daily": 0,
-      "rsi": 100,
-      "signal_score": -20,
-      "confidence": 60,
-      "reasons": [
-        "RSI suracheté (100.0)"
-      ],
-      "sma5": 0.0,
-      "sma10": 0.0,
-      "sma20": 0.0,
-      "data_points": 37
-    },
-    {
-      "symbol": "SMBC.BC",
-      "signal": "CONSERVER",
-      "current_price": 12800.0,
-      "variation_daily": 0,
-      "rsi": 100,
-      "signal_score": 0,
-      "confidence": 60,
-      "reasons": [
-        "Tendance haussière (prix > SMA5 > SMA10)",
-        "RSI suracheté (100.0)"
-      ],
-      "sma5": 2560.0,
-      "sma10": 1280.0,
-      "sma20": 640.0,
-      "data_points": 37
-    },
-    {
-      "symbol": "SNTS.BC",
-      "signal": "CONSERVER",
-      "current_price": 17500.0,
-      "variation_daily": 0,
-      "rsi": 100,
-      "signal_score": 0,
-      "confidence": 60,
-      "reasons": [
-        "Tendance haussière (prix > SMA5 > SMA10)",
-        "RSI suracheté (100.0)"
-      ],
-      "sma5": 3500.0,
-      "sma10": 1750.0,
-      "sma20": 875.0,
-      "data_points": 37
-    },
-    {
-      "symbol": "SOGC.BC",
-      "signal": "CONSERVER",
-      "current_price": 8600.0,
-      "variation_daily": 0,
-      "rsi": 100,
-      "signal_score": 0,
-      "confidence": 60,
-      "reasons": [
-        "Tendance haussière (prix > SMA5 > SMA10)",
-        "RSI suracheté (100.0)"
-      ],
-      "sma5": 1720.0,
-      "sma10": 860.0,
-      "sma20": 430.0,
-      "data_points": 37
-    },
-    {
-      "symbol": "STAC.BC",
-      "signal": "CONSERVER",
-      "current_price": 1530.0,
-      "variation_daily": 24.390243902439025,
-      "rsi": 100,
-      "signal_score": 15,
-      "confidence": 60,
-      "reasons": [
-        "Tendance haussière (prix > SMA5 > SMA10)",
-        "RSI suracheté (100.0)",
-        "Momentum positif (+24.4%)"
-      ],
-      "sma5": 552.0,
-      "sma10": 276.0,
-      "sma20": 138.0,
-      "data_points": 39
-    },
-    {
-      "symbol": "STBC.BC",
-      "signal": "CONSERVER",
-      "current_price": 0.0,
-      "variation_daily": 0,
-      "rsi": 100,
-      "signal_score": -20,
-      "confidence": 60,
-      "reasons": [
-        "RSI suracheté (100.0)"
-      ],
-      "sma5": 0.0,
-      "sma10": 0.0,
-      "sma20": 0.0,
-      "data_points": 37
-    },
-    {
-      "symbol": "SVOC.BC",
-      "signal": "CONSERVER",
-      "current_price": 7900.0,
-      "variation_daily": 0,
-      "rsi": 100,
-      "signal_score": 0,
-      "confidence": 60,
-      "reasons": [
-        "Tendance haussière (prix > SMA5 > SMA10)",
-        "RSI suracheté (100.0)"
-      ],
-      "sma5": 1580.0,
-      "sma10": 790.0,
-      "sma20": 395.0,
-      "data_points": 37
-    },
-    {
-      "symbol": "TTLC.BC",
-      "signal": "CONSERVER",
-      "current_price": 13200.0,
-      "variation_daily": 0,
-      "rsi": 100,
-      "signal_score": 0,
-      "confidence": 60,
-      "reasons": [
-        "Tendance haussière (prix > SMA5 > SMA10)",
-        "RSI suracheté (100.0)"
-      ],
-      "sma5": 2640.0,
-      "sma10": 1320.0,
-      "sma20": 660.0,
-      "data_points": 37
-    },
-    {
-      "symbol": "TTLS.BC",
-      "signal": "CONSERVER",
-      "current_price": 2545.0,
-      "variation_daily": 0,
-      "rsi": 100,
-      "signal_score": 0,
-      "confidence": 60,
-      "reasons": [
-        "Tendance haussière (prix > SMA5 > SMA10)",
-        "RSI suracheté (100.0)"
-      ],
-      "sma5": 509.0,
-      "sma10": 254.5,
-      "sma20": 127.25,
-      "data_points": 38
-    },
-    {
-      "symbol": "UNLC.BC",
-      "signal": "CONSERVER",
-      "current_price": 0.0,
-      "variation_daily": 0,
-      "rsi": 100,
-      "signal_score": -20,
-      "confidence": 60,
-      "reasons": [
-        "RSI suracheté (100.0)"
-      ],
-      "sma5": 0.0,
-      "sma10": 0.0,
-      "sma20": 0.0,
-      "data_points": 37
+      "data_points": 24,
+      "last_update": "2025-12-09"
     }
   ],
-  "timestamp": "2025-12-29T14:47:24.123051+00:00",
-  "total_analyzed": 103
+  "market_summary": {
+    "average_price": 3967.2,
+    "total_volume": 1179766,
+    "active_stocks": 47,
+    "market_status": "OPEN"
+  },
+  "statistics": {
+    "total_buy": 10,
+    "total_sell": 6,
+    "total_hold": 24,
+    "high_potential": 6
+  }
 }

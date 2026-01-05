@@ -230,6 +230,132 @@
                 font-size: 1rem;
             }
         }
+
+        /* Styles pour les boutons de connexion rapide */
+        .role-card-btn {
+            width: 100%;
+            height: 100%;
+            min-height: 280px;
+            background: white;
+            border: none;
+            border-radius: 20px;
+            padding: 30px 20px;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .role-card-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            transition: height 0.3s ease;
+        }
+
+        .role-card-btn:hover {
+            transform: translateY(-10px) scale(1.03);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+        }
+
+        .role-card-btn:hover::before {
+            height: 100%;
+            opacity: 0.1;
+        }
+
+        .admin-card::before {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .analyst-card::before {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .investor-card::before {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        }
+
+        .reader-card::before {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        }
+
+        .role-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            color: white;
+            position: relative;
+            z-index: 1;
+        }
+
+        .admin-card .role-icon {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            box-shadow: 0 10px 30px rgba(245, 87, 108, 0.4);
+        }
+
+        .analyst-card .role-icon {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            box-shadow: 0 10px 30px rgba(0, 242, 254, 0.4);
+        }
+
+        .investor-card .role-icon {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            box-shadow: 0 10px 30px rgba(56, 249, 215, 0.4);
+        }
+
+        .reader-card .role-icon {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            box-shadow: 0 10px 30px rgba(254, 225, 64, 0.4);
+        }
+
+        .role-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: #1e293b;
+            position: relative;
+            z-index: 1;
+        }
+
+        .role-desc {
+            color: #64748b;
+            font-size: 0.95rem;
+            margin-bottom: 15px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .role-features {
+            text-align: left;
+            color: #475569;
+            position: relative;
+            z-index: 1;
+        }
+
+        .role-features small {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .role-features i {
+            color: #10b981;
+            margin-right: 5px;
+        }
+
+        @media (max-width: 991px) {
+            .role-card-btn {
+                min-height: 250px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -420,64 +546,108 @@
             </div>
         </div>
     </div>
-                        <div class="stats-label">Publications Récentes</div>
-                    </div>
+
+    <!-- Section Connexion Rapide par Rôle -->
+    <div class="container-responsive mt-5">
+        <div class="card-pro">
+            <h3 class="text-center mb-4">
+                <i class="bi bi-person-circle"></i> Connexion Rapide
+            </h3>
+            <p class="text-center text-muted mb-4">
+                Cliquez sur votre profil pour accéder rapidement à la plateforme
+            </p>
+            
+            <div class="row g-4">
+                <!-- Bouton Administrateur -->
+                <div class="col-md-6 col-lg-3">
+                    <form method="post" action="{% url 'users:quick_login' %}" class="h-100">
+                        {% csrf_token %}
+                        <input type="hidden" name="role" value="ADMIN">
+                        <button type="submit" class="role-card-btn admin-card">
+                            <div class="role-icon">
+                                <i class="bi bi-shield-fill-check"></i>
+                            </div>
+                            <h5 class="role-title">Administrateur</h5>
+                            <p class="role-desc">Accès complet au système</p>
+                            <div class="role-features">
+                                <small><i class="bi bi-check-circle-fill"></i> Gestion utilisateurs</small><br>
+                                <small><i class="bi bi-check-circle-fill"></i> Configuration système</small><br>
+                                <small><i class="bi bi-check-circle-fill"></i> Tous les outils</small>
+                            </div>
+                        </button>
+                    </form>
                 </div>
-                <div class="col-md-3">
-                    <div class="stats-card">
-                        <i class="bi bi-database stats-icon"></i>
-                        <div class="stats-number" id="total-obs">-</div>
-                        <div class="stats-label">Observations Totales</div>
-                    </div>
+
+                <!-- Bouton Analyste -->
+                <div class="col-md-6 col-lg-3">
+                    <form method="post" action="{% url 'users:quick_login' %}" class="h-100">
+                        {% csrf_token %}
+                        <input type="hidden" name="role" value="ANALYST">
+                        <button type="submit" class="role-card-btn analyst-card">
+                            <div class="role-icon">
+                                <i class="bi bi-graph-up-arrow"></i>
+                            </div>
+                            <h5 class="role-title">Analyste / Ingénieur</h5>
+                            <p class="role-desc">Outils d'analyse avancés</p>
+                            <div class="role-features">
+                                <small><i class="bi bi-check-circle-fill"></i> Analytics & Backtest</small><br>
+                                <small><i class="bi bi-check-circle-fill"></i> Export de données</small><br>
+                                <small><i class="bi bi-check-circle-fill"></i> Accès API</small>
+                            </div>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Bouton Investisseur -->
+                <div class="col-md-6 col-lg-3">
+                    <form method="post" action="{% url 'users:quick_login' %}" class="h-100">
+                        {% csrf_token %}
+                        <input type="hidden" name="role" value="INVESTOR">
+                        <button type="submit" class="role-card-btn investor-card">
+                            <div class="role-icon">
+                                <i class="bi bi-wallet2"></i>
+                            </div>
+                            <h5 class="role-title">Investisseur</h5>
+                            <p class="role-desc">Décisions d'investissement</p>
+                            <div class="role-features">
+                                <small><i class="bi bi-check-circle-fill"></i> Recommandations</small><br>
+                                <small><i class="bi bi-check-circle-fill"></i> Alertes en temps réel</small><br>
+                                <small><i class="bi bi-check-circle-fill"></i> Contexte macro</small>
+                            </div>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Bouton Lecteur -->
+                <div class="col-md-6 col-lg-3">
+                    <form method="post" action="{% url 'users:quick_login' %}" class="h-100">
+                        {% csrf_token %}
+                        <input type="hidden" name="role" value="READER">
+                        <button type="submit" class="role-card-btn reader-card">
+                            <div class="role-icon">
+                                <i class="bi bi-eye-fill"></i>
+                            </div>
+                            <h5 class="role-title">Lecteur</h5>
+                            <p class="role-desc">Consultation des données</p>
+                            <div class="role-features">
+                                <small><i class="bi bi-check-circle-fill"></i> Tableau de bord</small><br>
+                                <small><i class="bi bi-check-circle-fill"></i> Actions cotées</small><br>
+                                <small><i class="bi bi-check-circle-fill"></i> Publications</small>
+                            </div>
+                        </button>
+                    </form>
                 </div>
             </div>
 
-            <!-- Features Grid -->
-            <div class="row mt-5">
-                <div class="col-md-6 col-lg-3">
-                    <div class="feature-card brvm">
-                        <i class="bi bi-graph-up-arrow feature-icon text-primary"></i>
-                        <h4>Trading BRVM</h4>
-                        <p>47 actions cotées avec 70+ indicateurs techniques et fondamentaux en temps réel.</p>
-                        <a href="{% url 'dashboard:dashboard_brvm' %}" class="btn btn-sm btn-outline-primary">
-                            Explorer <i class="bi bi-arrow-right"></i>
-                        </a>
-                    </div>
-                </div>
-                <div class="col-md-6 col-lg-3">
-                    <div class="feature-card recommendations">
-                        <i class="bi bi-lightbulb feature-icon text-success"></i>
-                        <h4>Recommandations IA</h4>
-                        <p>Signaux BUY/HOLD/SELL générés automatiquement par analyse technique et fondamentale.</p>
-                        <a href="{% url 'dashboard:brvm_recommendations_page' %}" class="btn btn-sm btn-outline-success">
-                            Voir les Opportunités <i class="bi bi-arrow-right"></i>
-                        </a>
-                    </div>
-                </div>
-                <div class="col-md-6 col-lg-3">
-                    <div class="feature-card publications">
-                        <i class="bi bi-file-earmark-text feature-icon text-warning"></i>
-                        <h4>Publications</h4>
-                        <p>Rapports annuels, communiqués et documents financiers des sociétés cotées.</p>
-                        <a href="{% url 'dashboard:brvm_publications_page' %}" class="btn btn-sm btn-outline-warning">
-                            Consulter <i class="bi bi-arrow-right"></i>
-                        </a>
-                    </div>
-                </div>
-                <div class="col-md-6 col-lg-3">
-                    <div class="feature-card macro">
-                        <i class="bi bi-globe feature-icon text-info"></i>
-                        <h4>Contexte Macro</h4>
-                        <p>Indicateurs World Bank, IMF, AfDB et UN SDG pour 15 pays ouest-africains.</p>
-                        <a href="{% url 'dashboard:explorer' %}" class="btn btn-sm btn-outline-info">
-                            Analyser <i class="bi bi-arrow-right"></i>
-                        </a>
-                    </div>
-                </div>
+            <div class="text-center mt-4">
+                <p class="text-muted small">
+                    <i class="bi bi-info-circle"></i> Mode test activé - Connexion rapide sans mot de passe
+                </p>
             </div>
         </div>
+    </div>
 
-        <!-- Quick Links Section -->
+    <!-- Quick Links Section -->
         <div class="quick-links">
             <h3 class="text-center mb-4"><i class="bi bi-link-45deg"></i> Accès Rapide</h3>
             <div class="row">

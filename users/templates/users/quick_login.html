@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connexion Rapide - Plateforme BRVM</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .quick-login-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 50px 40px;
+            max-width: 600px;
+            width: 100%;
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 15px;
+            color: #333;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 40px;
+        }
+        
+        .role-buttons {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+        
+        .role-card {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 15px;
+            padding: 30px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            border: 3px solid transparent;
+        }
+        
+        .role-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .role-card.admin {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+        
+        .role-card.analyst {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+        
+        .role-card.investor {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            color: white;
+        }
+        
+        .role-card.reader {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            color: white;
+        }
+        
+        .role-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+        
+        .role-name {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        
+        .role-desc {
+            font-size: 13px;
+            opacity: 0.9;
+        }
+        
+        .role-form {
+            display: none;
+        }
+        
+        .back-link {
+            text-align: center;
+            margin-top: 30px;
+        }
+        
+        .back-link a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .back-link a:hover {
+            text-decoration: underline;
+        }
+        
+        @media (max-width: 600px) {
+            .role-buttons {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="quick-login-container">
+        <h1>🚀 Connexion Rapide</h1>
+        <p class="subtitle">Choisissez un rôle pour vous connecter instantanément</p>
+        
+        <div class="role-buttons">
+            <form method="post" class="role-form" id="form-ADMIN">
+                {% csrf_token %}
+                <input type="hidden" name="role" value="ADMIN">
+                <div class="role-card admin" onclick="document.getElementById('form-ADMIN').submit()">
+                    <div class="role-icon">👑</div>
+                    <div class="role-name">Administrateur</div>
+                    <div class="role-desc">Accès complet au système</div>
+                </div>
+            </form>
+            
+            <form method="post" class="role-form" id="form-ANALYST">
+                {% csrf_token %}
+                <input type="hidden" name="role" value="ANALYST">
+                <div class="role-card analyst" onclick="document.getElementById('form-ANALYST').submit()">
+                    <div class="role-icon">📊</div>
+                    <div class="role-name">Analyste</div>
+                    <div class="role-desc">Analytics + API + Export</div>
+                </div>
+            </form>
+            
+            <form method="post" class="role-form" id="form-INVESTOR">
+                {% csrf_token %}
+                <input type="hidden" name="role" value="INVESTOR">
+                <div class="role-card investor" onclick="document.getElementById('form-INVESTOR').submit()">
+                    <div class="role-icon">💼</div>
+                    <div class="role-name">Investisseur</div>
+                    <div class="role-desc">Recommandations + Alertes</div>
+                </div>
+            </form>
+            
+            <form method="post" class="role-form" id="form-READER">
+                {% csrf_token %}
+                <input type="hidden" name="role" value="READER">
+                <div class="role-card reader" onclick="document.getElementById('form-READER').submit()">
+                    <div class="role-icon">👤</div>
+                    <div class="role-name">Lecteur</div>
+                    <div class="role-desc">Consultation simple</div>
+                </div>
+            </form>
+        </div>
+        
+        <div class="back-link">
+            <a href="{% url 'users:login' %}">← Retour à la connexion classique</a>
+        </div>
+    </div>
+</body>
+</html>

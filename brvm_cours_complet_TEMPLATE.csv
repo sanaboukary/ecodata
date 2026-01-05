@@ -1,0 +1,48 @@
+TICKER,COURS,VARIATION_%,VOLUME,VALEUR,OUVERTURE,HAUT,BAS,PRECEDENT,SECTEUR,LIBELLE
+ABJC,,,,,,,,,Finance,BERNABE COTE D'IVOIRE
+BICC,,,,,,,,,Finance,BICICI
+BNBC,,,,,,,,,Finance,BANK OF AFRICA BENIN
+BOAB,,,,,,,,,Finance,BANK OF AFRICA BURKINA
+BOABF,,,,,,,,,Finance,BOA BURKINA FASO
+BOAC,,,,,,,,,Finance,BOA COTE D'IVOIRE
+BOAM,,,,,,,,,Finance,BOA MALI
+BOAS,,,,,,,,,Finance,BOA SENEGAL
+CABC,,,,,,,,,Finance,CORIS BANK
+CFAC,,,,,,,,,Finance,CIE
+CIEC,,,,,,,,,Distribution,COMPAGNIE IVOIRIENNE ELECTRICITE
+ECOC,,,,,,,,,Transport,ECOBANK
+ETIT,,,,,,,,,Telecom,ETI TOGO
+FTSC,,,,,,,,,Agriculture,FILTISAC
+NTLC,,,,,,,,,Agriculture,NESTLE CI
+NSBC,,,,,,,,,Finance,NSIA BANQUE CI
+ONTBF,,,,,,,,,Telecom,ONATEL BURKINA
+ORAC,,,,,,,,,Finance,ORANGE CI
+ORGT,,,,,,,,,Telecom,ORANGE COTE D'IVOIRE
+PALC,,,,,,,,,Agriculture,PALM CI
+PRSC,,,,,,,,,Services,TRACTAFRIC
+SAFC,,,,,,,,,Industrie,SAFCA
+SAGC,,,,,,,,,Agriculture,SUCRIVOIRE
+SCRC,,,,,,,,,Industrie,SICOR
+SDCC,,,,,,,,,Distribution,SODE CI
+SDSC,,,,,,,,,Distribution,SERVAIR ABIDJAN
+SEMC,,,,,,,,,Industrie,SIEM
+SGBC,8200,-0.5,3200,26240000,8250,8300,8150,8241,Finance,SOCIETE GENERALE BENIN
+SHEC,,,,,,,,,Energie,SHELL CI
+SIBC,,,,,,,,,Finance,SIB
+SICC,,,,,,,,,Industrie,SICABLE
+SICB,,,,,,,,,Finance,SICB
+SLBC,12500,1.2,2100,26250000,12350,12600,12300,12351,Finance,SOCIETE GENERALE SENEGAL
+SMBC,,,,,,,,,Finance,SMB CI
+SNTS,15500,2.3,8500,131750000,15400,15600,15350,15150,Telecom,SONATEL
+SOGB,7200,-1.1,1800,12960000,7280,7350,7150,7279,Finance,SOGB
+SPHC,,,,,,,,,Industrie,SAPH
+STAC,,,,,,,,,Agriculture,SITAB
+STBC,,,,,,,,,Finance,SETAO
+SVOC,,,,,,,,,Services,VIVO ENERGY
+TTLC,2500,0.0,950,2375000,2500,2550,2450,2500,Services,TOTAL CI
+TTRC,,,,,,,,,Transport,TOTAL SENEGAL
+TUBC,,,,,,,,,Finance,ORABANK TOGO
+UNLC,6800,3.2,4200,28560000,6589,6850,6550,6589,Distribution,UNILEVER CI
+UNXC,,,,,,,,,Distribution,UNIWAX
+NEIC,,,,,,,,,Finance,NEI-CEDA
+TOTAL,,,,,,,,,Energie,TOTAL ENERGIES

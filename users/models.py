@@ -13,19 +13,17 @@ class Role(models.Model):
     """
     Rôles disponibles dans la plateforme (RBAC - Role-Based Access Control)
     """
-    # Constantes pour les rôles
-    ADMIN_PLATFORM = 'admin_platform'
-    DATA_ENGINEER = 'data_engineer'
-    ANALYST_ECONOMIST = 'analyst_economist'
-    READER_STAKEHOLDER = 'reader_stakeholder'
-    API_CLIENT = 'api_client'
+    # Constantes pour les rôles - Système à 4 niveaux
+    ADMIN = 'ADMIN'
+    ANALYST = 'ANALYST'
+    INVESTOR = 'INVESTOR'
+    READER = 'READER'
     
     ROLE_CHOICES = [
-        (ADMIN_PLATFORM, 'Administrateur Plateforme'),
-        (DATA_ENGINEER, 'Ingénieur Data/ETL'),
-        (ANALYST_ECONOMIST, 'Analyste/Économiste'),
-        (READER_STAKEHOLDER, 'Lecteur (Stakeholder)'),
-        (API_CLIENT, 'Client API Externe'),
+        (ADMIN, 'Administrateur'),
+        (ANALYST, 'Ingénieur Financier / Analyste'),
+        (INVESTOR, 'Investisseur'),
+        (READER, 'Lecteur'),
     ]
     
     code = models.CharField(max_length=50, unique=True, choices=ROLE_CHOICES)

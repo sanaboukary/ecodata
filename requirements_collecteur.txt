@@ -1,0 +1,16 @@
+# Installation des dépendances pour le collecteur BRVM ultra-robuste
+
+# Dépendances principales
+pymongo>=4.0.0
+requests>=2.28.0
+beautifulsoup4>=4.11.0
+urllib3>=1.26.0
+pandas>=1.5.0
+lxml>=4.9.0
+
+# Selenium (stratégie avancée)
+selenium>=4.8.0
+webdriver-manager>=3.8.0
+
+# Django (si pas déjà installé)
+Django>=4.1.0
