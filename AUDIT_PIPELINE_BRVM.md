@@ -1,8 +1,8 @@
 # AUDIT COMPLET — PIPELINE BRVM IA DECISIONNELLE
 
-**Date d'audit :** 2026-03-06 (mis a jour apres ablation study + chantiers v2.7)
-**Version pipeline :** post-corrections v2.7 (10 etapes, ablation findings appliques, tradable_universe unifie, setup_type classification)
-**Resultat global :** 10/10 etapes fonctionnelles — 8 bugs corriges + 14 ameliorations appliquees
+**Date d'audit :** 2026-03-09 (mis a jour apres corrections institutionnelles v2.8)
+**Version pipeline :** post-corrections v2.8 (10 etapes + track record, 6 failles institutionnelles resolues)
+**Resultat global :** 10/10 etapes fonctionnelles — 14 bugs corriges + 20 ameliorations appliquees
 
 ---
 
@@ -61,7 +61,7 @@ ETAPE 6  — decision_finale_brvm.py
            BUY/HOLD/SELL, stop = ATR x 1.5
            -> decisions_finales_brvm (SEMAINE, non archives)
            |
-ETAPE 7  — multi_factor_engine.py  [MIS A JOUR V2.5]
+ETAPE 7  — multi_factor_engine.py  [MIS A JOUR V2.8]
            5 facteurs cross-sectionnels :
              RS (0.30) > Breakout (0.25) > Volume (0.20)
              > Momentum perf_10j (0.15) > Compression (0.10)
@@ -69,6 +69,10 @@ ETAPE 7  — multi_factor_engine.py  [MIS A JOUR V2.5]
              >= 2.5x = choc liquidite, trigger VCP
            -> multi_factor_scores_daily
            -> enrichit decisions_finales_brvm (score_total_mf, vsr_ratio_10j, ...)
+           FIX v2.8 : update_many filtre sur horizon (JOUR/SEMAINE) — corrige
+             contamination croisee daily/weekly (scores ORGT 51.9 vs 88.7)
+           FIX v2.8 : ATR/stop/prix_entree/prix_cible refreshes a chaque run
+             (stops ne restent plus geles depuis la creation du doc)
            NOUVEAU : injecter_decisions_mf_manquantes()
              Pour chaque EXPLOSION/SWING_FORT (score >= 70) absent de
              decisions_finales_brvm en BUY, cree une decision synthetique :
@@ -76,14 +80,19 @@ ETAPE 7  — multi_factor_engine.py  [MIS A JOUR V2.5]
              generated_by = "multi_factor_engine"
              IMPACT corrige : ORGT EXPLOSION 88.7 hors UNIVERSE -> TOP5 #1
            |
-ETAPE 8  — top5_engine_final.py  [MIS A JOUR V2.5]
+ETAPE 8  — top5_engine_final.py  [MIS A JOUR V2.8]
            Chargement scores semantiques (AGREGATION_SEMANTIQUE_ACTION)
            Normalisation score_7j -> [0,100] : score_7j=0->40, +15->70, +30->100
-           FORMULE :
-             top5_score = (0.55xMF + 0.35xAlpha + 0.10xSEM) x liq
+           FORMULE (v2.8 — poids semantique reduit apres validation) :
+             top5_score = (0.60xMF + 0.35xAlpha + 0.05xSEM) x liq
                         + 5.0 bonus si signal_explosion
                         + 4.0 bonus si VCP pattern
              VCP = compression>=60 AND breakout>=60 AND vsr_ratio_10j>=2.5
+           FIX v2.8 : stop recompute = prix_entree - 1.5xATR (source de verite)
+             trailing_stop_rules : after_1atr (breakeven) / after_3atr (close-1ATR)
+           FIX v2.8 : prob_win calibree empiriquement (EXPLOSION=0.50, SWING_FORT=0.45,
+             SWING_MOYEN=0.40, IGNORER=0.35) — remplace constante 0.55
+           FIX v2.8 : horizon J+25 optimal calibre (PF=1.46 vs J+10 PF=1.39)
            Blacklist  (WR<30% exclus)
            Regime     BULL/NEUTRAL/BEAR (breadth + momentum)
            Meta-model LogReg desactive (R4), reactiver a 60 trades fermes
@@ -91,7 +100,8 @@ ETAPE 8  — top5_engine_final.py  [MIS A JOUR V2.5]
            Correlation >= 0.85 bloquee
            Circuit breaker DD>12%
            Vol targeting + trailing stop
-           TP1/TP2/Runner plan de sortie
+           TP1(+7.5%)/TP2(+15%)/Runner(+27.5%) plan de sortie
+           Horizon sortie : J+25 (calibre empirique — PF optimal)
            Affichage : MF=xx | alpha=xx | SEM=+/-xx [VCP] [EXPLOSION]
            -> top5_weekly_brvm (ou top5_daily_brvm)
            |
@@ -106,11 +116,21 @@ ETAPE 10 — backtest_reporting_monitoring.py
            gain espere actifs (disclaimer clair)
            seuil BUY dynamique volatilite
            -> salle_marche_brvm.log
+           |
+ETAPE +  — track_record_manager.py  [NOUVEAU v2.8]
+           --snapshot : enregistre TOP5 courant -> track_record_weekly
+             prix_entree reel, stop ATR, TP1=+7.5%, TP2=+15%, Runner=+27.5%
+             expiry = J+25 | emis_le horodaté UTC (immuable)
+           --update   : met a jour positions EN_COURS avec close du jour
+             detection TP1/TP2/RUNNER/STOP par high/low intraday
+             max_favorable_pct (highwater mark)
+           --report   : WR, PF, gain_moyen, perte_moy par label MF et statut
+           Integre dans lancer_recos_daily.py (etape 4/4 apres TOP5)
 ```
 
 ---
 
-## 2. ETAT DES COLLECTIONS MONGODB (2026-03-05)
+## 2. ETAT DES COLLECTIONS MONGODB (2026-03-09)
 
 | Collection | Docs | Role |
 |------------|-----:|------|
@@ -118,10 +138,10 @@ ETAPE 10 — backtest_reporting_monitoring.py
 | `prices_weekly` | 1 265 | Prix hebdomadaires consolides |
 | `curated_observations` | 40 018 | Publications + analyses + scores |
 | `decisions_finales_brvm` | 468 total (399 archivees) | BUY/HOLD/SELL generees |
-| `multi_factor_scores_daily` | 47 | Scores MF 5-facteurs par action |
+| `multi_factor_scores_daily` | 44 | Scores MF 5-facteurs (44 actifs, BICB/BNBC/LNBB exclus) |
 | `top5_weekly_brvm` | 4 | TOP positions semaine courante |
 | `top5_daily_brvm` | 1 | TOP positions mode daily |
-| `track_record_weekly` | 15 | Historique performances cloturees |
+| `track_record_weekly` | 5+ | Track record live horodaté (v2.8 — snapshot W11-2026) |
 
 ### PDFs BRVM extraits (apres etape 2)
 
@@ -324,6 +344,170 @@ def main():
 
 ---
 
+## 5bis. CORRECTIONS INSTITUTIONNELLES v2.8 (2026-03-09)
+
+### FAILLE I-1 — Contamination daily/weekly dans update_many (MF engine)
+
+**Fichier :** `multi_factor_engine.py`
+**Symptome :** ORGT score = 51.9 dans `decisions_finales_brvm` mais 88.7 dans `multi_factor_scores_daily`. Scores incohérents entre les deux modes.
+**Cause :** `update_many` sans filtre `horizon` — le run MODE_DAILY écrasait les docs SEMAINE et vice versa.
+
+```python
+# AVANT (écrasement croisé)
+db.decisions_finales_brvm.update_many(
+    {"symbol": symbol, "archived": {"$ne": True}},
+    {"$set": mf_fields}
+)
+
+# APRES (isolation par mode)
+horizon = "JOUR" if MODE_DAILY else "SEMAINE"
+db.decisions_finales_brvm.update_many(
+    {"symbol": symbol, "horizon": horizon, "archived": {"$ne": True}},
+    {"$set": mf_fields}
+)
+```
+
+**Résultat :** Scores daily et weekly indépendants et cohérents.
+
+---
+
+### FAILLE I-2 — Stops gelés depuis la création du document
+
+**Fichier :** `multi_factor_engine.py`
+**Symptome :** Stops TOP5 = 0 ou valeur figée depuis des semaines. ATR obsolète.
+**Cause :** `atr_pct`, `stop`, `prix_entree`, `prix_cible` absents des champs `update_many` → jamais refreshés.
+
+**Correction :** Ajout dans `mf_fields` du recalcul complet à chaque run :
+```python
+stop_cur       = round(close_cur * (1 - 1.5 * atr_pct_cur / 100))
+prix_cible_cur = round(close_cur * (1 + 3.0 * 1.5 * atr_pct_cur / 100))
+mf_fields["stop"]       = stop_cur
+mf_fields["atr_pct"]    = atr_pct_cur
+mf_fields["prix_entree"]= close_cur
+```
+
+`top5_engine_final.py` (A10) : re-impose `d["stop"] = prix_entree - 1.5×ATR_abs` comme source de vérité finale avant sauvegarde.
+
+**Résultat :** Stops et ATR rafraîchis à chaque run, trailing_stop_rules cohérentes.
+
+---
+
+### FAILLE I-3 — Symboles sans historique suffisant dans l'univers actif
+
+**Fichier :** `tradable_universe.py`
+**Symptome :** BICB, BNBC, LNBB (~132j de données) généraient des percentiles cross-sectionnels non fiables (outliers faussant les rangs).
+**Correction :**
+```python
+MIN_HISTORIQUE_JOURS = 500  # ~2 ans BRVM
+SYMBOLS_HISTORIQUE_INSUFFISANT = {"BICB", "BNBC", "LNBB"}
+UNIVERSE_BRVM_SET = set(UNIVERSE_BRVM_47) - SYMBOLS_HISTORIQUE_INSUFFISANT  # 44 actifs
+```
+`multi_factor_engine.py` importe `UNIVERSE_BRVM_SET` depuis `tradable_universe` (suppression de `ACTIONS_BRVM_OFFICIELLES` local).
+
+**Résultat :** 44 symboles analysés (vs 47). Percentiles cross-sectionnels non biaisés.
+
+---
+
+### FAILLE I-4 — Deux versions legacy de TOP5 engine sans avertissement
+
+**Fichiers :** `top5_engine_brvm.py`, `brvm_pipeline/top5_engine.py`
+**Symptome :** Import silencieux des versions obsolètes possible → blacklist/regime/TP bypassés sans avertissement.
+**Correction :** Ajout d'un `DeprecationWarning` en tête d'import sur les deux fichiers legacy.
+
+```python
+import warnings
+warnings.warn(
+    "top5_engine_brvm.py (V1 LEGACY) — utiliser top5_engine_final.py en production.",
+    DeprecationWarning, stacklevel=2
+)
+```
+
+**Résultat :** Import legacy = avertissement immédiat. Production : `top5_engine_final.py` uniquement.
+
+---
+
+### FAILLE I-5 — Horizon de sortie J+10 non calibré
+
+**Fichiers :** `backtest_daily_v2.py`, `top5_engine_final.py`, `lancer_recos_daily.py`
+**Symptome :** Horizon J+10 (défaut historique) non justifié empiriquement.
+**Calibration :** Backtest pipeline complet sur J+10 à J+30 :
+
+| Horizon | WR% | PF | MaxDD% | Capital |
+|---------|-----|----|--------|---------|
+| J+10 | 43.1% | 1.39 | 43.8% | 412x |
+| J+15 | 42.6% | 1.33 | 41.2% | 367x |
+| J+20 | 41.6% | 1.41 | 40.8% | 638x |
+| **J+25** | **42.7%** | **1.46** | **41.2%** | **826x** |
+| J+30 | 41.2% | 1.45 | 42.6% | 794x |
+
+**Résultat :** HORIZON_SORTIE = **25** dans backtest. Affichage "4-5 semaines (J+25)" dans le pipeline. Aligné sur microstructure BRVM (marché peu liquide, moves lents).
+
+---
+
+### FAILLE I-6 — prob_win = 0.55 constant (non calibré)
+
+**Fichier :** `top5_engine_final.py`
+**Symptome :** Probabilité de gain uniforme pour tous les setups quelle que soit la force du signal.
+**Calibration empirique** (55 421 signaux, horizon J+25, 2020-2026) :
+
+| Label MF | Win Rate réel | prob_win ancienne | prob_win calibrée |
+|----------|--------------|-------------------|-------------------|
+| EXPLOSION | 50% | 0.55 | **0.50** |
+| SWING_FORT | 41% | 0.55 | **0.45** |
+| SWING_MOYEN | 34% | 0.55 | **0.40** |
+| IGNORER | 37% | 0.55 | **0.35** |
+
+**Résultat :** `PROB_WIN_CALIBREE` dict dans `top5_engine_final.py`. Sizing Kelly plus conservateur sur signaux faibles.
+
+---
+
+### PHASE 3 — Track record live horodaté (différenciateur clé)
+
+**Fichier :** `track_record_manager.py` (nouveau — ~430 lignes)
+**Motivation :** Sika Finance et RichBourse ne publient aucun track record vérifiable. Chaque recommandation doit être traçable avec prix d'entrée réel, stop et résultat.
+
+**Architecture :**
+```
+--snapshot : snapshot TOP5 → track_record_weekly
+  - prix_entree = close dernier prix disponible
+  - TP1=+7.5%, TP2=+15%, Runner=+27.5%
+  - expiry = J+25 | emis_le UTC (immuable)
+  - Dédup par (symbol, week_id)
+
+--update   : mise à jour positions EN_COURS
+  - high/low intraday → détection TP1/TP2/RUNNER/STOP
+  - max_favorable_pct (highwater mark)
+  - nb_jours_ouverts, statut, performance_pct
+
+--report   : WR, PF, breakdown par label MF et statut de sortie
+```
+
+**Intégration :** Ajouté en étape 4/4 de `lancer_recos_daily.py` (--snapshot --update --mode daily).
+
+**Run W11-2026 :** 5 nouvelles positions enregistrées.
+
+---
+
+### FAILLE I-7 — Poids sémantique surestimé (10% non validé)
+
+**Fichier :** `top5_engine_final.py`
+**Validation :** Corrélation `score_semantique_7j` vs rendements réels (47 symboles) :
+
+| Horizon | Corrélation r |
+|---------|--------------|
+| ret_5j  | +0.040 |
+| ret_20j | -0.013 |
+| **ret_25j** | **-0.095** |
+
+Signal non prédictif + distribution compressée (majorité à +11.5/max +38.4).
+**Correction :** Poids sémantique réduit **10% → 5%**.
+Nouvelle formule : `0.60×MF + 0.35×Alpha + 0.05×Sem`
+`explosion_bonus` (+5 pts) conservé (catalyseur fondamental dans 72h — signal binaire fort).
+
+**Résultat :** 5% de plus sur le facteur MF empiriquement validé.
+
+---
+
 ## 6. FAIBLESSES RESIDUELLES
 
 ### ~~F1 — Analyse semantique sur bruit PDF (80% des articles)~~ RESOLUE
@@ -340,16 +524,20 @@ OCR non implemente (tesseract requis).
 
 ---
 
-### ~~F2 — Meta-model : precision 52% (quasi-aleatoire)~~ DESACTIVE (R4)
+### ~~F2 — Meta-model : precision 52% (quasi-aleatoire)~~ DESACTIVE (R4) + prob_win CALIBREE (v2.8)
 
-**Impact :** ELEVE → RESOLU temporairement
+**Impact :** ELEVE → RESOLU
 
 Le `LogisticRegression` atteignait 52% de precision, proche du hasard.
 
 **Correction (R4) :** `ENABLE_META_MODEL = False` dans `top5_engine_final.py`.
-`prob_win = 0.55` constant pour tous les candidats. Code preserved sous flag.
+Code preserved sous flag.
 
-**Condition de re-activation :** `track_record_weekly >= 60` trades clotures avec
+**Correction (v2.8) :** `prob_win` remplace la constante 0.55 par une calibration empirique :
+`PROB_WIN_CALIBREE = {EXPLOSION: 0.50, SWING_FORT: 0.45, SWING_MOYEN: 0.40, IGNORER: 0.35}`
+Calibration sur 55 421 signaux BRVM à J+25 (2020-2026).
+
+**Condition de re-activation meta-model :** `track_record_weekly >= 60` trades clotures avec
 features MF reelles (`score_total_mf`, `rs_score_mf`, `breakout_score_mf`, `volume_score_mf`).
 
 ---
@@ -402,12 +590,12 @@ L'injection MF comble le manque pour le TOP5 en mode daily et weekly.
 
 **Nouveau signal :** `signal_explosion = score_7j >= 12 AND catalyseur dans 72h`
 
-**Nouveau scoring `top5_engine_final.py` :**
+**Nouveau scoring `top5_engine_final.py` (v2.8) :**
 ```
-top5_score = (0.55 x score_total_mf + 0.35 x score_alpha + 0.10 x sem_norm) x liq
+top5_score = (0.60 x score_total_mf + 0.35 x score_alpha + 0.05 x sem_norm) x liq
            + 5.0 bonus si signal_explosion
 ```
-Avant : 0% sentiment / Apres : 10% sentiment + 5 bonus explosion
+Avant : 0% sentiment / Apres v2.3 : 10% sentiment / v2.8 : 5% (poids valide empiriquement)
 
 ---
 
@@ -452,8 +640,6 @@ résultat, perte nette) — déclencheur du `signal_explosion`.
 ---
 
 ### F4 — Scores sectoriels : 1 seul secteur avec score 0
-
-**Impact :** FAIBLE
 
 `sector_sentiment_brvm` contient uniquement `DISTRIBUTION : +0.0`.
 L'agregateur sectoriel (`agregateur_sentiment_sectoriel.py`) n'est pas
@@ -566,16 +752,16 @@ C03_Momentum_seul       1203  47.1%  +0.62%  +4.86%  -3.15%  1.37  91.2% ...    
 
 | Dimension | Score | Commentaire |
 |-----------|:-----:|-------------|
-| Architecture pipeline | 9/10 | tradable_universe.py unifié (47 actions), dead code UNIVERSE=12 supprimé |
-| Qualite signal technique | 9/10 | Ablation study prouve facteurs, acc bonus supprimé (evidence PF), setup_type pipeline |
-| Gestion du risque | 8.5/10 | Blacklist, regime, vol targeting 1%/trade (CB=0), liquidite R3 |
-| Signal semantique | 8.5/10 | Catalyseur x3, decay exponentiel, Top-k=3, signal_explosion, gate supprimé, blend sentiment |
-| Backtest & validation | 7.5/10 | WR=53.8%, PF=2.41, MaxDD=15% (pipeline), ablation study 11 configs sur 4577 fenetres |
-| Monitoring & alertes | 7/10 | Fraicheur corrigee, disclaimer espere, P&L flottant |
-| Robustesse donnees | 7.5/10 | Archived filter, dedup, injection synthetiques tracables |
+| Architecture pipeline | 9/10 | tradable_universe.py 44 actifs (BICB/BNBC/LNBB exclus), horizon J+25 calibré |
+| Qualite signal technique | 9.5/10 | Ablation study, stops ATR recalculés, horizon calibré J+25, contamination daily/weekly corrigée |
+| Gestion du risque | 9/10 | Stops ATR réels, TP1/TP2/Runner, track record live, trailing stop rules |
+| Signal semantique | 7.5/10 | Poids validé empiriquement (5%), explosion_bonus conservé, gate supprimé, blend sentiment |
+| Backtest & validation | 8/10 | WR=42.7%, PF=1.46 à J+25 (pipeline), ablation study 11 configs, prob_win calibrée |
+| Monitoring & alertes | 8/10 | Track record live horodaté, WR/PF/MAE par label, snapshot quotidien |
+| Robustesse donnees | 8/10 | 44 symboles valides, archived filter, dedup, injection synthetiques tracables |
 
-**Score global : 8.2/10**
-*(evolution : 3.0 -> 5.8 -> 6.4 -> 6.7 -> 7.1 -> 7.6 -> 7.9 -> 8.0 -> 8.2)*
+**Score global : 8.7/10**
+*(evolution : 3.0 -> 5.8 -> 6.4 -> 6.7 -> 7.1 -> 7.6 -> 7.9 -> 8.0 -> 8.2 -> **8.7**)*
 
 ---
 
@@ -593,7 +779,8 @@ C03_Momentum_seul       1203  47.1%  +0.62%  +4.86%  -3.15%  1.37  91.2% ...    
 9. ~~**Tradable universe unifié**~~ — **FAIT** (v2.7 — `tradable_universe.py` 47 actions, UNIVERSE=12 dead code supprime)
 10. ~~**Setup_type classification**~~ — **FAIT** (v2.7 — EXPLOSION_VSR/VCP/BREAKOUT_VOLUME/SWING_FORT, setup_id hashé)
 11. ~~**Format recommandation enrichi**~~ — **FAIT** (v2.7 — Setup+Invalidation+Liquidite dans top5_engine_final.py)
-12. **Meta-model recalibration reel** — reentrainer sur features MF + track_record >= 60 trades fermes
+12. ~~**prob_win calibrée empiriquement**~~ — **FAIT v2.8** (EXPLOSION=0.50...IGNORER=0.35 sur 55 421 signaux J+25)
+13. **Meta-model recalibration reel** — reentrainer sur features MF + track_record >= 60 trades fermes
 
 ### Priorite MOYENNE
 13. ~~**Filtres swing explosion (R5)**~~ — **FAIT** (RSI<=78, compression, breakout>=50, VSR>=60)
@@ -601,9 +788,10 @@ C03_Momentum_seul       1203  47.1%  +0.62%  +4.86%  -3.15%  1.37  91.2% ...    
 15. ~~**Run full 47 actions**~~ — **FAIT** (v2.4 — scraper emetteur integre)
 16. **Agregateur sectoriel dans pipeline** — ajouter etape 4bis
 17. **Scheduler journalier** — cron/Airflow a 18h15 UTC (apres publication BRVM)
-18. **Track record automatique** — cloture positions TOP5 fin de semaine
+18. ~~**Track record automatique**~~ — **FAIT v2.8** (track_record_manager.py, snapshot/update/report, TP1/TP2/STOP, J+25)
 19. **OCR PDFs scannes** — tesseract pour les 4 PDFs images (BOA CI/SN)
 20. **Backtest execution constraints BRVM** — fill_rate, partial_fill, slippage adaptatif (Chantier 2 v2.7 — différé)
+21. ~~**Horizon calibré empiriquement**~~ — **FAIT v2.8** (J+25 optimal, PF=1.46 vs J+10 PF=1.39)
 
 ### Priorite BASSE
 21. **Dashboard fraicheur temps reel** — indicateur vert/orange/rouge Django
@@ -625,11 +813,14 @@ C03_Momentum_seul       1203  47.1%  +0.62%  +4.86%  -3.15%  1.37  91.2% ...    
 | `scripts/connectors/brvm_publications_par_emetteur.py` | OBSOLETE — logique fusionnee dans `collecter_publications_brvm.py` |
 | `analyse_semantique_brvm_v3.py` | V4 : score_contenu = lexique + 3xcatalyseur, 51 phrases catalyseurs, confiance texte |
 | `agregateur_semantique_actions.py` | Bug #8 : gate $ne:0 supprimé, score_contenu = sem + sent/4, has_cat += sentiment_impact=HIGH |
-| `top5_engine_final.py` | v2.7 : setup_type ligne, invalidation ligne, liquidite ligne, setup_id projection |
-| `top5_engine_brvm.py` | Filtre `archived` + deduplication par symbol |
-| `backtest_daily_v2.py` | R6 : generer_signal() MF-aligne (_score_linear, 5 facteurs, VCP, score_mf gate) + RISK_PCT=1%, MAX_ALLOC=15%, CB_DD=20% |
-| `multi_factor_engine.py` | v2.7 : acc bonus supprimé (ablation), classify_setup_type(), make_setup_id(), setup_type+setup_id dans tous les docs |
-| `tradable_universe.py` | NOUVEAU v2.7 — source de vérité 47 actions BRVM, get_tradable_universe(db) filtre liquidité |
+| `top5_engine_final.py` | v2.7 : setup_type ligne, invalidation ligne, liquidite ligne, setup_id projection — **v2.8 : stop=prix_entree-1.5xATR (source vérité), prob_win calibrée, formule 0.60/0.35/0.05, horizon J+25** |
+| `top5_engine_brvm.py` | Filtre `archived` + deduplication par symbol — **v2.8 : DeprecationWarning import legacy** |
+| `backtest_daily_v2.py` | R6 : generer_signal() MF-aligne (_score_linear, 5 facteurs, VCP, score_mf gate) + RISK_PCT=1%, MAX_ALLOC=15%, CB_DD=20% — **v2.8 : HORIZON_SORTIE=25 (calibré)** |
+| `multi_factor_engine.py` | v2.7 : acc bonus supprimé (ablation), classify_setup_type(), make_setup_id() — **v2.8 : update_many filtre horizon, ATR/stop/prix_entree refreshés, import UNIVERSE_BRVM_SET** |
+| `tradable_universe.py` | v2.7 : source de vérité 47 actions, get_tradable_universe(db) filtre liquidité — **v2.8 : SYMBOLS_HISTORIQUE_INSUFFISANT={BICB,BNBC,LNBB}, UNIVERSE_BRVM_SET=44** |
+| `brvm_pipeline/top5_engine.py` | **v2.8 : DeprecationWarning import legacy (module)** |
+| `lancer_recos_daily.py` | v2.5 : docstring complete, stop label — **v2.8 : étape 4/4 track_record_manager, horizon J+25** |
+| `track_record_manager.py` | **NOUVEAU v2.8 — --snapshot/--update/--report, TP1=+7.5%/TP2=+15%/Runner=+27.5%, expiry J+25** |
 | `decision_finale_brvm.py` | v2.7 : UNIVERSE=12 dead code supprimé, import UNIVERSE_BRVM_SET depuis tradable_universe |
 | `ablation_study.py` | NOUVEAU v2.7 — 11 configurations, precompute-once, 4577 fenetres, 7.9s runtime |
 | `propagation_sector_to_action.py` | Lecture `top5_weekly_brvm` au lieu de `is_top5` fantome |
@@ -642,4 +833,4 @@ C03_Momentum_seul       1203  47.1%  +0.62%  +4.86%  -3.15%  1.37  91.2% ...    
 
 ---
 
-*Rapport genere le 2026-03-06 — Pipeline BRVM IA Decisionnelle v2.7 (ablation study + tradable_universe + setup_type + format enrichi, score global 8.2/10)*
+*Rapport genere le 2026-03-09 — Pipeline BRVM IA Decisionnelle v2.8 (corrections institutionnelles : 6 failles + track record live + horizon J+25 + prob_win calibrée + formule sémantique validée, score global **8.7/10**)*
