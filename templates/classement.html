@@ -1,0 +1,32 @@
+<form method="get" class="mb-3">
+  <label for="objectif">Objectif :</label>
+  <select name="objectif" id="objectif" onchange="this.form.submit()">
+    <option value="TRADING" {% if objectif == "TRADING" %}selected{% endif %}>Trading court terme</option>
+    <option value="DIVIDENDE" {% if objectif == "DIVIDENDE" %}selected{% endif %}>Dividendes</option>
+    <option value="CROISSANCE" {% if objectif == "CROISSANCE" %}selected{% endif %}>Croissance</option>
+    <option value="DEFENSIF" {% if objectif == "DEFENSIF" %}selected{% endif %}>Défensif</option>
+  </select>
+</form>
+
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>Rang</th>
+      <th>Action</th>
+      <th>Score</th>
+      <th>Signal</th>
+      <th>Horizon</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for row in data %}
+    <tr>
+      <td>{{ row.rank }}</td>
+      <td>{{ row.symbol }}</td>
+      <td>{{ row.score }}</td>
+      <td>{{ row.signal }}</td>
+      <td>{{ row.horizon }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>

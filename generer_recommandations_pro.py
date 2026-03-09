@@ -2,12 +2,19 @@
 """
 Générateur de Recommandations PROFESSIONNEL
 Avec indicateurs techniques standards (RSI, MACD, SMA, Bollinger)
++ ANALYSE DE SENTIMENT (publications BRVM)
 Approche ingénieur analyste financier
 """
+import sys
+if hasattr(sys.stdout, 'reconfigure'):
+    sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+if hasattr(sys.stderr, 'reconfigure'):
+    sys.stderr.reconfigure(encoding='utf-8', errors='replace')
 from pymongo import MongoClient
 from datetime import datetime, timedelta
 import statistics
 import json
+import re
 
 def calculate_sma(prices, period):
     """Simple Moving Average"""
@@ -78,11 +85,85 @@ def calculate_bollinger_bands(prices, period=20, std_dev=2):
     
     return upper_band, sma, lower_band
 
+def analyze_sentiment_publications(db, symbol, days=30):
+    """
+    Analyse de sentiment des publications BRVM pour un symbole
+    Retourne: score sentiment (-10 à +10), nombre publications, signaux
+    """
+    # Date limite (30 derniers jours)
+    date_limite = (datetime.now() - timedelta(days=days)).isoformat()
+    
+    # Rechercher publications mentionnant le symbole
+    # Recherche dans titre + contenu
+    symbol_clean = symbol.replace('.BC', '').replace('.CI', '')
+    
+    publications = list(db.curated_observations.find({
+        'source': 'BRVM_PUBLICATIONS',
+        'ts': {'$gte': date_limite},
+        '$or': [
+            {'attrs.titre': {'$regex': symbol_clean, '$options': 'i'}},
+            {'attrs.societe': {'$regex': symbol_clean, '$options': 'i'}},
+            {'key': {'$regex': symbol_clean, '$options': 'i'}}
+        ]
+    }))
+    
+    if not publications:
+        return 0, 0, []
+    
+    # Mots-clés positifs
+    mots_positifs = [
+        'croissance', 'augmentation', 'hausse', 'bénéfice', 'profit', 'dividende',
+        'progression', 'amélioration', 'succès', 'record', 'performance',
+        'expansion', 'développement', 'investissement', 'partenariat',
+        'innovation', 'nouveau contrat', 'chiffre affaires', 'résultats positifs',
+        'excellent', 'solide', 'robuste', 'dynamique', 'opportunité'
+    ]
+    
+    # Mots-clés négatifs
+    mots_negatifs = [
+        'baisse', 'diminution', 'perte', 'déficit', 'recul', 'chute',
+        'difficulté', 'crise', 'problème', 'risque', 'dette', 'endettement',
+        'licenciement', 'fermeture', 'restructuration', 'alerte',
+        'pénalité', 'amende', 'sanction', 'litige', 'procès'
+    ]
+    
+    sentiment_total = 0
+    signals_sentiment = []
+    
+    for pub in publications:
+        titre = pub.get('attrs', {}).get('titre', '').lower()
+        contenu = pub.get('attrs', {}).get('contenu', '').lower()
+        texte = titre + ' ' + contenu
+        
+        # Compter occurrences
+        score_pub = 0
+        for mot in mots_positifs:
+            if mot in texte:
+                score_pub += 1
+        
+        for mot in mots_negatifs:
+            if mot in texte:
+                score_pub -= 1
+        
+        sentiment_total += score_pub
+        
+        # Identifier publications importantes
+        if score_pub >= 3:
+            signals_sentiment.append(f"Publication positive: {titre[:50]}...")
+        elif score_pub <= -3:
+            signals_sentiment.append(f"Publication négative: {titre[:50]}...")
+    
+    # Normaliser score sur -10 à +10
+    nb_pubs = len(publications)
+    sentiment_score = max(-10, min(10, sentiment_total / max(1, nb_pubs) * 5))
+    
+    return sentiment_score, nb_pubs, signals_sentiment
+
 print("=" * 80)
-print("📊 GÉNÉRATEUR RECOMMANDATIONS PROFESSIONNEL")
+print("📊 GÉNÉRATEUR RECOMMANDATIONS PROFESSIONNEL + SENTIMENT")
 print("=" * 80)
 print("Approche: Ingénieur Analyste Financier")
-print("Indicateurs: RSI, MACD, SMA, Bandes de Bollinger")
+print("Indicateurs: RSI, MACD, SMA, Bollinger + Analyse Sentiment Publications")
 
 client = MongoClient('mongodb://localhost:27017/')
 db = client['centralisation_db']
@@ -152,7 +233,10 @@ for obs_today in data_today:
     # 6. Volatilité
     volatility_20 = (statistics.stdev(historical_prices[-20:]) / statistics.mean(historical_prices[-20:])) * 100
     
-    # ===== SCORING PROFESSIONNEL (100 points) =====
+    # 7. ANALYSE DE SENTIMENT PUBLICATIONS
+    sentiment_score, nb_publications, sentiment_signals = analyze_sentiment_publications(db, symbol, days=30)
+    
+    # ===== SCORING PROFESSIONNEL (115 points avec sentiment) =====
     
     score = 0
     signals = []
@@ -274,6 +358,32 @@ for obs_today in data_today:
     elif avg_volume_20 >= 500:
         score += 5
     
+    # === SENTIMENT PUBLICATIONS (15 points) ===
+    
+    if sentiment_score >= 7:  # Très positif
+        score += 15
+        signals.append(f"Sentiment TRÈS POSITIF ({nb_publications} pubs)")
+        signals.extend(sentiment_signals[:2])
+    elif sentiment_score >= 4:  # Positif
+        score += 12
+        signals.append(f"Sentiment positif ({nb_publications} pubs)")
+        signals.extend(sentiment_signals[:1])
+    elif sentiment_score >= 1:  # Légèrement positif
+        score += 8
+        signals.append(f"Sentiment favorable ({nb_publications} pubs)")
+    elif sentiment_score >= -1:  # Neutre
+        score += 5
+        if nb_publications > 0:
+            signals.append(f"Sentiment neutre ({nb_publications} pubs)")
+    elif sentiment_score >= -4:  # Négatif
+        score += 2
+        signals.append(f"Sentiment négatif ({nb_publications} pubs)")
+        signals.extend(sentiment_signals[:1])
+    else:  # Très négatif
+        score += 0
+        signals.append(f"Sentiment TRÈS NÉGATIF ({nb_publications} pubs)")
+        signals.extend(sentiment_signals[:2])
+    
     # === FILTRES QUALITÉ ===
     
     # Rejeter si:
@@ -287,9 +397,12 @@ for obs_today in data_today:
     if avg_volume_20 < 100:  # Pas assez liquide
         disqualified = True
         signals.append("REJETÉ: Liquidité insuffisante")
+    if sentiment_score < -6:  # Sentiment trop négatif
+        disqualified = True
+        signals.append("REJETÉ: Sentiment publications très négatif")
     
-    # Seuil minimum: 60 points (professionnel)
-    if score >= 60 and not disqualified:
+    # Seuil minimum: 65 points (sur 115 avec sentiment)
+    if score >= 65 and not disqualified:
         recommendations.append({
             'symbol': symbol,
             'score': score,
@@ -301,9 +414,11 @@ for obs_today in data_today:
             'sma_50': round(sma_50, 2) if sma_50 else None,
             'volatility_20j': round(volatility_20, 2),
             'volume_avg': int(avg_volume_20),
+            'sentiment_score': round(sentiment_score, 2),
+            'nb_publications': nb_publications,
             'nb_jours_data': len(historical_prices),
             'signals': signals,
-            'confiance': 'HAUTE' if score >= 80 else 'MOYENNE' if score >= 70 else 'ACCEPTABLE'
+            'confiance': 'HAUTE' if score >= 90 else 'MOYENNE' if score >= 75 else 'ACCEPTABLE'
         })
 
 # Trier par score
@@ -315,13 +430,14 @@ print(f"   (sur {len(recommendations)} actions qualifiées / {len(data_today)} a
 print("=" * 80)
 
 for i, reco in enumerate(top5, 1):
-    print(f"\n{i}. {reco['symbol']} - SCORE: {reco['score']}/100 - {reco['confiance']}")
+    print(f"\n{i}. {reco['symbol']} - SCORE: {reco['score']}/115 - {reco['confiance']}")
     print(f"   Prix:         {reco['prix_actuel']:>10,.0f} FCFA")
     print(f"   Momentum 7j:  {reco['momentum_7j']:>10.2f}%")
     print(f"   RSI (14):     {reco['rsi']:>10.2f}" if reco['rsi'] else "   RSI:          Non calculable")
     print(f"   SMA 20:       {reco['sma_20']:>10,.0f}" if reco['sma_20'] else "   SMA 20:       N/A")
     print(f"   Volatilité:   {reco['volatility_20j']:>10.2f}%")
     print(f"   Volume moy:   {reco['volume_avg']:>10,}")
+    print(f"   Sentiment:    {reco['sentiment_score']:>10.2f}/10 ({reco['nb_publications']} pubs)")
     print(f"   Données:      {reco['nb_jours_data']} jours")
     
     if reco['signals']:
@@ -333,10 +449,11 @@ for i, reco in enumerate(top5, 1):
 rapport = {
     'date_generation': datetime.now().isoformat(),
     'date_donnees': date_today,
-    'strategie': 'TRADING_PROFESSIONNEL_INDICATEURS_TECHNIQUES',
-    'approche': 'Ingénieur Analyste Financier',
-    'indicateurs_utilises': ['RSI', 'MACD', 'SMA', 'Bollinger Bands', 'Volume'],
-    'seuil_score': 60,
+    'strategie': 'TRADING_PROFESSIONNEL_INDICATEURS_TECHNIQUES_SENTIMENT',
+    'approche': 'Ingénieur Analyste Financier + Analyse Sentiment Publications',
+    'indicateurs_utilises': ['RSI', 'MACD', 'SMA', 'Bollinger Bands', 'Volume', 'Sentiment Publications'],
+    'seuil_score': 65,
+    'score_max': 115,
     'actions_analysees': len(data_today),
     'actions_qualifiees': len(recommendations),
     'top_5': top5,
@@ -344,7 +461,8 @@ rapport = {
         'technique': '40 points (momentum, RSI, MACD, volume)',
         'tendance': '25 points (SMA, Bollinger)',
         'risque_ajuste': '20 points (volatilité, Sharpe)',
-        'liquidite': '15 points (volume moyen)'
+        'liquidite': '15 points (volume moyen)',
+        'sentiment': '15 points (analyse publications BRVM)'
     }
 }
 
@@ -355,7 +473,7 @@ with open(filename, 'w', encoding='utf-8') as f:
 print(f"\n📄 Rapport sauvegardé: {filename}")
 
 print("\n" + "=" * 80)
-print("✅ RECOMMANDATIONS PROFESSIONNELLES GÉNÉRÉES")
+print("✅ RECOMMANDATIONS PROFESSIONNELLES + SENTIMENT GÉNÉRÉES")
 print("=" * 80)
 print("Basées sur:")
 print("  ✅ RSI (Relative Strength Index)")
@@ -364,6 +482,7 @@ print("  ✅ SMA 20/50 (Simple Moving Averages)")
 print("  ✅ Bandes de Bollinger")
 print("  ✅ Analyse de volume")
 print("  ✅ Gestion du risque (volatilité, liquidité)")
+print("  ✅ ANALYSE SENTIMENT (publications BRVM 30 derniers jours)")
 print("\nÀ FAIRE:")
 print("  ⏳ Backtest rigoureux sur 60 jours")
 print("  ⏳ Validation Win Rate ≥60%")

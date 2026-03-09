@@ -1,0 +1,95 @@
+<!-- ✨ COMPOSANT RÉUTILISABLE : STATISTIQUES DE PRÉTRAITEMENT ✨ -->
+{% if preprocessing_stats %}
+<div class="filters-panel" style="margin-top: 1.5rem; background: linear-gradient(135deg, #1e3a5f 0%, #2d5a7b 100%);">
+  <h2 style="color: #60a5fa; font-size: 1.1rem; margin-bottom: 0.8rem;">
+    🔬 Qualité des Données
+  </h2>
+  
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+    <!-- Total traité -->
+    <div style="background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 8px; border-left: 3px solid #10b981;">
+      <div style="font-size: 0.75rem; color: rgba(255,255,255,0.6); text-transform: uppercase; margin-bottom: 0.3rem;">
+        Records traités
+      </div>
+      <div style="font-size: 1.5rem; font-weight: 700; color: #fff;">
+        {{ preprocessing_stats.cleaned_records|default:0 }}
+      </div>
+      <div style="font-size: 0.7rem; color: rgba(255,255,255,0.5); margin-top: 0.2rem;">
+        sur {{ preprocessing_stats.total_records|default:0 }} bruts
+      </div>
+    </div>
+    
+    <!-- Taux de succès -->
+    <div style="background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 8px; border-left: 3px solid #3b82f6;">
+      <div style="font-size: 0.75rem; color: rgba(255,255,255,0.6); text-transform: uppercase; margin-bottom: 0.3rem;">
+        Taux de succès
+      </div>
+      <div style="font-size: 1.5rem; font-weight: 700; color: #fff;">
+        {{ preprocessing_stats.success_rate|default:0|floatformat:1 }}%
+      </div>
+      <div style="font-size: 0.7rem; color: rgba(255,255,255,0.5); margin-top: 0.2rem;">
+        {% if preprocessing_stats.success_rate >= 95 %}✓ Excellent{% elif preprocessing_stats.success_rate >= 85 %}⚠ Bon{% else %}⚠ Moyen{% endif %}
+      </div>
+    </div>
+    
+    <!-- Doublons supprimés -->
+    <div style="background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 8px; border-left: 3px solid #f59e0b;">
+      <div style="font-size: 0.75rem; color: rgba(255,255,255,0.6); text-transform: uppercase; margin-bottom: 0.3rem;">
+        Doublons nettoyés
+      </div>
+      <div style="font-size: 1.5rem; font-weight: 700; color: #fff;">
+        {{ preprocessing_stats.duplicates_removed|default:0 }}
+      </div>
+      <div style="font-size: 0.7rem; color: rgba(255,255,255,0.5); margin-top: 0.2rem;">
+        records en double
+      </div>
+    </div>
+    
+    <!-- Valeurs manquantes -->
+    <div style="background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 8px; border-left: 3px solid #8b5cf6;">
+      <div style="font-size: 0.75rem; color: rgba(255,255,255,0.6); text-transform: uppercase; margin-bottom: 0.3rem;">
+        Valeurs interpolées
+      </div>
+      <div style="font-size: 1.5rem; font-weight: 700; color: #fff;">
+        {{ preprocessing_stats.missing_values_filled|default:0 }}
+      </div>
+      <div style="font-size: 0.7rem; color: rgba(255,255,255,0.5); margin-top: 0.2rem;">
+        gaps comblés
+      </div>
+    </div>
+    
+    <!-- Outliers détectés -->
+    <div style="background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 8px; border-left: 3px solid #ef4444;">
+      <div style="font-size: 0.75rem; color: rgba(255,255,255,0.6); text-transform: uppercase; margin-bottom: 0.3rem;">
+        Outliers détectés
+      </div>
+      <div style="font-size: 1.5rem; font-weight: 700; color: #fff;">
+        {{ preprocessing_stats.outliers_detected|default:0 }}
+      </div>
+      <div style="font-size: 0.7rem; color: rgba(255,255,255,0.5); margin-top: 0.2rem;">
+        valeurs aberrantes
+      </div>
+    </div>
+    
+    <!-- Valeurs invalides -->
+    <div style="background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 8px; border-left: 3px solid #ec4899;">
+      <div style="font-size: 0.75rem; color: rgba(255,255,255,0.6); text-transform: uppercase; margin-bottom: 0.3rem;">
+        Valeurs invalides
+      </div>
+      <div style="font-size: 1.5rem; font-weight: 700; color: #fff;">
+        {{ preprocessing_stats.invalid_records|default:0 }}
+      </div>
+      <div style="font-size: 0.7rem; color: rgba(255,255,255,0.5); margin-top: 0.2rem;">
+        hors plage
+      </div>
+    </div>
+  </div>
+  
+  <div style="margin-top: 1rem; padding: 0.8rem; background: rgba(59, 130, 246, 0.1); border-radius: 6px; border: 1px solid rgba(59, 130, 246, 0.3);">
+    <p style="font-size: 0.8rem; color: rgba(255,255,255,0.7); margin: 0;">
+      💡 <strong>Note:</strong> Les données affichées ont été nettoyées, validées et traitées automatiquement. 
+      Les valeurs manquantes sont interpolées linéairement, les outliers sont signalés mais conservés pour analyse.
+    </p>
+  </div>
+</div>
+{% endif %}

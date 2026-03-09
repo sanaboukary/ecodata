@@ -41,4 +41,12 @@ urlpatterns = [
     path('predictions/', views.predictions_page, name='predictions_page'),
     path('api/predictions/<str:symbol>/', views.stock_prediction_api, name='stock_prediction_api'),
     path('api/predictions/batch/', views.batch_predictions_api, name='batch_predictions_api'),
+    
+    # Data Marketplace - Téléchargement de données
+    path('marketplace/', views.data_marketplace_page, name='data_marketplace_page'),
+    path('marketplace/prepare/', views.prepare_download, name='prepare_download'),
+    path('marketplace/download/', views.download_data, name='download_data'),
+    path('marketplace/get-years/', views.get_available_years, name='get_available_years'),
+    path('marketplace/get-datasets/', views.get_available_datasets, name='get_available_datasets'),
+    path('marketplace/api-docs/', views.api_documentation, name='api_documentation'),
 ]

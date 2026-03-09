@@ -1,7 +1,12 @@
 """
 SCRAPER PRODUCTION BRVM - DONNÉES RÉELLES UNIQUEMENT
 🔴 POLITIQUE ZÉRO TOLÉRANCE : Scraping site officiel BRVM
-Source: https://www.brvm.org/fr/investir/cours-et-cotations
+
+STRATÉGIES:
+1. API REST BRVM (si disponible)
+2. Selenium navigation intelligente
+3. Scraping HTML direct avec BeautifulSoup
+4. Fallback vers saisie manuelle
 """
 import requests
 from bs4 import BeautifulSoup
@@ -9,17 +14,36 @@ from datetime import datetime
 import re
 import time
 
+def scraper_brvm_api():
+    """
+    Tentative #1: API REST BRVM (non documentée)
+    """
+    print("\n🔌 Tentative via API REST...")
+    api_urls = [
+        "https://www.brvm.org/api/cours",
+        "https://www.brvm.org/api/quotes",
+        "https://www.brvm.org/sites/default/files/data/cours.json",
+    ]
+    
+    for url in api_urls:
+        try:
+            resp = requests.get(url, timeout=10, verify=False)
+            if resp.status_code == 200:
+                print(f"✅ API trouvée: {url}")
+                return resp.json()
+        except:
+            continue
+    
+    print("❌ Aucune API REST trouvée")
+    return None
+
 def scraper_brvm_officiel():
     """
-    Scraper le site officiel BRVM pour obtenir les cours en temps réel
-    
-    Returns:
-        list: Liste de dict avec {symbol, close, volume, variation, open, high, low, ...}
-        None: Si le scraping échoue
+    Tentative #2: Scraper avec BeautifulSoup
     """
-    url = "https://www.brvm.org/fr/search/node/cours%20et%20cotation"
+    url = "https://www.brvm.org/fr/investir/cours-et-cotations"
     
-    print(f"\n🌐 Scraping BRVM officiel: {url}")
+    print(f"\n🌐 Scraping BRVM HTML: {url}")
     
     try:
         # Headers pour simuler un navigateur

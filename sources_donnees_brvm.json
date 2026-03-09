@@ -1,0 +1,413 @@
+[
+  {
+    "type": "CSV",
+    "path": "brvm_8dec2025_template.csv",
+    "size": 1001
+  },
+  {
+    "type": "CSV",
+    "path": "brvm_cours_complet_TEMPLATE.csv",
+    "size": 1952
+  },
+  {
+    "type": "CSV",
+    "path": "cours_brvm_22dec_TEMPLATE.csv",
+    "size": 1526
+  },
+  {
+    "type": "CSV",
+    "path": "cours_brvm_reels_TEMPLATE.csv",
+    "size": 234
+  },
+  {
+    "type": "CSV",
+    "path": "cours_brvm_template.csv",
+    "size": 353
+  },
+  {
+    "type": "CSV",
+    "path": "decisions_brvm_20260128.csv",
+    "size": 20917
+  },
+  {
+    "type": "CSV",
+    "path": "decisions_brvm_20260129.csv",
+    "size": 20897
+  },
+  {
+    "type": "CSV",
+    "path": "decisions_brvm_20260130.csv",
+    "size": 20915
+  },
+  {
+    "type": "CSV",
+    "path": "decisions_brvm_20260202.csv",
+    "size": 20960
+  },
+  {
+    "type": "CSV",
+    "path": "decisions_brvm_20260203.csv",
+    "size": 20960
+  },
+  {
+    "type": "CSV",
+    "path": "decisions_brvm_20260204.csv",
+    "size": 20924
+  },
+  {
+    "type": "CSV",
+    "path": "decisions_brvm_20260205.csv",
+    "size": 20924
+  },
+  {
+    "type": "CSV",
+    "path": "donnees_brvm_2026-01-05.csv",
+    "size": 333
+  },
+  {
+    "type": "CSV",
+    "path": "donnees_brvm_2026-01-09.csv",
+    "size": 1238
+  },
+  {
+    "type": "CSV",
+    "path": "donnees_brvm_2026-02-02.csv",
+    "size": 2583
+  },
+  {
+    "type": "CSV",
+    "path": "donnees_reelles_brvm.csv",
+    "size": 4572
+  },
+  {
+    "type": "CSV",
+    "path": "exemple_brvm_8dec2025.csv",
+    "size": 351
+  },
+  {
+    "type": "CSV",
+    "path": "exemple_cours_brvm.csv",
+    "size": 582
+  },
+  {
+    "type": "CSV",
+    "path": "export_richbourse_sentiment.csv",
+    "size": 19878
+  },
+  {
+    "type": "CSV",
+    "path": "historique_brvm.csv",
+    "size": 66750
+  },
+  {
+    "type": "CSV",
+    "path": "historique_brvm_60jours_TEMPLATE.csv",
+    "size": 74916
+  },
+  {
+    "type": "CSV",
+    "path": "historique_brvm_complement_nov_dec.csv",
+    "size": 25962
+  },
+  {
+    "type": "CSV",
+    "path": "modele_import_brvm.csv",
+    "size": 622
+  },
+  {
+    "type": "CSV",
+    "path": "csv\\cours_brvm_test.csv",
+    "size": 350
+  },
+  {
+    "type": "CSV",
+    "path": "csv_brvm\\cours_brvm_test.csv",
+    "size": 350
+  },
+  {
+    "type": "CSV",
+    "path": "out_brvm\\brvm_bs4_20260105_110847.csv",
+    "size": 2441
+  },
+  {
+    "type": "CSV",
+    "path": "out_brvm\\brvm_complet_20260105_110056.csv",
+    "size": 3246
+  },
+  {
+    "type": "HTML",
+    "path": "brvm_ag_20251222_140139.html",
+    "size": 68671
+  },
+  {
+    "type": "HTML",
+    "path": "brvm_ag_20251222_140433.html",
+    "size": 70061
+  },
+  {
+    "type": "HTML",
+    "path": "brvm_ag_20251222_140634.html",
+    "size": 70061
+  },
+  {
+    "type": "HTML",
+    "path": "brvm_assemblees_20251222_130509.html",
+    "size": 70060
+  },
+  {
+    "type": "HTML",
+    "path": "brvm_assemblees_20251222_131058.html",
+    "size": 70060
+  },
+  {
+    "type": "HTML",
+    "path": "brvm_auto_20251223_105331.html",
+    "size": 42537
+  },
+  {
+    "type": "HTML",
+    "path": "brvm_bulletins_20251222_130511.html",
+    "size": 50377
+  },
+  {
+    "type": "HTML",
+    "path": "brvm_bulletins_20251222_131100.html",
+    "size": 50377
+  },
+  {
+    "type": "HTML",
+    "path": "brvm_bulletins_20251222_140054.html",
+    "size": 48988
+  },
+  {
+    "type": "HTML",
+    "path": "brvm_bulletins_20251222_140415.html",
+    "size": 50378
+  },
+  {
+    "type": "HTML",
+    "path": "brvm_bulletins_20251222_140615.html",
+    "size": 50378
+  },
+  {
+    "type": "HTML",
+    "path": "brvm_complet_20251223_114334.html",
+    "size": 42942
+  },
+  {
+    "type": "HTML",
+    "path": "brvm_cours_page.html",
+    "size": 41754
+  },
+  {
+    "type": "HTML",
+    "path": "brvm_page_SNTS.html",
+    "size": 55074
+  },
+  {
+    "type": "HTML",
+    "path": "brvm_rapports_20251222_130507.html",
+    "size": 60012
+  },
+  {
+    "type": "HTML",
+    "path": "brvm_rapports_20251222_131055.html",
+    "size": 60012
+  },
+  {
+    "type": "HTML",
+    "path": "brvm_scrape_20251208_162424.html",
+    "size": 23152
+  },
+  {
+    "type": "HTML",
+    "path": "brvm_scrape_20251222_112328.html",
+    "size": 51735
+  },
+  {
+    "type": "HTML",
+    "path": "brvm_scrape_20251222_121840.html",
+    "size": 51738
+  },
+  {
+    "type": "HTML",
+    "path": "brvm_scrape_20251222_150648.html",
+    "size": 51584
+  },
+  {
+    "type": "HTML",
+    "path": "brvm_scrape_20251222_160732.html",
+    "size": 51584
+  },
+  {
+    "type": "HTML",
+    "path": "brvm_scrape_20251223_101539.html",
+    "size": 51721
+  },
+  {
+    "type": "HTML",
+    "path": "brvm_scrape_20251223_101619.html",
+    "size": 51721
+  },
+  {
+    "type": "HTML",
+    "path": "brvm_scrape_20251226_141235.html",
+    "size": 51742
+  },
+  {
+    "type": "HTML",
+    "path": "brvm_scrape_20251229_104408.html",
+    "size": 51733
+  },
+  {
+    "type": "HTML",
+    "path": "brvm_scrape_20251229_104614.html",
+    "size": 51734
+  },
+  {
+    "type": "HTML",
+    "path": "brvm_scrape_20260105_092018.html",
+    "size": 50338
+  },
+  {
+    "type": "HTML",
+    "path": "brvm_scrape_20260106_090656.html",
+    "size": 50515
+  },
+  {
+    "type": "HTML",
+    "path": "brvm_scrape_enrichi_20260126_094655.html",
+    "size": 56367
+  },
+  {
+    "type": "HTML",
+    "path": "brvm_selenium_20251222_113356.html",
+    "size": 93014
+  },
+  {
+    "type": "HTML",
+    "path": "brvm_selenium_20251222_151041.html",
+    "size": 42657
+  },
+  {
+    "type": "HTML",
+    "path": "brvm_selenium_20251222_161025.html",
+    "size": 42393
+  },
+  {
+    "type": "HTML",
+    "path": "brvm_selenium_20251223_102248.html",
+    "size": 42532
+  },
+  {
+    "type": "HTML",
+    "path": "brvm_selenium_20251229_104826.html",
+    "size": 42543
+  },
+  {
+    "type": "HTML",
+    "path": "brvm_selenium_20260108_112414.html",
+    "size": 82793
+  },
+  {
+    "type": "HTML",
+    "path": "brvm_selenium_20260112_092133.html",
+    "size": 41357
+  },
+  {
+    "type": "HTML",
+    "path": "debug_bs4_www.brvm.org.html",
+    "size": 24296
+  },
+  {
+    "type": "HTML",
+    "path": "debug_selenium_www.brvm.org_0.html",
+    "size": 92929
+  },
+  {
+    "type": "HTML",
+    "path": "www.brvm.org.html",
+    "size": 91848
+  },
+  {
+    "type": "HTML",
+    "path": "www.brvm.org_fr.html",
+    "size": 91990
+  },
+  {
+    "type": "HTML",
+    "path": "dashboard\\templates\\dashboard\\brvm_recommendations.html",
+    "size": 11749
+  },
+  {
+    "type": "HTML",
+    "path": "dashboard\\templates\\dashboard\\dashboard_brvm.html",
+    "size": 10701
+  },
+  {
+    "type": "HTML",
+    "path": "templates\\brvm\\recommendations.html",
+    "size": 10608
+  },
+  {
+    "type": "HTML",
+    "path": "templates\\dashboard\\brvm_publications.html",
+    "size": 12024
+  },
+  {
+    "type": "HTML",
+    "path": "templates\\dashboard\\brvm_recommendations.html",
+    "size": 44612
+  },
+  {
+    "type": "HTML",
+    "path": "templates\\dashboard\\dashboard_brvm.html",
+    "size": 37926
+  },
+  {
+    "type": "HTML",
+    "path": "templates\\dashboard\\dashboard_brvm_premium.html",
+    "size": 15076
+  },
+  {
+    "type": "JSON",
+    "path": "csv\\brvm_societes_cotees_structured.json",
+    "size": 2
+  },
+  {
+    "type": "TXT",
+    "path": "COLLECTE_REUSSIE.txt",
+    "size": 2579
+  },
+  {
+    "type": "TXT",
+    "path": "donnees_brvm_check.txt",
+    "size": 1122
+  },
+  {
+    "type": "MongoDB",
+    "collection": "curated_observations",
+    "field": "value",
+    "count": 11470
+  },
+  {
+    "type": "DUMP",
+    "path": "templates\\dashboard\\dashboard_afdb.html.backup",
+    "size": 25369
+  },
+  {
+    "type": "DUMP",
+    "path": "templates\\dashboard\\dashboard_un.html.backup",
+    "size": 21545
+  },
+  {
+    "type": "DUMP",
+    "path": "templates\\dashboard\\index_backup.html",
+    "size": 26351
+  },
+  {
+    "type": "DUMP",
+    "path": "users\\views_backup.py",
+    "size": 12334
+  }
+]

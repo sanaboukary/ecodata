@@ -82,3 +82,100 @@ coverage.xml
 
 # OS
 Thumbs.db
+
+# Claude Code temporary files
+tmpclaude-*-cwd
+nul
+
+# Scraped HTML pages (données brutes, non versionnées)
+brvm_scrape_*.html
+brvm_selenium_*.html
+brvm_ag_*.html
+brvm_auto_*.html
+brvm_bulletins_*.html
+brvm_assemblees_*.html
+brvm_rapports_*.html
+brvm_complet_*.html
+brvm_simple_*.html
+debug_selenium_*.html
+debug_bs4_*.html
+response*.html
+www.brvm.org*.html
+brvm_cours_page.html
+brvm_page_*.html
+
+# Fichiers de sortie console (output intermédiaires)
+*_output.txt
+*_result.txt
+*_results.txt
+*_resultat.txt
+analyse_output.txt
+analyse_sample.txt
+analyse_complete*.txt
+analyse_raisons.txt
+audit_output.txt
+daily_volume_check.txt
+decision_output.txt
+decision_test.txt
+diagnostic_output.txt
+diagnostic_resultat.txt
+donnees_brvm_check.txt
+donnees_output.txt
+finalisation_output.txt
+generation_log.txt
+collecte_log.txt
+enrichissement_log.txt
+installation_log.txt
+nettoyage_resultat.txt
+ohlc_audit.txt
+output_agregation.txt
+qualite_output.txt
+recommandations_output.txt
+rebuild_final.txt
+restauration_output.txt
+resultats_finaux.txt
+structure_brvm_output.txt
+tmp_out.txt
+verif_output.txt
+verif_top5.txt
+pycache_dirs.txt
+files_to_delete.txt
+atr_check.txt
+complement_result.txt
+
+# Résultats de backtest (données, pas du code)
+backtest_daily_v2_*.csv
+backtest_mf_A_ranking_*.csv
+backtest_mf_B_tpstop_*.csv
+backtest_pipeline_*.csv
+backtest_mf_engine_*.csv
+rapport_prices_weekly.csv
+rapport_donnees_*.txt
+rapport_worldbank_*.txt
+
+# Fichiers de données exportées
+decisions_brvm_*.csv
+donnees_brvm_*.csv
+export_richbourse_sentiment.csv
+
+# Fichiers JSON de résultats (données temporaires)
+top5_pro_*.json
+recommandations_ia_latest.json
+
+# PDFs volumineux (documents non versionnés)
+*.pdf
+
+# Fichiers de débogage et résultats temporaires
+resume_*.txt
+INVENTAIRE_BRVM_RESULTAT.txt
+RESTAURATION_BRVM_RESULTS.txt
+ETAT_PRODUCTION_BRVM.txt
+CONFIG_PRODUCTION_BRVM.txt
+ANALYSE_DATES_BRVM.txt
+ANALYSE_DONNEES_PERDUES.txt
+COLLECTE_REUSSIE.txt
+AUDIT_RESUME_VISUEL_*.txt
+GUIDE_RAPIDE.txt
+SYSTEME_PUBLICATIONS_README.txt
+SCHEMA_SYSTEME_PUBLICATIONS.txt
+MARKETPLACE_MOCKUP.txt

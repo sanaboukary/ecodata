@@ -1,0 +1,55 @@
+<div class="mb-3">
+  <a href="/brvm/classement/" class="btn btn-secondary">Voir le classement par objectif</a>
+</div>
+
+<form method="get" class="mb-3">
+  <label for="horizon">Horizon :</label>
+  <select name="horizon" id="horizon" onchange="this.form.submit()">
+    <option value="SEMAINE" {% if horizon == "SEMAINE" %}selected{% endif %}>Semaine</option>
+    <option value="MOIS" {% if horizon == "MOIS" %}selected{% endif %}>Mois</option>
+    <option value="TRIMESTRE" {% if horizon == "TRIMESTRE" %}selected{% endif %}>Trimestre</option>
+    <option value="ANNUEL" {% if horizon == "ANNUEL" %}selected{% endif %}>Annuel</option>
+  </select>
+</form>
+<form method="get" class="mb-3">
+  <label for="horizon">Horizon :</label>
+  <select name="horizon" id="horizon" onchange="this.form.submit()">
+    <option value="SEMAINE" {% if horizon == "SEMAINE" %}selected{% endif %}>Semaine</option>
+    <option value="MOIS" {% if horizon == "MOIS" %}selected{% endif %}>Mois</option>
+    <option value="TRIMESTRE" {% if horizon == "TRIMESTRE" %}selected{% endif %}>Trimestre</option>
+    <option value="ANNUEL" {% if horizon == "ANNUEL" %}selected{% endif %}>Annuel</option>
+  </select>
+</form>
+
+<a href="/brvm/recommendations/refresh/" class="btn btn-primary">
+  Actualiser
+</a>
+
+
+
+{% if messages %}
+  {% for message in messages %}
+  <div class="alert alert-{{ message.tags }}">
+    {{ message }}
+  </div>
+  {% endfor %}
+{% endif %}
+
+{% for d in decisions %}
+<div class="card mb-4">
+  <h4>{{ d.symbol }} — {{ d.signal }}</h4>
+  <p><strong>Horizon :</strong> {{ d.horizon }}</p>
+  <p><strong>Score :</strong> {{ d.score }}</p>
+  <p><strong>Confiance :</strong> {{ d.confidence|floatformat:0 }}%</p>
+  <p><strong>Stop Loss :</strong> {{ d.stop_loss }} FCFA</p>
+  <p><strong>Take Profit :</strong> {{ d.take_profit }} FCFA</p>
+  <p><strong>Justifications :</strong></p>
+  <ul>
+    {% for j in d.justifications %}
+      <li>{{ j }}</li>
+    {% endfor %}
+  </ul>
+</div>
+{% empty %}
+<p>Aucune décision disponible</p>
+{% endfor %}

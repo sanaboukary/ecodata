@@ -2,6 +2,16 @@ from django.http import HttpResponse
 from django.shortcuts import render
 from plateforme_centralisation.mongo import get_mongo_db
 
+# Import Data Marketplace functions
+from dashboard.data_marketplace import (
+    data_marketplace_page,
+    prepare_download,
+    download_data,
+    api_documentation,
+    get_available_years,
+    get_available_datasets
+)
+
 # Fonction index() définie plus bas (ligne 818+) - ne pas dupliquer ici
 
 # =====================
@@ -1079,10 +1089,12 @@ def index(request):
             'title': pub.get('key'),
             'date': _format_date(pub.get('ts')),
             'category': attrs.get('category', 'Actualité'),
+            'type': pub.get('dataset', 'PUBLICATION'),
+            'emetteur': attrs.get('emetteur', 'BRVM'),
             'url': attrs.get('url', '#'),
             'file_type': attrs.get('file_type', 'PDF'),
             'file_size': attrs.get('file_size', 'N/A'),
-            'description': attrs.get('description', pub.get('key', ''))
+            'description': attrs.get('snippet', attrs.get('description', pub.get('key', '')))
         })
     
     return render(request, "dashboard/index.html", {
@@ -1210,31 +1222,75 @@ def dashboard_brvm(request):
     """Dashboard détaillé BRVM - Vue Premium pour Investisseurs"""
     _, db = get_mongo_db()
     import json
+    from dashboard.preprocessing import preprocess_for_dashboard
+    from dashboard.brvm_companies import get_company_name
     
-    # Récupérer les dernières données BRVM (une observation par action)
+    # ✨ CORRECTION: Utiliser prices_daily au lieu de curated_observations
+    # Récupérer les dernières données par action (1 doc par symbole)
     pipeline_latest = [
-        {'$match': {'source': 'BRVM'}},
-        {'$sort': {'ts': -1}},
+        {'$sort': {'date': -1}},
         {'$group': {
-            '_id': '$key',
+            '_id': '$symbol',
             'last_doc': {'$first': '$$ROOT'}
         }},
         {'$replaceRoot': {'newRoot': '$last_doc'}}
     ]
     
-    latest_stocks = list(db.curated_observations.aggregate(pipeline_latest))
+    latest_stocks = list(db.prices_daily.aggregate(pipeline_latest))
     
-    # Calcul des métriques du marché
-    total_market_cap = sum(doc.get('attrs', {}).get('market_cap', 0) for doc in latest_stocks)
-    total_volume = sum(doc.get('attrs', {}).get('volume', 0) for doc in latest_stocks)
-    avg_pe_ratio = sum(doc.get('attrs', {}).get('pe_ratio', 0) for doc in latest_stocks if doc.get('attrs', {}).get('pe_ratio', 0) > 0) / max(len([d for d in latest_stocks if d.get('attrs', {}).get('pe_ratio', 0) > 0]), 1)
+    # Conversion au format attendu par le template
+    latest_stocks_formatted = []
+    for doc in latest_stocks:
+        symbol = doc.get('symbol')
+        latest_stocks_formatted.append({
+            'key': symbol,
+            'value': doc.get('close', 0),
+            'ts': doc.get('date'),
+            'attrs': {
+                'name': get_company_name(symbol),  # CORRECTION: Utiliser le mapping
+                'sector': doc.get('sector', 'N/A'),
+                'country': 'CI',  # BRVM = Côte d'Ivoire
+                'market_cap': 0,  # TODO: calculer depuis volume * close
+                'volume': doc.get('volume', 0),
+                'pe_ratio': 0,  # TODO: ajouter si disponible
+                'day_change_pct': doc.get('variation_pct', 0)
+            }
+        })
+    
+    latest_stocks = latest_stocks_formatted
+    
+    # Les données brutes pour preprocessing (toutes les données daily pour l'historique)
+    brvm_raw_data = list(db.prices_daily.find({}, sort=[('date', -1)]))
+    
+    # ✨ PRÉTRAITEMENT DES DONNÉES ✨
+    brvm_df, preprocessing_stats = preprocess_for_dashboard(
+        raw_data=brvm_raw_data,
+        source='BRVM',
+        fill_missing=True,          # Interpolate missing values
+        detect_outliers=True,       # IQR method for stock prices
+        temporal_aggregation=None   # Keep original granularity (important for stock data)
+    )
+    
+    # Convert DataFrame back to list of dicts for compatibility
+    if not brvm_df.empty:
+        brvm_data = brvm_df.to_dict('records')
+    else:
+        brvm_data = []
+    
+    # Calcul des métriques du marché (gérer les valeurs None)
+    total_market_cap = sum(doc.get('attrs', {}).get('market_cap') or 0 for doc in latest_stocks)
+    total_volume = sum(doc.get('attrs', {}).get('volume') or 0 for doc in latest_stocks)
+    
+    # Calcul PE ratio moyen (exclure les None)
+    pe_ratios = [doc.get('attrs', {}).get('pe_ratio') for doc in latest_stocks if doc.get('attrs', {}).get('pe_ratio') is not None and doc.get('attrs', {}).get('pe_ratio') > 0]
+    avg_pe_ratio = sum(pe_ratios) / len(pe_ratios) if pe_ratios else 0
     
     # Calcul des indices (simulation basée sur les vraies actions)
-    sorted_by_cap = sorted(latest_stocks, key=lambda x: x.get('attrs', {}).get('market_cap', 0), reverse=True)
+    sorted_by_cap = sorted(latest_stocks, key=lambda x: x.get('attrs', {}).get('market_cap') or 0, reverse=True)
     brvm10_stocks = sorted_by_cap[:10]
     
-    brvm_composite_value = sum(doc.get('value', 0) * doc.get('attrs', {}).get('market_cap', 0) for doc in latest_stocks) / max(total_market_cap, 1)
-    brvm10_value = sum(doc.get('value', 0) for doc in brvm10_stocks) / max(len(brvm10_stocks), 1)
+    brvm_composite_value = sum((doc.get('value') or 0) * (doc.get('attrs', {}).get('market_cap') or 0) for doc in latest_stocks) / max(total_market_cap, 1)
+    brvm10_value = sum(doc.get('value') or 0 for doc in brvm10_stocks) / max(len(brvm10_stocks), 1)
     
     # Variation journalière moyenne
     avg_day_change = sum(doc.get('attrs', {}).get('day_change_pct', 0) for doc in latest_stocks) / max(len(latest_stocks), 1)
@@ -1316,9 +1372,9 @@ def dashboard_brvm(request):
             }
         
         sector_analysis[sector]['stocks_count'] += 1
-        sector_analysis[sector]['total_market_cap'] += attrs.get('market_cap', 0)
-        sector_analysis[sector]['total_volume'] += attrs.get('volume', 0)
-        sector_analysis[sector]['performances'].append(attrs.get('day_change_pct', 0))
+        sector_analysis[sector]['total_market_cap'] += (attrs.get('market_cap') or 0)
+        sector_analysis[sector]['total_volume'] += (attrs.get('volume') or 0)
+        sector_analysis[sector]['performances'].append(attrs.get('day_change_pct') or 0)
     
     sector_stats = []
     for sector, data in sector_analysis.items():
@@ -1350,8 +1406,8 @@ def dashboard_brvm(request):
         date = ts.split('T')[0] if isinstance(ts, str) else (ts.strftime('%Y-%m-%d') if ts else '')
         if date and date not in seen_dates:
             chart_labels.append(date)
-            chart_prices.append(doc.get('value', 0))
-            chart_volumes.append(doc.get('attrs', {}).get('volume', 0))
+            chart_prices.append(doc.get('value') or 0)
+            chart_volumes.append(doc.get('attrs', {}).get('volume') or 0)
             seen_dates.add(date)
     
     chart_data = {
@@ -1360,13 +1416,22 @@ def dashboard_brvm(request):
         'volumes': chart_volumes
     }
     
-    # Liste complète des actions pour le sélecteur
+    # Liste complète des actions pour le sélecteur (DEDUPLIQUEES)
     all_stocks_list = []
+    seen_symbols = set()
+    
     for stock in sorted(latest_stocks, key=lambda x: x.get('key', '')):
+        symbol = stock.get('key')
+        
+        # Éviter les doublons
+        if symbol in seen_symbols:
+            continue
+        seen_symbols.add(symbol)
+        
         attrs = stock.get('attrs', {})
         all_stocks_list.append({
-            'symbol': stock.get('key'),
-            'name': attrs.get('name', stock.get('key')),
+            'symbol': symbol,
+            'name': get_company_name(symbol),  # CORRECTION: Utiliser le mapping
             'sector': attrs.get('sector', 'N/A'),
             'country': attrs.get('country', 'N/A')
         })
@@ -1379,8 +1444,9 @@ def dashboard_brvm(request):
         "sector_stats": sector_stats,
         "chart_data": json.dumps(chart_data),
         "all_stocks": all_stocks_list,
-        "total_observations": db.curated_observations.count_documents({'source': 'BRVM'}),
+        "total_observations": db.prices_daily.count_documents({}),  # CORRECTION: depuis prices_daily
         "active_source": "BRVM",
+        "preprocessing_stats": preprocessing_stats,  # ✨ STATS QUALITÉ DONNÉES
     })
 
 
@@ -1389,6 +1455,7 @@ def dashboard_imf(request):
     _, db = get_mongo_db()
     import json
     from collections import defaultdict
+    from dashboard.preprocessing import preprocess_for_dashboard
     
     # Paramètres de filtre
     country_filter = request.GET.get('country', '')
@@ -1400,21 +1467,34 @@ def dashboard_imf(request):
     if year_filter:
         query['ts'] = {'$regex': f'^{year_filter}'}
     
-    # Récupérer données FMI
-    imf_data = list(db.curated_observations.find(query, sort=[('ts', -1)]))
+    # Récupérer données FMI BRUTES
+    imf_raw_data = list(db.curated_observations.find(query, sort=[('ts', -1)]))
     
-    # Mapping pays CEDEAO
+    # ✨ PRÉTRAITEMENT DES DONNÉES ✨
+    imf_df, preprocessing_stats = preprocess_for_dashboard(
+        raw_data=imf_raw_data,
+        source='IMF',
+        fill_missing=True,
+        detect_outliers=True,
+        temporal_aggregation=None  # Garder granularité originale
+    )
+    
+    # Convertir DataFrame en liste de dicts pour compatibilité
+    if not imf_df.empty:
+        imf_data = imf_df.to_dict('records')
+    else:
+        imf_data = []
+    
+    # Mapping pays UEMOA (codes ISO2 utilisés dans la base)
     cedeao_countries = {
-        'BEN': '🇧🇯 Bénin',
-        'BFA': '🇧🇫 Burkina Faso',
-        'CIV': '🇨🇮 Côte d\'Ivoire',
-        'GHA': '🇬🇭 Ghana',
-        'GIN': '🇬🇳 Guinée',
-        'MLI': '🇲🇱 Mali',
-        'NER': '🇳🇪 Niger',
-        'NGA': '🇳🇬 Nigeria',
-        'SEN': '🇸🇳 Sénégal',
-        'TGO': '🇹🇬 Togo',
+        'BJ': '🇧🇯 Bénin',
+        'BF': '🇧🇫 Burkina Faso',
+        'CI': '🇨🇮 Côte d\'Ivoire',
+        'GW': '🇬🇼 Guinée-Bissau',
+        'ML': '🇲🇱 Mali',
+        'NE': '🇳🇪 Niger',
+        'SN': '🇸🇳 Sénégal',
+        'TG': '🇹🇬 Togo',
     }
     
     # Mapping indicateurs FMI
@@ -1439,7 +1519,6 @@ def dashboard_imf(request):
     # Extraire années et pays disponibles
     available_years = set()
     available_countries = set()
-    available_indicators = set()
     
     for doc in imf_data:
         ts = str(doc.get('ts', ''))
@@ -1447,19 +1526,36 @@ def dashboard_imf(request):
             available_years.add(ts[:4])
         
         key = doc.get('key', '')
-        # Format clé: CIV.PCPI_IX ou M.CIV.PCPI_IX
-        parts = key.split('.')
-        if len(parts) >= 2:
-            country_code = parts[1] if parts[0] == 'M' else parts[0]
-            if country_code in cedeao_countries:
-                available_countries.add(country_code)
+        # Format clé IMF: PAYS.INDICATEUR (ex: CI.BCA, SN.PCPI_IX)
+        # OU format alternatif: INDICATEUR_PAYS (ex: NGDP_RPCH_BJ)
+        if '.' in key:
+            # Format: PAYS.INDICATEUR
+            parts = key.split('.')
             if len(parts) >= 2:
-                indicator_code = parts[-1]
-                available_indicators.add(indicator_code)
+                country_code = parts[0]  # Premier élément = code pays
+                indicator_code = parts[1]  # Deuxième élément = indicateur
+                if country_code in cedeao_countries:
+                    available_countries.add(country_code)
+                if indicator_code:
+                    available_indicators.add(indicator_code)
+        else:
+            # Format: INDICATEUR_PAYS
+            parts = key.split('_')
+            if len(parts) >= 2:
+                country_code = parts[-1]  # Dernier élément = code pays
+                indicator_code = '_'.join(parts[:-1])  # Indicateur
+                if country_code in cedeao_countries:
+                    available_countries.add(country_code)
+                if indicator_code:
+                    available_indicators.add(indicator_code)
     
     available_years = sorted(available_years, reverse=True)
-    available_countries = sorted(available_countries)
-    available_indicators = sorted(available_indicators)
+    
+    # Convertir available_countries en dictionnaire avec les noms
+    available_countries_dict = {code: cedeao_countries[code] for code in sorted(available_countries)}
+    
+    # Convertir available_indicators en dictionnaire avec les noms
+    available_indicators_dict = {code: indicator_names.get(code, code) for code in sorted(available_indicators)}
     
     # KPIs Clés pour Investisseurs
     kpis = {
@@ -1556,9 +1652,11 @@ def dashboard_imf(request):
         "active_source": "IMF",
         # Filtres
         "available_years": available_years,
-        "available_countries": {k: v for k, v in cedeao_countries.items() if k in available_countries},
-        "available_indicators": {k: indicator_names.get(k, k) for k in available_indicators},
+        "available_countries": available_countries_dict,
+        "available_indicators": available_indicators_dict,
         "country_filter": country_filter,
+        # ✨ Statistiques de prétraitement ✨
+        "preprocessing_stats": preprocessing_stats,
         "year_filter": year_filter,
         "indicator_filter": indicator_filter,
         "cedeao_countries": cedeao_countries,
@@ -1571,6 +1669,7 @@ def dashboard_worldbank(request):
     _, db = get_mongo_db()
     import json
     from collections import defaultdict
+    from dashboard.preprocessing import preprocess_for_dashboard
     
     # Récupérer les paramètres de filtre
     year_filter = request.GET.get('year', '')
@@ -1585,8 +1684,23 @@ def dashboard_worldbank(request):
     if year_filter:
         query['ts'] = {'$regex': f'^{year_filter}'}
     
-    # Récupérer données WorldBank
-    wb_data = list(db.curated_observations.find(query, sort=[('ts', -1)]))
+    # ✨ RÉCUPÉRER DONNÉES BRUTES ✨
+    wb_raw_data = list(db.curated_observations.find(query, sort=[('ts', -1)]))
+    
+    # ✨ PRÉTRAITEMENT DES DONNÉES ✨
+    wb_df, preprocessing_stats = preprocess_for_dashboard(
+        raw_data=wb_raw_data,
+        source='WorldBank',
+        fill_missing=True,          # Interpolate missing values
+        detect_outliers=True,       # IQR method
+        temporal_aggregation=None   # Keep original granularity
+    )
+    
+    # Convert DataFrame back to list of dicts for compatibility
+    if not wb_df.empty:
+        wb_data = wb_df.to_dict('records')
+    else:
+        wb_data = []
     
     # Filtre par trimestre (après récupération car basé sur le mois)
     if quarter_filter and wb_data:
@@ -1725,31 +1839,50 @@ def dashboard_worldbank(request):
                 'country_count': len(stats['countries'])
             })
     
-    # KPIs clés - Top indicateurs
+    # KPIs clés - Calculés sur les données FILTRÉES
     kpis = {
-        'gdp_growth': {'name': 'Croissance PIB Moyenne', 'value': 0, 'unit': '%', 'icon': '📈'},
+        'gdp_per_capita': {'name': 'PIB par Habitant', 'value': 0, 'unit': '$', 'icon': '💵'},
         'population': {'name': 'Population Totale', 'value': 0, 'unit': 'M', 'icon': '👥'},
-        'poverty_rate': {'name': 'Taux de Pauvreté', 'value': 0, 'unit': '%', 'icon': '💰'},
-        'health_expenditure': {'name': 'Dépenses Santé/PIB', 'value': 0, 'unit': '%', 'icon': '🏥'},
-        'education_expenditure': {'name': 'Dépenses Éducation/PIB', 'value': 0, 'unit': '%', 'icon': '🎓'},
-        'literacy_rate': {'name': 'Taux d\'Alphabétisation', 'value': 0, 'unit': '%', 'icon': '📚'},
-        'electricity_access': {'name': 'Accès Électricité', 'value': 0, 'unit': '%', 'icon': '💡'},
+        'inflation': {'name': 'Inflation (CPI)', 'value': 0, 'unit': '%', 'icon': '📈'},
+        'child_mortality': {'name': 'Mortalité Infantile', 'value': 0, 'unit': '‰', 'icon': '👶'},
+        'primary_enrollment': {'name': 'Scolarisation Primaire', 'value': 0, 'unit': '%', 'icon': '🎓'},
+        'unemployment': {'name': 'Taux de Chômage', 'value': 0, 'unit': '%', 'icon': '💼'},
+        'trade_gdp': {'name': 'Commerce/PIB', 'value': 0, 'unit': '%', 'icon': '🌍'},
         'internet_users': {'name': 'Utilisateurs Internet', 'value': 0, 'unit': '%', 'icon': '🌐'},
     }
     
     # Mapping des codes vers les KPIs
     kpi_mapping = {
-        'NY.GDP.MKTP.KD.ZG': 'gdp_growth',
+        'NY.GDP.PCAP.CD': 'gdp_per_capita',
         'SP.POP.TOTL': 'population',
-        'SI.POV.DDAY': 'poverty_rate',
-        'SH.XPD.GHED.GD.ZS': 'health_expenditure',  # Changé de CHEX à GHED (plus de données)
-        'SE.XPD.TOTL.GD.ZS': 'education_expenditure',
-        'SE.ADT.LITR.ZS': 'literacy_rate',
-        'EG.ELC.ACCS.ZS': 'electricity_access',
+        'FP.CPI.TOTL.ZG': 'inflation',
+        'SH.DYN.MORT': 'child_mortality',
+        'SE.PRM.ENRR': 'primary_enrollment',
+        'SL.UEM.TOTL.ZS': 'unemployment',
+        'NE.TRD.GNFS.ZS': 'trade_gdp',
         'IT.NET.USER.ZS': 'internet_users',
     }
     
-    # Calculer les KPIs par pays
+    # ✅ CALCULER KPIs À PARTIR DES DONNÉES FILTRÉES (wb_data)
+    kpi_values = defaultdict(list)
+    for doc in wb_data:
+        dataset = doc.get('dataset')
+        value = doc.get('value')
+        if dataset in kpi_mapping and value is not None:
+            kpi_key = kpi_mapping[dataset]
+            kpi_values[kpi_key].append(value)
+    
+    # Calculer moyennes pour chaque KPI
+    for kpi_key, values in kpi_values.items():
+        if values:
+            avg_val = sum(values) / len(values)
+            # Formatage spécial pour Population (en millions)
+            if kpi_key == 'population':
+                kpis[kpi_key]['value'] = round(avg_val / 1_000_000, 1)
+            else:
+                kpis[kpi_key]['value'] = round(avg_val, 2)
+    
+    # ✅ CALCULER KPIs PAR PAYS À PARTIR DES DONNÉES FILTRÉES
     valid_countries = {
         'Bénin', 'Burkina Faso', 'Côte d\'Ivoire', 'Ghana', 
         'Guinée-Bissau', 'Mali', 'Niger', 'Nigeria', 
@@ -1757,107 +1890,72 @@ def dashboard_worldbank(request):
         'Cap-Vert', 'Gambie', 'Liberia'
     }
     
-    # Mapping des noms de pays vers codes ISO
     country_to_code = {
-        'Bénin': 'BEN',
-        'Burkina Faso': 'BFA',
-        'Côte d\'Ivoire': 'CIV',
-        'Ghana': 'GHA',
-        'Guinée-Bissau': 'GNB',
-        'Mali': 'MLI',
-        'Niger': 'NER',
-        'Nigeria': 'NGA',
-        'Sénégal': 'SEN',
-        'Togo': 'TGO',
-        'Guinée': 'GIN',
-        'Mauritanie': 'MRT',
-        'Cap-Vert': 'CPV',
-        'Gambie': 'GMB',
-        'Liberia': 'LBR'
+        'Bénin': 'BEN', 'Burkina Faso': 'BFA', 'Côte d\'Ivoire': 'CIV',
+        'Ghana': 'GHA', 'Guinée-Bissau': 'GNB', 'Mali': 'MLI',
+        'Niger': 'NER', 'Nigeria': 'NGA', 'Sénégal': 'SEN',
+        'Togo': 'TGO', 'Guinée': 'GIN', 'Mauritanie': 'MRT',
+        'Cap-Vert': 'CPV', 'Gambie': 'GMB', 'Liberia': 'LBR'
     }
     
-    # Structure pour stocker les KPIs par pays
+    # Initialiser structure KPIs par pays avec TOUS les indicateurs
     kpis_by_country = {}
-    
-    # Pour chaque pays, calculer ses KPIs
     for country in valid_countries:
-        country_code = country_to_code.get(country, '')
-        
         kpis_by_country[country] = {
-            'gdp_growth': {'value': 0, 'dataset': 'NY.GDP.MKTP.KD.ZG', 'key': f'{country_code}.NY.GDP.MKTP.KD.ZG', 'unit': '%'},
-            'population': {'value': 0, 'dataset': 'SP.POP.TOTL', 'key': f'{country_code}.SP.POP.TOTL', 'unit': 'M'},
-            'health_expenditure': {'value': 0, 'dataset': 'SH.XPD.GHED.GD.ZS', 'key': country, 'unit': '%'},
-            'education_expenditure': {'value': 0, 'dataset': 'SE.XPD.TOTL.GD.ZS', 'key': country, 'unit': '%'},
-            'literacy_rate': {'value': 0, 'dataset': 'SE.ADT.LITR.ZS', 'key': country, 'unit': '%'},
-            'electricity_access': {'value': 0, 'dataset': 'EG.ELC.ACCS.ZS', 'key': country, 'unit': '%'},
-            'internet_users': {'value': 0, 'dataset': 'IT.NET.USER.ZS', 'key': country, 'unit': '%'},
+            'gdp_per_capita': {'value': 0, 'unit': '$'},
+            'population': {'value': 0, 'unit': 'M'},
+            'inflation': {'value': 0, 'unit': '%'},
+            'child_mortality': {'value': 0, 'unit': '‰'},
+            'primary_enrollment': {'value': 0, 'unit': '%'},
+            'unemployment': {'value': 0, 'unit': '%'},
+            'trade_gdp': {'value': 0, 'unit': '%'},
+            'internet_users': {'value': 0, 'unit': '%'},
+            'gdp_growth': {'value': 0, 'unit': '%'},
+            'health_expenditure': {'value': 0, 'unit': '%'},
+            'education_expenditure': {'value': 0, 'unit': '%'},
+            'literacy_rate': {'value': 0, 'unit': '%'},
+            'electricity_access': {'value': 0, 'unit': '%'},
+        }
+    
+    # Grouper les données filtrées par pays et indicateur
+    country_kpi_data = defaultdict(lambda: defaultdict(list))
+    for doc in wb_data:
+        country_code = doc.get('attrs', {}).get('country', '')
+        country_name = code_to_country.get(country_code, '')
+        dataset = doc.get('dataset', '')
+        value = doc.get('value')
+        
+        if country_name and dataset and value is not None:
+            country_kpi_data[country_name][dataset].append(value)
+    
+    # Calculer moyennes par pays
+    for country_name, datasets in country_kpi_data.items():
+        for dataset, values in datasets.items():
+            if dataset in kpi_mapping and values:
+                kpi_key = kpi_mapping[dataset]
+                avg_val = sum(values) / len(values)
+                
+                if kpi_key == 'population':
+                    kpis_by_country[country_name][kpi_key]['value'] = round(avg_val / 1_000_000, 2)
+                else:
+                    kpis_by_country[country_name][kpi_key]['value'] = round(avg_val, 2)
+        
+        # Indicateurs supplémentaires
+        extra_mapping = {
+            'NY.GDP.MKTP.KD.ZG': 'gdp_growth',
+            'SH.XPD.CHEX.GD.ZS': 'health_expenditure',
+            'SE.XPD.TOTL.GD.ZS': 'education_expenditure',
+            'SE.ADT.LITR.ZS': 'literacy_rate',
+            'EG.ELC.ACCS.ZS': 'electricity_access',
         }
         
-        # Récupérer les données pour chaque indicateur en utilisant attrs.country
-        for kpi_key, kpi_info in kpis_by_country[country].items():
-            # Essayer d'abord avec attrs.country (nouveau format)
-            data = db.curated_observations.find_one({
-                'source': 'WorldBank',
-                'dataset': kpi_info['dataset'],
-                'attrs.country': country_code
-            }, sort=[('ts', -1)])
-            
-            # Si pas de résultat, essayer avec key (ancien format)
-            if not data:
-                data = db.curated_observations.find_one({
-                    'source': 'WorldBank',
-                    'dataset': kpi_info['dataset'],
-                    'key': country
-                }, sort=[('ts', -1)])
-            
-            if data and data.get('value') is not None:
-                value = data['value']
-                # Formatage spécial pour Population (en millions)
-                if kpi_key == 'population':
-                    kpis_by_country[country][kpi_key]['value'] = round(value / 1_000_000, 2)
-                else:
-                    kpis_by_country[country][kpi_key]['value'] = round(value, 2)
+        for dataset, values in datasets.items():
+            if dataset in extra_mapping and values:
+                kpi_key = extra_mapping[dataset]
+                avg_val = sum(values) / len(values)
+                kpis_by_country[country_name][kpi_key]['value'] = round(avg_val, 2)
     
-    # Calculer les KPIs moyens pour l'affichage global
-    cedeao_codes = list(country_to_code.values())
-    cedeao_names = list(country_to_code.keys())
-    
-    for dataset, kpi_key in kpi_mapping.items():
-        if kpi_key in kpis:
-            # Récupérer la dernière valeur pour chaque pays CEDEAO
-            country_values = []
-            
-            for country_code in cedeao_codes:
-                # Essayer d'abord avec attrs.country (nouveau format)
-                latest_doc = db.curated_observations.find_one({
-                    'source': 'WorldBank',
-                    'dataset': dataset,
-                    'attrs.country': country_code
-                }, sort=[('ts', -1)])
-                
-                # Si pas de résultat, essayer avec key (ancien format)
-                if not latest_doc:
-                    country_name = code_to_country.get(country_code, '')
-                    if country_name:
-                        latest_doc = db.curated_observations.find_one({
-                            'source': 'WorldBank',
-                            'dataset': dataset,
-                            'key': country_name
-                        }, sort=[('ts', -1)])
-                
-                if latest_doc and latest_doc.get('value') is not None:
-                    country_values.append(latest_doc['value'])
-            
-            if country_values:
-                avg_val = sum(country_values) / len(country_values)
-                
-                # Formatage spécial pour Population (en millions)
-                if kpi_key == 'population':
-                    kpis[kpi_key]['value'] = round(avg_val / 1_000_000, 1)
-                else:
-                    kpis[kpi_key]['value'] = round(avg_val, 2)
-    
-    # Données pour graphiques - Top 5 pays par PIB
+    # Données pour graphiques
     chart_data = []
     gdp_by_country = defaultdict(list)
     
@@ -1889,24 +1987,40 @@ def dashboard_worldbank(request):
     
     # Noms complets des indicateurs
     indicator_names = {
+        # Économie
         'NY.GDP.MKTP.KD.ZG': 'Croissance du PIB (%)',
         'NY.GNP.PCAP.CD': 'RNB par habitant (USD)',
+        'NY.GDP.PCAP.CD': 'PIB par habitant (USD)',
+        'NE.TRD.GNFS.ZS': 'Commerce (% PIB)',
+        'NE.EXP.GNFS.ZS': 'Exportations de biens et services (% PIB)',
+        'NE.IMP.GNFS.ZS': 'Importations de biens et services (% PIB)',
+        'BX.KLT.DINV.WD.GD.ZS': 'Investissement direct étranger (% PIB)',
+        'FP.CPI.TOTL.ZG': 'Inflation, prix consommateur (%)',
+        'SL.UEM.TOTL.ZS': 'Taux de chômage (%)',
+        
+        # Population & Social
         'SP.POP.TOTL': 'Population totale',
         'SP.URB.TOTL.IN.ZS': 'Taux d\'urbanisation (%)',
         'SI.POV.DDAY': 'Pauvreté (<$2.15/jour) (%)',
+        'SH.DYN.MORT': 'Mortalité infantile (pour 1000 naiss.)',
+        'SH.STA.MMRT': 'Mortalité maternelle (pour 100k)',
+        
+        # Santé
         'SH.XPD.CHEX.GD.ZS': 'Dépenses santé courantes (% PIB)',
-        'SE.XPD.TOTL.GD.ZS': 'Dépenses éducation (% PIB)',
-        'EG.ELC.ACCS.ZS': 'Accès électricité (%)',
-        'IT.NET.USER.ZS': 'Utilisateurs Internet (%)',
-        'IT.CEL.SETS.P2': 'Abonnements mobile (pour 100 pers.)',
+        'SH.XPD.GHED.GD.ZS': 'Dépenses santé publiques (% PIB)',
+        'SH.MED.PHYS.ZS': 'Médecins (pour 1000 pers.)',
         'SH.H2O.SMDW.ZS': 'Accès eau potable (%)',
+        
+        # Éducation
+        'SE.XPD.TOTL.GD.ZS': 'Dépenses éducation (% PIB)',
         'SE.PRM.ENRR': 'Taux scolarisation primaire (%)',
         'SE.SEC.ENRR': 'Taux scolarisation secondaire (%)',
         'SE.ADT.LITR.ZS': 'Taux d\'alphabétisation (%)',
-        'SH.MED.PHYS.ZS': 'Médecins (pour 1000 pers.)',
-        'SH.STA.MMRT': 'Mortalité maternelle (pour 100k)',
-        'SH.XPD.GHED.GD.ZS': 'Dépenses santé publiques (% PIB)',
-        'FP.CPI.TOTL.ZG': 'Inflation, prix consommateur (%)',
+        
+        # Infrastructure & Technologie
+        'EG.ELC.ACCS.ZS': 'Accès électricité (%)',
+        'IT.NET.USER.ZS': 'Utilisateurs Internet (%)',
+        'IT.CEL.SETS.P2': 'Abonnements mobile (pour 100 pers.)',
     }
     
     # Statistiques détaillées par indicateur
@@ -1982,16 +2096,12 @@ def dashboard_worldbank(request):
         "chart_data": json.dumps(chart_data),
         "source_name": "Banque Mondiale - Indicateurs de Développement",
         "active_source": "WorldBank",
-        # Filtres
+        "preprocessing_stats": preprocessing_stats,  # ✨ STATS QUALITÉ DONNÉES
         "available_years": available_years,
-        "available_quarters": ['Q1', 'Q2', 'Q3', 'Q4'],
-        "available_sectors": list(sector_indicators.keys()),
-        "available_countries": available_countries,
-        "country_display": country_display,
-        "selected_year": year_filter,
-        "selected_quarter": quarter_filter,
-        "selected_sector": sector_filter,
-        "selected_country": country_filter,
+        "available_countries": {k: v for k, v in country_codes.items() if k in available_countries},
+        "country_filter": country_filter,
+        "year_filter": year_filter,
+        "country_codes": country_codes,
     })
 
 
@@ -2000,6 +2110,7 @@ def dashboard_un(request):
     _, db = get_mongo_db()
     import json
     from collections import defaultdict
+    from dashboard.preprocessing import preprocess_for_dashboard
     
     # Filtres
     country_filter = request.GET.get('country', '')
@@ -2009,7 +2120,23 @@ def dashboard_un(request):
     if year_filter:
         query['ts'] = {'$regex': f'^{year_filter}'}
     
-    un_data = list(db.curated_observations.find(query, sort=[('ts', -1)]))
+    # ✨ RÉCUPÉRER DONNÉES BRUTES ✨
+    un_raw_data = list(db.curated_observations.find(query, sort=[('ts', -1)]))
+    
+    # ✨ PRÉTRAITEMENT DES DONNÉES ✨
+    un_df, preprocessing_stats = preprocess_for_dashboard(
+        raw_data=un_raw_data,
+        source='UN_SDG',
+        fill_missing=True,          # Interpolate missing values
+        detect_outliers=True,       # IQR method
+        temporal_aggregation=None   # Keep original granularity
+    )
+    
+    # Convert DataFrame back to list of dicts for compatibility
+    if not un_df.empty:
+        un_data = un_df.to_dict('records')
+    else:
+        un_data = []
     
     # Mapping codes pays vers noms
     country_codes = {
@@ -2124,6 +2251,7 @@ def dashboard_un(request):
         "chart_data": json.dumps(chart_data),
         "source_name": "ONU - Objectifs de Développement Durable",
         "active_source": "UN_SDG",
+        "preprocessing_stats": preprocessing_stats,  # ✨ STATS QUALITÉ DONNÉES
         "available_years": available_years,
         "available_countries": {k: v for k, v in country_codes.items() if k in available_countries},
         "country_filter": country_filter,
@@ -2137,6 +2265,7 @@ def dashboard_afdb(request):
     _, db = get_mongo_db()
     import json
     from collections import defaultdict
+    from dashboard.preprocessing import preprocess_for_dashboard
     
     # Filtres
     country_filter = request.GET.get('country', '')
@@ -2146,7 +2275,23 @@ def dashboard_afdb(request):
     if year_filter:
         query['ts'] = {'$regex': f'^{year_filter}'}
     
-    afdb_data = list(db.curated_observations.find(query, sort=[('ts', -1)]))
+    # ✨ RÉCUPÉRER DONNÉES BRUTES ✨
+    afdb_raw_data = list(db.curated_observations.find(query, sort=[('ts', -1)]))
+    
+    # ✨ PRÉTRAITEMENT DES DONNÉES ✨
+    afdb_df, preprocessing_stats = preprocess_for_dashboard(
+        raw_data=afdb_raw_data,
+        source='AfDB',
+        fill_missing=True,          # Interpolate missing values
+        detect_outliers=True,       # IQR method
+        temporal_aggregation=None   # Keep original granularity
+    )
+    
+    # Convert DataFrame back to list of dicts for compatibility
+    if not afdb_df.empty:
+        afdb_data = afdb_df.to_dict('records')
+    else:
+        afdb_data = []
     
     # Mapping codes pays
     country_codes = {
@@ -2260,6 +2405,7 @@ def dashboard_afdb(request):
         "chart_data": json.dumps(chart_data),
         "source_name": "BAD - Financement du Développement",
         "active_source": "AfDB",
+        "preprocessing_stats": preprocessing_stats,  # ✨ STATS QUALITÉ DONNÉES
         "available_years": available_years,
         "available_countries": {k: v for k, v in country_codes.items() if k in available_countries},
         "country_filter": country_filter,
@@ -2907,8 +3053,7 @@ def stock_detail(request, symbol):
             {'$match': {'source': 'BRVM', 'attrs.sector': attrs.get('sector'), 'key': {'$ne': symbol}}},
             {'$sort': {'ts': -1}},
             {'$group': {'_id': '$key', 'last_doc': {'$first': '$$ROOT'}}},
-            {'$replaceRoot': {'newRoot': '$last_doc'}},
-            {'$limit': 5}
+            {'$replaceRoot': {'newRoot': '$last_doc'}}
         ]
         similar_docs = list(db.curated_observations.aggregate(pipeline))
         for doc in similar_docs:
@@ -4029,7 +4174,7 @@ def predict_api(request, indicator, country):
     API prédiction ML pour un indicateur
     
     Args:
-        indicator: Code indicateur (SP.POP.TOTL, NY.GDP.MKTP.CD, etc.)
+        indicator: Code indicateur (SP.POP.TOTL, NY.GDP.MKTP.KD.ZG, etc.)
         country: Code pays (BEN, CIV, etc.)
     
     Query params:
@@ -4466,167 +4611,113 @@ def correlation_dashboard(request):
 def brvm_recommendations_page(request):
     """
     Page des recommandations d'investissement BRVM
-    Analyse prédictive basée sur les données réelles
+    Analyse prédictive basée sur les données réelles - TOP 5 HEBDOMADAIRE
     """
-    from dashboard.analytics.recommendation_engine import RecommendationEngine
     from dashboard.analytics.stock_names import get_stock_full_name, get_stock_display_name
     from plateforme_centralisation.mongo import get_mongo_db
     from datetime import datetime, timedelta
+
+    _, db = get_mongo_db()
     
-    # Paramètres
-    days = int(request.GET.get('days', 60))
-    min_confidence = int(request.GET.get('min_confidence', 65))
-    force_refresh = request.GET.get('refresh', 'false').lower() == 'true'
+    # Lire le TOP 5 hebdomadaire classé
+    top5_list = list(
+        db.top5_weekly_brvm.find(
+            {},
+            {"_id": 0}
+        ).sort([("rank", 1)])
+    )
     
-    # Essayer de charger les recommandations récentes depuis MongoDB (dernières 6 heures)
-    db_client, db = get_mongo_db()
-    cached_recs = None
+    # Adapter pour le template
+    adapted_recos = []
+    for doc in top5_list:
+        adapted_recos.append({
+            "symbol": doc.get("symbol", ""),
+            "company_name": get_stock_full_name(doc.get("symbol", "")),
+            "display_name": get_stock_display_name(doc.get("symbol", "")),
+            "action": "BUY",
+            "confidence": doc.get("confidence", 0),
+            "score_tech": doc.get("top5_score", 0),
+            "risk_level": doc.get("classe", "C"),
+            "justification": doc.get("justification", ""),
+            "horizon": "SEMAINE",
+            "rank": doc.get("rank", 0),
+            "classe": doc.get("classe", "C"),
+            # Prix et gains
+            "prix_entree": doc.get("prix_entree", 0),
+            "prix_cible": doc.get("prix_cible", 0),
+            "stop": doc.get("stop", 0),
+            "gain_attendu": doc.get("gain_attendu", 0),
+            # Alias pour compatibilité template
+            "current_price": doc.get("prix_entree", 0),
+            "target_price": doc.get("prix_cible", 0),
+            "expected_weekly_return": doc.get("gain_attendu", 0),
+            "buy_price": doc.get("prix_entree", 0),
+            "sell_price_week": doc.get("prix_cible", 0),
+            "weekly_profit_potential": doc.get("gain_attendu", 0),
+            # Indicateurs techniques
+            "wos": doc.get("wos", 0),
+            "rr": doc.get("rr", 0),
+            "rsi": doc.get("rsi", 0),
+            "atr_pct": doc.get("atr_pct", 0),
+            "volatility": doc.get("atr_pct", 0),  # ATR% utilisé comme mesure de volatilité
+            "volume_ratio": 1.5,  # Valeur par défaut
+            "trend": "UP",  # Tous les BUY sont UP
+            # Listes
+            "raisons": doc.get("raisons", []),
+            "top5_score": doc.get("top5_score", 0),
+        })
     
-    if not force_refresh:
-        six_hours_ago = datetime.now() - timedelta(hours=6)
-        cached_recs = db.daily_recommendations.find_one(
-            {'date': {'$gte': six_hours_ago}},
-            sort=[('date', -1)]
+    # Calcul des statistiques
+    total_recommendations = len(adapted_recos)
+    avg_confidence = sum(r["confidence"] for r in adapted_recos) / total_recommendations if total_recommendations else 0
+    avg_weekly_potential = sum(r["gain_attendu"] for r in adapted_recos) / total_recommendations if total_recommendations else 0
+    
+    # Calculer taux de réussite des 7 derniers jours depuis track_record
+    semaine_derniere = datetime.now() - timedelta(days=7)
+    track_records = list(db.track_record_weekly.find({
+        "fige_le": {"$gte": semaine_derniere}
+    }))
+    
+    if track_records:
+        total_recs = sum(len(tr.get('symbols', [])) for tr in track_records)
+        gagnantes = sum(
+            len([s for s in tr.get('resultats_reels', {}).values() 
+                 if isinstance(s, dict) and s.get('gain_reel', 0) > 0])
+            for tr in track_records
         )
-    
-    # Si pas de cache récent ou refresh forcé, générer de nouvelles recommandations
-    if not cached_recs:
-        engine = RecommendationEngine()
-        raw_recommendations = engine.generate_recommendations(days=days, min_confidence=min_confidence)
+        win_rate_7days = round((gagnantes / total_recs * 100) if total_recs > 0 else 0)
     else:
-        # Utiliser les recommandations en cache
-        raw_recommendations = cached_recs.get('recommendations', {})
+        win_rate_7days = 0
     
-    # Transformer les données pour le template
-    # Gérer le cas où recommendations est une liste (format lancer_analyse_ia_rapide.py)
-    if isinstance(raw_recommendations, list):
-        # Séparer par signal
-        buy_signals = [r for r in raw_recommendations if r.get('signal') == 'BUY']
-        sell_signals = [r for r in raw_recommendations if r.get('signal') == 'SELL']
-        premium_signals = [r for r in buy_signals if r.get('confidence', 0) >= 75]
-    else:
-        # Format dictionnaire (RecommendationEngine)
-        buy_signals = raw_recommendations.get('buy_signals', [])
-        sell_signals = raw_recommendations.get('sell_signals', [])
-        premium_signals = raw_recommendations.get('premium_opportunities', [])
-    
-    # Adapter les signaux BUY pour le template
-    def adapt_signal(signal):
-        symbol = signal.get('symbol', '')
-        current_price = signal.get('current_price', 0)
-        target_price = signal.get('target_price', 0)
-        potential_gain = signal.get('potential_gain', 0)
-        
-        # Calculer prix d'achat recommandé (légèrement en dessous du prix actuel)
-        buy_price = current_price * 0.98  # -2% du prix actuel pour entrée optimale
-        
-        # Calculer prix de vente hebdomadaire (basé sur le potentiel de gain)
-        # Pour les actions à fort potentiel, on vise 50-70% du gain total dans la semaine
-        weekly_gain_target = potential_gain * 0.60  # 60% du potentiel total
-        sell_price_week = current_price * (1 + weekly_gain_target / 100)
-        
-        # Prix de vente conservateur (si volatilité élevée)
-        volatility = signal.get('volatility', 0)
-        if volatility > 50:
-            sell_price_week = current_price * (1 + weekly_gain_target * 0.5 / 100)  # 50% du gain en mode prudent
-        
-        return {
-            'symbol': symbol,
-            'company_name': get_stock_full_name(symbol),
-            'display_name': get_stock_display_name(symbol),
-            'action': 'ACHAT FORT' if signal.get('confidence', 0) >= 90 else 'ACHAT',
-            'current_price': current_price,
-            'target_price': target_price,
-            'expected_weekly_return': potential_gain,
-            'confidence': signal.get('confidence', 0),
-            'stop_loss': signal.get('stop_loss', 0),
-            'take_profit_1': signal.get('target_price', 0) * 1.05,  # +5% du target
-            'take_profit_2': signal.get('target_price', 0) * 1.10,  # +10% du target
-            'risk_level': 'HIGH' if volatility > 50 else 'MEDIUM' if volatility > 30 else 'LOW',
-            'key_factors': signal.get('reasons', [])[:3],  # Top 3 raisons
-            'reasons': signal.get('reasons', []),
-            # Nouveaux champs pour trading hebdomadaire
-            'buy_price': buy_price,
-            'sell_price_week': sell_price_week,
-            'weekly_profit_potential': ((sell_price_week - buy_price) / buy_price) * 100,
-            # Données techniques complètes
-            'volatility': volatility,
-            'volume_ratio': signal.get('volume_ratio', 0),
-            'trend': signal.get('trend', 'NEUTRAL'),
-            'rsi': signal.get('rsi', 0),
-            'macd': signal.get('macd', {}),
-            'bollinger': signal.get('bollinger', {}),
-            'atr': signal.get('atr', {}),
-            'publication_sentiment': signal.get('publication_sentiment', {}),
-            'fundamentals': signal.get('fundamentals', {}),
-            'macro_context': signal.get('macro_context', {}),
-        }
-    
-    # Catégoriser les signaux BUY
-    strong_buys = [adapt_signal(s) for s in buy_signals if s.get('confidence', 0) >= 90 and s.get('potential_gain', 0) >= 8]
-    high_potential = [adapt_signal(s) for s in buy_signals if s.get('potential_gain', 0) >= 15]
-    regular_buys = [adapt_signal(s) for s in buy_signals if s.get('confidence', 0) < 90 and s.get('potential_gain', 0) < 15]
-    
-    # Catégoriser les signaux SELL
-    def adapt_sell_signal(signal):
-        adapted = adapt_signal(signal)
-        adapted['action'] = 'VENTE FORTE' if signal.get('confidence', 0) >= 90 else 'VENTE'
-        return adapted
-    
-    strong_sells = [adapt_sell_signal(s) for s in sell_signals if s.get('confidence', 0) >= 90]
-    regular_sells = [adapt_sell_signal(s) for s in sell_signals if s.get('confidence', 0) < 90]
-    
-    # Calculer les statistiques
-    all_buy_signals = buy_signals + premium_signals
-    avg_confidence = sum(s.get('confidence', 0) for s in all_buy_signals) / len(all_buy_signals) if all_buy_signals else 0
-    avg_potential = sum(s.get('potential_gain', 0) for s in all_buy_signals) / len(all_buy_signals) if all_buy_signals else 0
-    
-    recommendations = {
-        'total_recommendations': len(buy_signals),
-        'average_confidence': avg_confidence,
-        'average_weekly_potential': avg_potential,
-        'high_potential_stocks': high_potential,
-        'strong_buys': strong_buys,
-        'buys': regular_buys,
-        'strong_sells': strong_sells,
-        'sells': regular_sells,
-        'statistics': {
-            'total_high_potential': len(high_potential),
-            'total_buy': len(buy_signals),
-            'total_sell': len(sell_signals),
-            'total_analyzed': raw_recommendations.get('total_actions_analyzed', len(raw_recommendations)) if isinstance(raw_recommendations, dict) else len(raw_recommendations)
-        }
+    # Structure pour le template
+    recommendations_struct = {
+        "total_recommendations": total_recommendations,
+        "average_confidence": avg_confidence,
+        "average_weekly_potential": avg_weekly_potential,
+        "high_potential_stocks": adapted_recos,  # Tous les TOP5 sont à fort potentiel
+        "statistics": {
+            "total_high_potential": total_recommendations
+        },
     }
     
-    # Simuler des performances pour le template
-    performance = {
-        'backtest_7_days': {
-            'win_rate': 82.5
+    # Performance backtest
+    performance_struct = {
+        "backtest_7_days": {
+            "win_rate": win_rate_7days
         }
     }
-    
-    # Indiquer si les données proviennent du cache ou sont fraîches
-    data_source = 'cache' if cached_recs and not force_refresh else 'fresh'
-    cache_time = cached_recs.get('date') if cached_recs else None
-    
-    # Gérer le timestamp selon le format
-    if isinstance(raw_recommendations, dict):
-        timestamp = raw_recommendations.get('generated_at', datetime.now().isoformat())
-    else:
-        timestamp = datetime.now().isoformat()
-    
+
     context = {
-        'recommendations': recommendations,
-        'performance': performance,
-        'days': days,
-        'min_confidence': min_confidence,
-        'timestamp': timestamp,
-        'data_source': data_source,
-        'cache_time': cache_time,
-        'page_title': 'Recommandations IA - Investissement BRVM'
+        "horizons": ["SEMAINE"],
+        "selected_horizon": "SEMAINE",
+        "recommendations": recommendations_struct,
+        "performance": performance_struct,
+        "timestamp": datetime.now().isoformat(),
+        "page_title": "Recommandations IA - Investissement BRVM",
+        "data_source": "live",
+        "top5_recommendations": adapted_recos,  # Pour le tableau
     }
-    
-    return render(request, 'dashboard/brvm_recommendations.html', context)
+    return render(request, "dashboard/brvm_recommendations.html", context)
 
 
 @require_http_methods(["GET"])

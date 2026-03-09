@@ -19,7 +19,6 @@ def generate_trading_recommendations(days: int = 7) -> list:
         for symbol in item["actions"]:
             obs = list(db.curated_observations.find({
                 "source": "BRVM",
-                "dataset": "QUOTES",
                 "key": symbol,
                 "ts": {"$gte": (datetime.utcnow() - timedelta(days=days)).isoformat()}
             }).sort("ts", -1).limit(2))
@@ -78,7 +77,7 @@ def correlate_publications_with_actions(days: int = 7) -> List[Dict[str, Any]]:
         "ts": {"$gte": since}
     }))
     # Récupérer la liste des symboles d'actions
-    stocks = list(db.curated_observations.find({"source": "BRVM", "dataset": "QUOTES"}).distinct("key"))
+    stocks = list(db.curated_observations.find({"source": "BRVM"}).distinct("key"))
     results = []
     for pub in pubs:
         text = pub["key"] + " " + pub["attrs"].get("url", "")

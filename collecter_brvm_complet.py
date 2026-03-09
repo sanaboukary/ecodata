@@ -149,57 +149,65 @@ def collecter_selenium_complet():
         
         for url in urls:
             try:
-                log(f"Connexion: {url}")
-                
-                # Délai humain avant requête
-                random_delay(0.5, 1.5)
-                
-                driver.get(url)
-                
-                # Comportement humain : attendre un peu
-                random_delay(1.0, 2.0)
-                
-                # Scroll aléatoire léger (simulation humaine)
-                driver.execute_script(f"window.scrollTo(0, {random.randint(50, 150)});")
-                random_delay(0.3, 0.7)
-                driver.execute_script("window.scrollTo(0, 0);")
-                
-                # Fermer cookies avec délai humain
-                try:
-                    btns = Wait(driver, 3).until(
-                        EC.presence_of_all_elements_located((By.TAG_NAME, "button"))
-                    )
-                    for b in btns:
-                        if any(x in (b.text or "").lower() for x in ["accept", "accepter", "agree"]):
-                            random_delay(0.2, 0.5)  # Délai avant clic
-                            b.click()
-                            random_delay(0.3, 0.6)  # Délai après clic
-                            log("Cookies acceptés", 'INFO')
-                            break
-                except:
-                    pass
-                
-                # Attendre tables
-                Wait(driver, 20).until(EC.presence_of_element_located((By.TAG_NAME, "table")))
-                
-                # SCROLL pour charger TOUTES les actions (pagination lazy-load) - MODE HUMAIN
-                log("Scroll progressif pour charger toutes les 47 actions...")
-                last_height = driver.execute_script("return document.body.scrollHeight")
-                scroll_attempts = 0
-                max_scrolls = 15
-                
-                while scroll_attempts < max_scrolls:
-                    # Scroll progressif (pas instantané, comme un humain)
-                    current_position = driver.execute_script("return window.pageYOffset;")
-                    scroll_increment = random.randint(300, 600)
-                    target_position = min(current_position + scroll_increment, last_height)
-                    
-                    driver.execute_script(f"window.scrollTo({{top: {target_position}, behavior: 'smooth'}});")
-                    
-                    # Délai aléatoire humain
-                    random_delay(1.2, 2.5)
-                    
-                    # Parfois scroll retour (comportement humain)
+                for url in urls:
+                    try:
+                        # ...scraping Selenium, extraction des tableaux, conversion en DataFrame all_data...
+                        pass
+                    except Exception as e:
+                        pass
+                # Comportement humain avant fermeture
+                random_delay(0.5, 1.0)
+                driver.quit()
+                log("ChromeDriver fermé proprement", 'INFO')
+                if not all_data:
+                    log("Aucune donnée collectée", 'ERROR')
+                    return pd.DataFrame()
+                # Concat et nettoyage
+                df_combined = pd.concat(all_data, ignore_index=True).dropna(how='all')
+                # Normalisation colonnes
+                rename_map = {
+                    'Symbole': 'Ticker', 'Symbol': 'Ticker',
+                    'Libellé': 'Libelle', 'Libelle': 'Libelle', 'Name': 'Libelle',
+                    'Dernier': 'Cours', 'Dernier cours': 'Cours', 'Last': 'Cours', 'Close': 'Cours',
+                    'Cours': 'Cours',
+                    'Variation (%)': 'Variation_%', 'Variation': 'Variation_%', 'Change (%)': 'Variation_%',
+                    'Volume': 'Volume', 'Quantité': 'Volume',
+                    'Valeur': 'Valeur', 'Value': 'Valeur',
+                    'Ouverture': 'Ouverture', 'Open': 'Ouverture',
+                    'Plus Haut': 'Haut', 'High': 'Haut', 'Haut': 'Haut',
+                    'Plus Bas': 'Bas', 'Low': 'Bas', 'Bas': 'Bas',
+                    'Secteur': 'Secteur', 'Sector': 'Secteur',
+                    'Précédent': 'Precedent', 'Previous': 'Precedent',
+                    'Nb Trans': 'Nb_Transactions', 'Transactions': 'Nb_Transactions',
+                    'Cap. Bours.': 'Capitalisation', 'Market Cap': 'Capitalisation'
+                }
+                cols = {c: rename_map.get(c, c) for c in df_combined.columns}
+                df_combined = df_combined.rename(columns=cols)
+                # Convertir numériques
+                numeric_cols = ['Cours', 'Variation_%', 'Volume', 'Valeur', 'Ouverture', 
+                               'Haut', 'Bas', 'Precedent', 'Nb_Transactions', 'Capitalisation']
+                for col in numeric_cols:
+                    if col in df_combined.columns:
+                        # Conversion stricte : tolérance zéro
+                        df_combined[col] = df_combined[col].apply(parse_french_number)
+                # Nettoyer Ticker
+                if 'Ticker' in df_combined.columns:
+                    df_combined['Ticker'] = df_combined['Ticker'].astype(str).str.strip().str.upper()
+                    # Log avant filtrage
+                    log(f"Actions brutes collectées: {len(df_combined)}")
+                    # Tolérance zéro : refuser toute ligne sans ticker ou sans prix
+                    lignes_douteuses = df_combined[df_combined['Ticker'].isna() | df_combined['Ticker'].eq('') | df_combined['Cours'].isna() | (df_combined['Cours'] <= 0)]
+                    if not lignes_douteuses.empty:
+                        log(f"Tolérance zéro : {len(lignes_douteuses)} ligne(s) douteuse(s) détectée(s)", 'ERROR')
+                        log(f"Exemples :\n{lignes_douteuses.head().to_string(index=False)}", 'ERROR')
+                        raise ValueError("Tolérance zéro : collecte stoppée, données douteuses détectées")
+                    # Filtrer seulement les 47 actions (mais garder toutes si tickers différents)
+                    # ...existing code...
+                # Dédupliquer
+                if 'Ticker' in df_combined.columns:
+                    # ...existing code...
+                log(f"Données nettoyées: {len(df_combined)} actions (objectif: 47)", 'SUCCESS' if len(df_combined) >= 40 else 'WARNING')
+                return df_combined
                     if random.random() < 0.2:  # 20% de chance
                         back_scroll = random.randint(50, 150)
                         driver.execute_script(f"window.scrollBy(0, -{back_scroll});")

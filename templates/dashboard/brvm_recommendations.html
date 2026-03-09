@@ -336,8 +336,41 @@
 </div>
 
 <div class="content-wrapper">
-  <!-- Section Actions à Fort Potentiel -->
-  {% if recommendations.high_potential_stocks %}
+  <h2 class="section-title">Tableau des recommandations générées</h2>
+  {% if top5_recommendations %}
+    <table style="width:100%;border-collapse:collapse;">
+      <thead>
+        <tr style="background:#f1f5f9;">
+          <th style="padding:8px;border:1px solid #e2e8f0;">Rang</th>
+          <th style="padding:8px;border:1px solid #e2e8f0;">Symbole</th>
+          <th style="padding:8px;border:1px solid #e2e8f0;">Action</th>
+          <th style="padding:8px;border:1px solid #e2e8f0;">Classe</th>
+          <th style="padding:8px;border:1px solid #e2e8f0;">Confiance</th>
+          <th style="padding:8px;border:1px solid #e2e8f0;">Gain Attendu</th>
+          <th style="padding:8px;border:1px solid #e2e8f0;">Justification</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for rec in top5_recommendations %}
+        <tr>
+          <td style="padding:8px;border:1px solid #e2e8f0;text-align:center;font-weight:700;">#{{ rec.rank }}</td>
+          <td style="padding:8px;border:1px solid #e2e8f0;"><strong>{{ rec.symbol }}</strong></td>
+          <td style="padding:8px;border:1px solid #e2e8f0;"><span style="background:#10b981;color:white;padding:4px 8px;border-radius:4px;">{{ rec.action }}</span></td>
+          <td style="padding:8px;border:1px solid #e2e8f0;"><span style="background:{% if rec.classe == 'A' %}#10b981{% elif rec.classe == 'B' %}#3b82f6{% else %}#f59e0b{% endif %};color:white;padding:4px 8px;border-radius:4px;font-weight:700;">Classe {{ rec.classe }}</span></td>
+          <td style="padding:8px;border:1px solid #e2e8f0;">{{ rec.confidence }}%</td>
+          <td style="padding:8px;border:1px solid #e2e8f0;color:#10b981;font-weight:700;">+{{ rec.gain_attendu|floatformat:1 }}%</td>
+          <td style="padding:8px;border:1px solid #e2e8f0;">{{ rec.justification }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p>Aucune recommandation disponible pour cet horizon.</p>
+  {% endif %}
+</div>
+
+<!-- Section Actions à Fort Potentiel -->
+{% if recommendations.high_potential_stocks %}
   <section style="margin-bottom: 3rem; background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); padding: 2rem; border-radius: 16px; border: 3px solid #f59e0b;">
     <h2 class="section-title" style="color: #92400e;">
       <i class="fas fa-rocket" style="color: #f59e0b;"></i>
@@ -556,27 +589,31 @@
           {% endif %}
         </div>
         
-        <div class="rec-levels">
-          <div class="level">
-            <span class="level-label">Stop Loss:</span>
-            <span class="level-value stop-loss">{{ rec.stop_loss|floatformat:0 }} FCFA</span>
+        <div class="rec-details">
+          <div class="detail-item">
+            <span class="detail-label">Stop Loss:</span>
+            <span class="detail-value">{{ rec.stop_loss|floatformat:0 }} FCFA</span>
           </div>
-          <div class="level">
-            <span class="level-label">Take Profit 1:</span>
-            <span class="level-value take-profit">{{ rec.take_profit_1|floatformat:0 }} FCFA</span>
+          <div class="detail-item">
+            <span class="detail-label">Take Profit 1:</span>
+            <span class="detail-value" style="color: #10b981;">{{ rec.take_profit_1|floatformat:0 }} FCFA</span>
           </div>
-          <div class="level">
-            <span class="level-label">Take Profit 2:</span>
-            <span class="level-value take-profit">{{ rec.take_profit_2|floatformat:0 }} FCFA</span>
+          <div class="detail-item">
+            <span class="detail-label">Take Profit 2:</span>
+            <span class="detail-value" style="color: #059669;">{{ rec.take_profit_2|floatformat:0 }} FCFA</span>
           </div>
         </div>
-        
+
+        <div class="confidence-bar">
+          <div class="confidence-fill" style="width: {{ rec.confidence }}%;"></div>
+        </div>
+
         {% if rec.reasons %}
-        <div class="rec-reasons">
-          <strong style="color: #92400e;">Raisons de l'opportunité:</strong>
-          <ul>
+        <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #e2e8f0;">
+          <strong style="color: #92400e; font-size: 1rem;">Raisons de l'opportunité:</strong>
+          <ul style="margin-top: 0.5rem; padding-left: 1.2rem; font-size: 0.9rem; color: #64748b;">
             {% for reason in rec.reasons %}
-            <li>{{ reason }}</li>
+            <li style="margin-top: 0.3rem;">{{ reason }}</li>
             {% endfor %}
           </ul>
         </div>
@@ -697,6 +734,7 @@
             📊 Analyse Technique Complète
           </div>
           
+          <!-- Ligne 1: Indicateurs principaux -->
           <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.8rem; margin-bottom: 0.8rem;">
             {% if rec.rsi %}
             <div style="background: white; padding: 0.6rem; border-radius: 6px; text-align: center;">
@@ -729,6 +767,7 @@
             </div>
           </div>
           
+          <!-- Ligne 2: MACD -->
           {% if rec.macd %}
           <div style="background: white; padding: 0.8rem; border-radius: 6px; margin-bottom: 0.8rem;">
             <div style="font-size: 0.75rem; color: #64748b; font-weight: 600; margin-bottom: 0.4rem;">📈 MACD</div>
@@ -754,6 +793,7 @@
           </div>
           {% endif %}
           
+          <!-- Ligne 3: Bollinger Bands -->
           {% if rec.bollinger %}
           <div style="background: white; padding: 0.8rem; border-radius: 6px; margin-bottom: 0.8rem;">
             <div style="font-size: 0.75rem; color: #64748b; font-weight: 600; margin-bottom: 0.4rem;">📊 Bandes de Bollinger</div>
@@ -779,6 +819,7 @@
           </div>
           {% endif %}
           
+          <!-- Ligne 4: Sentiment & Macro -->
           <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.8rem;">
             {% if rec.publication_sentiment and rec.publication_sentiment.sentiment_score %}
             <div style="background: white; padding: 0.8rem; border-radius: 6px;">
@@ -801,6 +842,7 @@
             {% endif %}
           </div>
           
+          <!-- Ligne 5: Fundamentaux -->
           {% if rec.fundamentals %}
           <div style="background: white; padding: 0.8rem; border-radius: 6px; margin-top: 0.8rem;">
             <div style="font-size: 0.75rem; color: #64748b; font-weight: 600; margin-bottom: 0.4rem;">💼 Analyse Fondamentale</div>
