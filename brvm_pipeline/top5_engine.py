@@ -1,5 +1,22 @@
 #!/usr/bin/env python3
 """
+###############################################################################
+# DEPRECATED — NE PAS UTILISER EN PRODUCTION
+###############################################################################
+# Ce fichier est la version MODULAIRE du TOP5 engine (formule Expected_Return
+# + Volume_Acceleration + Semantic + WOS + Risk_Reward).
+# Il a été remplacé par top5_engine_final.py (V2.5+) qui est la source de
+# vérité unique pour toutes les recommandations en production.
+#
+# Différence critique avec top5_engine_final.py :
+#   - Formule différente : 0.30 × Expected_Return vs 0.55 × MF_score
+#   - Pas de stop ATR réel, pas de vol targeting, pas de circuit breaker
+#   - Pas de filtre corrélation ni blacklist dynamique
+#
+# Ce fichier est conservé UNIQUEMENT pour la modularité Django (brvm_pipeline).
+# Toute nouvelle fonctionnalité doit être ajoutée dans top5_engine_final.py.
+###############################################################################
+
 ⭐ TOP5 ENGINE - STOCK PICKING HEBDOMADAIRE BRVM
 
 OBJECTIF UNIQUE :
@@ -19,6 +36,11 @@ import os, sys
 from pathlib import Path
 from datetime import datetime, timedelta
 import math
+import warnings
+warnings.warn(
+    "brvm_pipeline/top5_engine.py (MODULAIRE LEGACY) — utiliser top5_engine_final.py en production.",
+    DeprecationWarning, stacklevel=2
+)
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(BASE_DIR))

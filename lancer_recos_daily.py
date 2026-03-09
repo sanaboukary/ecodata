@@ -595,7 +595,7 @@ def afficher_top5():
             return
 
         print(f"\n{'='*70}")
-        print("  TOP 5 RECOMMANDATIONS BRVM — COURT TERME | Horizon : 2-3 semaines")
+        print("  TOP 5 RECOMMANDATIONS BRVM — COURT TERME | Horizon : 4-5 semaines (J+25)")
         print(f"{'='*70}")
         print(f"  {'#':<3} {'Symbol':<6} {'Cl.':<4} {'Entrée':>9} {'Gain':>7} {'Stop':>7} {'WOS':>5} {'ATR%':>5} {'RR':>5}  {'Alloc':>6}  {'Timing'}")
         print(f"  {'-'*68}")
@@ -628,7 +628,7 @@ def afficher_top5():
 
             print(f"  #{rank:<2} {symbol:<6} {classe:<4} {prix:>9,.0f} {gain:>+6.1f}% {stop_pct:>-6.1f}% {wos:>5.1f} {atr:>4.1f}% {rr:>5.2f}  {alloc:>4.0f}%{'':<2}  {timing_tag}{liq_tag}")
 
-        # A4 — Time Stop J+10 : alerte si action dans TOP5 depuis >= 10 jours
+        # A4 — Time Stop J+25 (horizon optimal calibré sur 6 ans de données réelles BRVM)
         alertes_timestop = []
         for r in top5:
             first_sel = r.get("first_selected_at")
@@ -637,22 +637,22 @@ def afficher_top5():
                 if first_sel.tzinfo is None:
                     first_sel = first_sel.replace(tzinfo=timezone.utc)
                 jours = (datetime.now(timezone.utc) - first_sel).days
-                if jours >= 10:
+                if jours >= 25:
                     alertes_timestop.append((r.get("symbol", "?"), jours))
 
         if alertes_timestop:
             print(f"\n  {'!'*66}")
-            print(f"  TIME STOP J+10 — EVALUER SORTIE AUJOURD'HUI")
+            print(f"  TIME STOP J+25 — EVALUER SORTIE AUJOURD'HUI")
             print(f"  {'!'*66}")
             for sym, nb_j in alertes_timestop:
-                print(f"  >>> {sym:<6} dans TOP5 depuis {nb_j}j (max 10j) — sortir si cible non atteinte")
+                print(f"  >>> {sym:<6} dans TOP5 depuis {nb_j}j (max 25j) — sortir si cible non atteinte")
             print(f"  {'!'*66}")
 
         print(f"\n  Générées le : {datetime.now().strftime('%d/%m/%Y %H:%M')}")
         print(f"\n  {'─'*66}")
         print(f"  REGLES DE GESTION COURT TERME")
         print(f"  {'─'*66}")
-        print(f"  > Horizon de détention : 2-3 semaines")
+        print(f"  > Horizon de détention : 4-5 semaines (J+25)")
         print(f"  > MAX 3 positions simultanées")
         print(f"  > Alloc A=15% | B=10% | C=5% du portefeuille par position")
         print(f"  > Timing ATTENDRE! → différer l'entrée au lendemain")
@@ -717,6 +717,13 @@ if __name__ == "__main__":
     if not ok:
         print("[STOP] Erreur étape 3")
         sys.exit(1)
+
+    # 4. Track Record — Snapshot du TOP5 + mise à jour positions ouvertes
+    titre("[4/4] Track Record — Snapshot + Update positions ouvertes")
+    subprocess.run(
+        [sys.executable, "track_record_manager.py", "--snapshot", "--update", "--mode", "daily"],
+        capture_output=False, text=True
+    )
 
     afficher_top5()
 

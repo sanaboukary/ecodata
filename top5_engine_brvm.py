@@ -1,3 +1,27 @@
+###############################################################################
+# DEPRECATED — NE PAS UTILISER EN PRODUCTION
+###############################################################################
+# Ce fichier est la version V1 LEGACY du TOP5 engine (formule WOS + sigmoid).
+# Il a été remplacé par top5_engine_final.py (V2.5+) qui intègre :
+#   - Multi-Factor Engine (MF 5 facteurs cross-sectionnels)
+#   - Stop ATR réel × 1.5
+#   - Vol targeting par régime de marché
+#   - Circuit breaker + filtre corrélation + blacklist dynamique
+#
+# Pipelines de production :
+#   lancer_recos_daily.py  → top5_engine_final.py --mode daily
+#   lancer_recos_pro.py    → top5_engine_final.py
+#   pipeline_brvm.py       → top5_engine_final.py
+#
+# Ce fichier est conservé UNIQUEMENT pour comparaison historique (comparer_systemes.py).
+# Toute nouvelle fonctionnalité doit être ajoutée dans top5_engine_final.py.
+###############################################################################
+import warnings
+warnings.warn(
+    "top5_engine_brvm.py (V1 LEGACY) — utiliser top5_engine_final.py en production.",
+    DeprecationWarning, stacklevel=2
+)
+
 from plateforme_centralisation.mongo import get_mongo_db
 import math
 

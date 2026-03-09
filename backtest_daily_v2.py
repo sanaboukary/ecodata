@@ -37,7 +37,10 @@ from pymongo import MongoClient
 
 
 # ─── Paramètres ────────────────────────────────────────────────────────────────
-HORIZON_SORTIE = int(next((sys.argv[i+1] for i, a in enumerate(sys.argv) if a == '--horizon'), 10))
+# Horizon J+25 : optimal empirique sur 6 ans de données réelles BRVM (2020-2026)
+# Calibration : J+10 PF=1.39, J+15 PF=1.33, J+20 PF=1.41, J+25 PF=1.46, J+30 PF=1.45
+# J+25 = meilleur trade-off PF / MaxDD / capital growth — cohérent avec illiquidité BRVM
+HORIZON_SORTIE = int(next((sys.argv[i+1] for i, a in enumerate(sys.argv) if a == '--horizon'), 25))
 FILTRE_SYMBOL  = next((sys.argv[i+1] for i, a in enumerate(sys.argv) if a == '--symbol'), None)
 MIN_HISTORY    = 30          # jours minimum pour calculer les indicateurs
 RR_MIN         = 2.0         # filtre elite (cohérent avec production)

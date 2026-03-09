@@ -22,7 +22,7 @@ Structure fonds quant :
     < 55  → IGNORER
 
   Intégration dans top5_engine_final.py :
-    FINAL_SCORE = 0.60 × SCORE_TOTAL + 0.40 × SCORE_ALPHA × 100
+    FINAL_SCORE = 0.60 × SCORE_TOTAL + 0.35 × SCORE_ALPHA × 100 + 0.05 × sem_norm
 
 Usage :
   python multi_factor_engine.py
@@ -48,22 +48,17 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "plateforme_centralisation.setti
 import django
 django.setup()
 from plateforme_centralisation.mongo import get_mongo_db
+from tradable_universe import UNIVERSE_BRVM_SET, SYMBOLS_HISTORIQUE_INSUFFISANT, INDICES_BRVM
 
 # ─── Config mode ────────────────────────────────────────────────────────────
 MODE_DAILY      = "--mode" in sys.argv and "daily" in sys.argv
 COLLECTION_PRICE = "prices_daily"  if MODE_DAILY else "prices_weekly"
 DATE_FIELD       = "date"          if MODE_DAILY else "week"
 
-# Indices à exclure (pas des actions tradables)
-INDICES_BRVM = {"BRVM-PRESTIGE", "BRVM-COMPOSITE", "BRVM-10", "BRVM-30", "BRVMC", "BRVM10"}
-
-ACTIONS_BRVM_OFFICIELLES = {
-    "ABJC", "BICB", "BICC", "BNBC", "BOAB", "BOABF", "BOAC", "BOAM", "BOAN", "BOAS",
-    "CABC", "CBIBF", "CFAC", "CIEC", "ECOC", "ETIT", "FTSC", "LNBB", "NEIC", "NSBC",
-    "NTLC", "ONTBF", "ORAC", "ORGT", "PALC", "PRSC", "SAFC", "SCRC", "SDCC", "SDSC",
-    "SEMC", "SGBC", "SHEC", "SIBC", "SICC", "SIVC", "SLBC", "SMBC", "SNTS", "SOGC",
-    "SPHC", "STAC", "STBC", "TTLC", "TTLS", "UNLC", "UNXC",
-}
+# ─── Indices à exclure + Univers de recommandation actif ────────────────────
+# Source de vérité : tradable_universe.py (UNIVERSE_BRVM_SET exclut déjà
+# BICB, BNBC, LNBB — historique insuffisant pour percentiles cross-sectionnels).
+# INDICES_BRVM et UNIVERSE_BRVM_SET importés depuis tradable_universe.
 
 # ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -400,7 +395,7 @@ def main():
 
     # 2. Symboles disponibles
     symbols_db = set(db[COLLECTION_PRICE].distinct("symbol"))
-    actions    = sorted(s for s in ACTIONS_BRVM_OFFICIELLES if s in symbols_db)
+    actions    = sorted(s for s in UNIVERSE_BRVM_SET if s in symbols_db)
     print(f"  {len(actions)} actions BRVM analysées\n")
 
     # 3. Calcul facteurs bruts
@@ -464,6 +459,7 @@ def main():
     # 8. Sauvegarde MongoDB
     now = datetime.now(timezone.utc)
     mf_collection = "multi_factor_scores_daily" if MODE_DAILY else "multi_factor_scores_weekly"
+    horizon        = "JOUR" if MODE_DAILY else "SEMAINE"
 
     for d in all_factors:
         symbol = d["symbol"]
@@ -496,21 +492,48 @@ def main():
         )
 
         # Injection dans decisions_finales_brvm (pour top5_engine_final.py)
+        # IMPORTANT : filtrer par horizon pour éviter la contamination croisée daily↔weekly.
+        # Sans ce filtre, le run weekly écrase les scores daily dans les docs horizon="JOUR"
+        # (et inversement), causant des incohérences silencieuses entre les deux modes.
+        #
+        # ATR + STOP recalculés à chaque run depuis prices_daily/weekly (données fraîches).
+        # stop = close_courant - 1.5 × ATR_20j  (recalculé ici, pas depuis une valeur gelée)
+        close_cur = d.get("close")
+        atr_pct_cur = d.get("atr_pct")
+        stop_cur = None
+        prix_cible_cur = None
+        if close_cur and close_cur > 0 and atr_pct_cur and atr_pct_cur > 0:
+            stop_pct_cur   = round(1.5 * atr_pct_cur, 2)
+            stop_cur       = round(close_cur * (1 - stop_pct_cur / 100))
+            gain_cur       = round(3.0 * stop_pct_cur, 1)   # R/R 3:1
+            prix_cible_cur = round(close_cur * (1 + gain_cur / 100))
+
+        mf_fields = {
+            "score_total_mf":        d["score_total_mf"],
+            "mf_label":              d["mf_label"],
+            "setup_type":            d.get("setup_type"),
+            "setup_id":              d.get("setup_id"),
+            "acceleration_score_mf": d.get("acceleration_score"),
+            "breakout_score_mf":     d.get("breakout_score"),
+            "volume_score_mf":       d.get("volume_ratio_score"),
+            "compression_score_mf":  d.get("compression_score"),
+            "rs_score_mf":           d.get("rs_score"),
+            "momentum_score_mf":     d.get("momentum_score"),
+            "vsr_ratio_10j":         d.get("vsr_ratio_10j"),
+            "mf_synced_at":          now,
+            # Prix rafraîchis depuis les données courantes
+            "atr_pct":               atr_pct_cur,
+            "prix_entree":           close_cur,
+        }
+        if stop_cur is not None:
+            mf_fields["stop"]        = stop_cur
+            mf_fields["gain_attendu"]  = round(3.0 * (1.5 * atr_pct_cur), 1)
+            mf_fields["expected_return"] = mf_fields["gain_attendu"]
+            mf_fields["prix_cible"]  = prix_cible_cur
+
         db.decisions_finales_brvm.update_many(
-            {"symbol": symbol, "archived": {"$ne": True}},
-            {"$set": {
-                "score_total_mf":        d["score_total_mf"],
-                "mf_label":              d["mf_label"],
-                "setup_type":            d.get("setup_type"),
-                "setup_id":              d.get("setup_id"),
-                "acceleration_score_mf": d.get("acceleration_score"),
-                "breakout_score_mf":     d.get("breakout_score"),
-                "volume_score_mf":       d.get("volume_ratio_score"),
-                "compression_score_mf":  d.get("compression_score"),
-                "rs_score_mf":           d.get("rs_score"),
-                "momentum_score_mf":     d.get("momentum_score"),
-                "vsr_ratio_10j":         d.get("vsr_ratio_10j"),
-            }}
+            {"symbol": symbol, "horizon": horizon, "archived": {"$ne": True}},
+            {"$set": mf_fields}
         )
 
     print(f"  [OK] {len(all_factors)} scores sauvegardés → {mf_collection}")
